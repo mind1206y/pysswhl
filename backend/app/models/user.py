@@ -27,6 +27,15 @@ role_permission = Table(
     Column("permission_id", Integer, ForeignKey("permissions.id", ondelete="CASCADE"), primary_key=True),
 )
 
+user_department = Table(
+    "user_department",
+    Base.metadata,
+    Column("user_id", Integer, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True),
+    Column(
+        "department_id", Integer, ForeignKey("departments.id", ondelete="CASCADE"), primary_key=True
+    ),
+)
+
 
 class User(Base):
     __tablename__ = "users"
@@ -35,7 +44,6 @@ class User(Base):
     username = Column(String(50), unique=True, nullable=False, index=True, comment="登录名")
     password_hash = Column(String(128), nullable=False, comment="bcrypt 哈希")
     real_name = Column(String(50), default="", comment="姓名")
-    department = Column(String(50), default="", comment="部门")
     phone = Column(String(20), default="", comment="手机号")
     is_active = Column(Boolean, default=True, comment="是否启用")
     is_superuser = Column(Boolean, default=False, comment="超级管理员,拥有全部权限")
@@ -44,13 +52,16 @@ class User(Base):
     last_login_at = Column(DateTime, nullable=True)
 
     roles = relationship("Role", secondary=user_role, back_populates="users", lazy="selectin")
+    departments = relationship(
+        "Department", secondary=user_department, back_populates="users", lazy="selectin"
+    )
 
     def to_dict(self):
         return {
             "id": self.id,
             "username": self.username,
             "real_name": self.real_name,
-            "department": self.department,
+            "departments": [{"id": d.id, "name": d.name} for d in self.departments],
             "phone": self.phone,
             "is_active": self.is_active,
             "is_superuser": self.is_superuser,
@@ -58,6 +69,25 @@ class User(Base):
             "created_at": self.created_at.strftime("%Y-%m-%d %H:%M:%S") if self.created_at else None,
             "last_login_at": self.last_login_at.strftime("%Y-%m-%d %H:%M:%S") if self.last_login_at else None,
             "roles": [{"id": r.id, "name": r.name, "code": r.code} for r in self.roles],
+        }
+
+
+class Department(Base):
+    __tablename__ = "departments"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(50), unique=True, nullable=False, comment="部门名称")
+    remark = Column(String(200), default="", comment="备注")
+    created_at = Column(DateTime, default=datetime.now)
+
+    users = relationship("User", secondary=user_department, back_populates="departments", lazy="selectin")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "remark": self.remark,
+            "created_at": self.created_at.strftime("%Y-%m-%d %H:%M:%S") if self.created_at else None,
         }
 
 

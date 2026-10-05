@@ -14,6 +14,7 @@ const menuItems = computed(() => {
   const items = [{ path: '/dashboard', title: '首页', icon: 'HomeFilled' }]
   const system = []
   if (auth.hasPerm('system:user:manage')) system.push({ path: '/system/users', title: '用户管理' })
+  if (auth.hasPerm('system:dept:manage')) system.push({ path: '/system/depts', title: '部门管理' })
   if (auth.hasPerm('system:role:manage')) system.push({ path: '/system/roles', title: '角色权限' })
   if (system.length) {
     items.push({ title: '系统管理', icon: 'Setting', children: system })

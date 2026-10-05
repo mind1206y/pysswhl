@@ -9,7 +9,7 @@ from app.api.deps import require_permission
 from app.core.config import settings
 from app.core.security import hash_password
 from app.db.session import get_db
-from app.models.user import Role, User
+from app.models.user import Department, Role, User
 
 router = APIRouter()
 
@@ -17,14 +17,14 @@ router = APIRouter()
 class UserCreate(BaseModel):
     username: str
     real_name: str = ""
-    department: str = ""
+    department_ids: List[int] = []
     phone: str = ""
     is_active: bool = True
 
 
 class UserUpdate(BaseModel):
     real_name: str = ""
-    department: str = ""
+    department_ids: Optional[List[int]] = None
     phone: str = ""
 
 
@@ -70,10 +70,11 @@ def create_user(
         password_hash=hash_password(settings.INITIAL_PASSWORD),
         must_change_password=True,
         real_name=data.real_name.strip(),
-        department=data.department.strip(),
         phone=data.phone.strip(),
         is_active=data.is_active,
     )
+    if data.department_ids:
+        user.departments = db.query(Department).filter(Department.id.in_(data.department_ids)).all()
     db.add(user)
     db.commit()
     db.refresh(user)
@@ -91,7 +92,8 @@ def update_user(
     if user is None:
         raise HTTPException(status_code=404, detail="用户不存在")
     user.real_name = data.real_name.strip()
-    user.department = data.department.strip()
+    if data.department_ids is not None:
+        user.departments = db.query(Department).filter(Department.id.in_(data.department_ids)).all()
     user.phone = data.phone.strip()
     db.commit()
     return user.to_dict()

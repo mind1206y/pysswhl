@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import OperationalError
 
-from app.api.routes import auth, roles, users
+from app.api.routes import auth, departments, roles, users
 from app.core.config import settings
 
 app = FastAPI(title="水司业务管理系统", version="0.1.0")
@@ -27,6 +27,7 @@ def db_error_handler(request: Request, exc: OperationalError):
 
 app.include_router(auth.router, prefix="/api/auth", tags=["认证"])
 app.include_router(users.router, prefix="/api/users", tags=["用户管理"])
+app.include_router(departments.router, prefix="/api/departments", tags=["部门管理"])
 app.include_router(roles.router, prefix="/api/roles", tags=["角色管理"])
 
 

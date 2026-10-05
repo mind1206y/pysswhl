@@ -10,10 +10,11 @@ from sqlalchemy import inspect, text
 from app.core.config import settings
 from app.core.security import hash_password
 from app.db.session import Base, SessionLocal, engine
-from app.models.user import Permission, Role, User
+from app.models.user import Department, Permission, Role, User
 
 DEFAULT_PERMISSIONS = [
     ("system:user:manage", "用户管理"),
+    ("system:dept:manage", "部门管理"),
     ("system:role:manage", "角色权限管理"),
 ]
 
@@ -38,20 +39,33 @@ def create_database():
 
 
 def ensure_columns():
-    """轻量迁移:给已存在的 users 表补齐后加的列(create_all 不会修改老表结构)。"""
+    """轻量迁移:create_all 不会修改已存在表的结构,这里补齐/清理 users 表字段。"""
     cols = {c["name"] for c in inspect(engine).get_columns("users")}
     with engine.begin() as conn:
-        if "department" not in cols:
-            conn.execute(text(
-                "ALTER TABLE users ADD COLUMN department VARCHAR(50) NOT NULL DEFAULT '' COMMENT '部门'"
-            ))
-            print("已补列 users.department")
         if "must_change_password" not in cols:
             conn.execute(text(
                 "ALTER TABLE users ADD COLUMN must_change_password TINYINT(1) "
                 "NOT NULL DEFAULT 0 COMMENT '登录后是否必须先修改初始密码'"
             ))
             print("已补列 users.must_change_password")
+        if "department" in cols:
+            # 部门已改为独立表 + 多对多关联:先把旧文本值迁移成关联,再删列
+            old_rows = conn.execute(
+                text("SELECT id, department FROM users WHERE department IS NOT NULL AND department <> ''")
+            ).fetchall()
+            for uid, dept_name in old_rows:
+                conn.execute(text(
+                    "INSERT IGNORE INTO departments (name, remark, created_at) "
+                    "VALUES (:name, '由旧部门字段迁移', NOW())"
+                ), {"name": dept_name})
+                dept_id = conn.execute(
+                    text("SELECT id FROM departments WHERE name = :name"), {"name": dept_name}
+                ).scalar()
+                conn.execute(text(
+                    "INSERT IGNORE INTO user_department (user_id, department_id) VALUES (:uid, :did)"
+                ), {"uid": uid, "did": dept_id})
+            conn.execute(text("ALTER TABLE users DROP COLUMN department"))
+            print(f"已迁移 {len(old_rows)} 条旧部门数据并删除 users.department 列")
 
 
 def main():

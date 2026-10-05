@@ -10,6 +10,7 @@ import {
   updateUser,
 } from '@/api/user'
 import { listRoles } from '@/api/role'
+import { listDepartments } from '@/api/dept'
 
 // ===== 列表 =====
 const loading = ref(false)
@@ -35,13 +36,17 @@ function search() {
   load()
 }
 
-onMounted(load)
+onMounted(async () => {
+  load()
+  allDepartments.value = await listDepartments()
+})
 
 // ===== 新增 / 编辑 =====
 const editDialog = ref(false)
 const editingId = ref(null)
 const editFormRef = ref()
-const editForm = reactive({ username: '', real_name: '', department: '', phone: '' })
+const allDepartments = ref([])
+const editForm = reactive({ username: '', real_name: '', department_ids: [], phone: '' })
 const editRules = {
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
   real_name: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
@@ -49,8 +54,8 @@ const editRules = {
 
 function openCreate() {
   editingId.value = null
-  // 创建时只填姓名/用户名/部门,密码用初始密码,用户首次登录强制修改
-  Object.assign(editForm, { username: '', real_name: '', department: '', phone: '' })
+  // 创建时只填姓名/用户名并勾选部门,密码用初始密码,用户首次登录强制修改
+  Object.assign(editForm, { username: '', real_name: '', department_ids: [], phone: '' })
   editDialog.value = true
 }
 
@@ -59,7 +64,7 @@ function openEdit(row) {
   Object.assign(editForm, {
     username: row.username,
     real_name: row.real_name,
-    department: row.department || '',
+    department_ids: (row.departments || []).map((d) => d.id),
     phone: row.phone,
   })
   editDialog.value = true
@@ -72,7 +77,7 @@ async function submitEdit() {
   } else {
     await updateUser(editingId.value, {
       real_name: editForm.real_name,
-      department: editForm.department,
+      department_ids: editForm.department_ids,
       phone: editForm.phone,
     })
   }
@@ -150,7 +155,14 @@ async function submitRoles() {
       <el-table-column prop="id" label="ID" width="70" />
       <el-table-column prop="username" label="用户名" min-width="120" />
       <el-table-column prop="real_name" label="姓名" min-width="100" />
-      <el-table-column prop="department" label="部门" min-width="120" />
+      <el-table-column label="部门" min-width="150">
+        <template #default="{ row }">
+          <el-tag v-for="d in row.departments" :key="d.id" size="small" style="margin-right: 4px">
+            {{ d.name }}
+          </el-tag>
+          <span v-if="!(row.departments || []).length" style="color: #c0c4cc">未分配</span>
+        </template>
+      </el-table-column>
       <el-table-column prop="phone" label="手机号" min-width="130" />
       <el-table-column label="角色" min-width="150">
         <template #default="{ row }">
@@ -198,7 +210,16 @@ async function submitRoles() {
         <el-input v-model="editForm.real_name" placeholder="登录后显示的姓名" />
       </el-form-item>
       <el-form-item label="部门">
-        <el-input v-model="editForm.department" />
+        <el-select
+          v-model="editForm.department_ids"
+          multiple
+          collapse-tags
+          collapse-tags-tooltip
+          placeholder="可多选,需先在「部门管理」中维护"
+          style="width: 100%"
+        >
+          <el-option v-for="d in allDepartments" :key="d.id" :value="d.id" :label="d.name" />
+        </el-select>
       </el-form-item>
       <el-form-item v-if="editingId != null" label="手机号">
         <el-input v-model="editForm.phone" />

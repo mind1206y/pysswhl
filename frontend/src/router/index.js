@@ -4,6 +4,7 @@ import MainLayout from '@/layout/MainLayout.vue'
 import Login from '@/views/Login.vue'
 import ChangePassword from '@/views/ChangePassword.vue'
 import Dashboard from '@/views/Dashboard.vue'
+import DeptManage from '@/views/system/DeptManage.vue'
 import UserManage from '@/views/system/UserManage.vue'
 import RoleManage from '@/views/system/RoleManage.vue'
 
@@ -22,6 +23,11 @@ const router = createRouter({
           path: 'system/users',
           component: UserManage,
           meta: { title: '用户管理', perm: 'system:user:manage' },
+        },
+        {
+          path: 'system/depts',
+          component: DeptManage,
+          meta: { title: '部门管理', perm: 'system:dept:manage' },
         },
         {
           path: 'system/roles',
