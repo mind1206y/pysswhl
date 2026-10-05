@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   createUser,
@@ -11,6 +11,7 @@ import {
 } from '@/api/user'
 import { listRoles } from '@/api/role'
 import { listDepartments } from '@/api/dept'
+import { buildDeptTree } from '@/utils/dept'
 
 // ===== 列表 =====
 const loading = ref(false)
@@ -46,6 +47,7 @@ const editDialog = ref(false)
 const editingId = ref(null)
 const editFormRef = ref()
 const allDepartments = ref([])
+const deptTree = computed(() => buildDeptTree(allDepartments.value))
 const editForm = reactive({ username: '', real_name: '', department_ids: [], phone: '' })
 const editRules = {
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
@@ -210,16 +212,18 @@ async function submitRoles() {
         <el-input v-model="editForm.real_name" placeholder="登录后显示的姓名" />
       </el-form-item>
       <el-form-item label="部门">
-        <el-select
+        <el-tree-select
           v-model="editForm.department_ids"
+          :data="deptTree"
+          :props="{ label: 'name' }"
+          node-key="id"
           multiple
           collapse-tags
           collapse-tags-tooltip
+          default-expand-all
           placeholder="可多选,需先在「部门管理」中维护"
           style="width: 100%"
-        >
-          <el-option v-for="d in allDepartments" :key="d.id" :value="d.id" :label="d.name" />
-        </el-select>
+        />
       </el-form-item>
       <el-form-item v-if="editingId != null" label="手机号">
         <el-input v-model="editForm.phone" />

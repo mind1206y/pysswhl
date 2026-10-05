@@ -77,6 +77,7 @@ class Department(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(50), unique=True, nullable=False, comment="部门名称")
+    parent_id = Column(Integer, ForeignKey("departments.id"), nullable=True, comment="上级部门id,空为顶级")
     remark = Column(String(200), default="", comment="备注")
     created_at = Column(DateTime, default=datetime.now)
 
@@ -86,6 +87,7 @@ class Department(Base):
         return {
             "id": self.id,
             "name": self.name,
+            "parent_id": self.parent_id,
             "remark": self.remark,
             "created_at": self.created_at.strftime("%Y-%m-%d %H:%M:%S") if self.created_at else None,
         }
