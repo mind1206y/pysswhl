@@ -44,7 +44,9 @@ async function submit() {
 
 <template>
   <div class="pwd-page">
-    <el-card class="pwd-card">
+    <div class="wave wave1"></div>
+    <div class="wave wave2"></div>
+    <div class="pwd-card">
       <h2 class="title">修改初始密码</h2>
       <el-alert
         type="warning"
@@ -68,31 +70,81 @@ async function submit() {
           <el-button type="primary" class="btn" :loading="loading" @click="submit">确认修改</el-button>
         </el-form-item>
       </el-form>
-    </el-card>
+    </div>
   </div>
 </template>
 
 <style scoped>
 .pwd-page {
+  position: relative;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #1f6fb2 0%, #0b2e4f 100%);
+  overflow: hidden;
+  background: linear-gradient(160deg, #2b7fc9 0%, #14507f 45%, #0a2d4d 100%);
 }
 .pwd-card {
-  width: 420px;
-  padding: 10px 10px 0;
+  position: relative;
+  z-index: 2;
+  width: 440px;
+  max-width: 92vw;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 24px 60px rgba(4, 32, 58, 0.45);
+  padding: 36px 36px 22px;
+  animation: cardIn 0.6s ease-out;
+}
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: none; }
 }
 .title {
+  margin: 0 0 18px;
   text-align: center;
-  margin: 10px 0 20px;
-  color: #303133;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #123c63;
 }
 .tip {
   margin-bottom: 20px;
 }
 .btn {
   width: 100%;
+  height: 44px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  letter-spacing: 6px;
+  background: linear-gradient(135deg, #2b7fc9, #14507f);
+}
+:deep(.el-button--primary:hover) {
+  filter: brightness(1.1);
+}
+:deep(.el-input__wrapper) {
+  border-radius: 8px;
+}
+.wave {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 140px;
+  background-repeat: repeat-x;
+  background-size: 720px 140px;
+  pointer-events: none;
+}
+.wave1 {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 720 140' preserveAspectRatio='none'%3E%3Cpath d='M0,80 C120,120 240,40 360,70 C480,100 600,50 720,80 L720,140 L0,140 Z' fill='rgba(255,255,255,0.08)'/%3E%3C/svg%3E");
+  animation: waveMove 22s linear infinite;
+}
+.wave2 {
+  height: 110px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 720 110' preserveAspectRatio='none'%3E%3Cpath d='M0,60 C140,95 280,30 420,58 C540,82 640,44 720,60 L720,110 L0,110 Z' fill='rgba(255,255,255,0.15)'/%3E%3C/svg%3E");
+  animation: waveMove 13s linear infinite;
+}
+@keyframes waveMove {
+  to { background-position-x: -720px; }
 }
 </style>
