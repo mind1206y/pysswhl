@@ -60,6 +60,12 @@ def ensure_columns():
                 "COMMENT '账号锁定截止时间,空为未锁定'"
             ))
             print("已补列 users.locked_until")
+        if "password_version" not in user_cols:
+            conn.execute(text(
+                "ALTER TABLE users ADD COLUMN password_version INT NOT NULL DEFAULT 0 "
+                "COMMENT '密码哈希版本:0=bcrypt,1=Argon2id+pepper'"
+            ))
+            print("已补列 users.password_version")
         if "department" in user_cols:
             # 部门已改为独立表 + 多对多关联:先把旧文本值迁移成关联,再删列
             old_rows = conn.execute(
@@ -127,6 +133,7 @@ def main():
                 User(
                     username="admin",
                     password_hash=hash_password("admin123"),
+                    password_version=1,
                     real_name="系统管理员",
                     is_superuser=True,
                     is_active=True,

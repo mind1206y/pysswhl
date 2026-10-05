@@ -6,3 +6,4 @@ cryptography>=42.0.0
 PyJWT>=2.8.0
 bcrypt>=4.1.2
 pydantic-settings>=2.2.1
+argon2-cffi>=25.1.0

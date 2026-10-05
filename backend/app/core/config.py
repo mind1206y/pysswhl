@@ -21,6 +21,10 @@ class Settings(BaseSettings):
     # 管理员创建/重置用户时使用的初始密码,用户登录后会被强制要求修改
     INITIAL_PASSWORD: str = "abc123456"
 
+    # 密码哈希胡椒:参与哈希计算的秘密随机串,只存本文件(.env),不进数据库。
+    # 一旦设置就不要更改;留空等于不启用该层保护。
+    PASSWORD_PEPPER: str = ""
+
     CORS_ORIGINS: str = "http://localhost:5173"
 
     @property

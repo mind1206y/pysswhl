@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import require_permission
 from app.core.config import settings
-from app.core.security import hash_password
+from app.core.security import CURRENT_PASSWORD_VERSION, hash_password
 from app.db.session import get_db
 from app.models.user import Department, Role, User
 
@@ -68,6 +68,7 @@ def create_user(
     user = User(
         username=username,
         password_hash=hash_password(settings.INITIAL_PASSWORD),
+        password_version=CURRENT_PASSWORD_VERSION,
         must_change_password=True,
         real_name=data.real_name.strip(),
         phone=data.phone.strip(),
@@ -127,6 +128,7 @@ def reset_password(
         raise HTTPException(status_code=404, detail="用户不存在")
     # 重置回初始密码,并要求用户下次登录先改密码
     user.password_hash = hash_password(settings.INITIAL_PASSWORD)
+    user.password_version = CURRENT_PASSWORD_VERSION
     user.must_change_password = True
     db.commit()
     return {"message": "已重置为初始密码,该用户下次登录须先修改密码"}

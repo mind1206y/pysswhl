@@ -42,7 +42,8 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String(50), unique=True, nullable=False, index=True, comment="登录名")
-    password_hash = Column(String(128), nullable=False, comment="bcrypt 哈希")
+    password_hash = Column(String(256), nullable=False, comment="密码哈希")
+    password_version = Column(Integer, default=0, comment="密码哈希版本:0=bcrypt旧版,1=Argon2id+pepper")
     real_name = Column(String(50), default="", comment="姓名")
     phone = Column(String(20), default="", comment="手机号")
     is_active = Column(Boolean, default=True, comment="是否启用")

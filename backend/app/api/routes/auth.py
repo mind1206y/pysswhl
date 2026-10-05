@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
 from app.core.security import (
+    CURRENT_PASSWORD_VERSION,
     create_access_token,
     decrypt_password,
     get_public_key_pem,
@@ -76,7 +77,7 @@ def login(data: LoginIn, db: Session = Depends(get_db)):
     if not user.is_active:
         raise HTTPException(status_code=403, detail="账号已停用,请联系管理员")
 
-    if not verify_password(plain, user.password_hash):
+    if not verify_password(plain, user.password_hash, user.password_version or 0):
         user.failed_attempts = (user.failed_attempts or 0) + 1
         if user.failed_attempts >= LOGIN_LOCK_THRESHOLD:
             user.locked_until = now + timedelta(minutes=LOGIN_LOCK_MINUTES)
@@ -96,6 +97,10 @@ def login(data: LoginIn, db: Session = Depends(get_db)):
     # 登录成功,清除错误计数与锁定状态
     user.failed_attempts = 0
     user.locked_until = None
+    # 旧版本哈希透明升级到当前算法(无需用户重置密码)
+    if (user.password_version or 0) < CURRENT_PASSWORD_VERSION:
+        user.password_hash = hash_password(plain)
+        user.password_version = CURRENT_PASSWORD_VERSION
     user.last_login_at = datetime.now()
     db.commit()
     return {"token": create_access_token(user.id, user.username), "user": build_user_info(user)}
@@ -126,6 +131,7 @@ def change_password(
             detail="新密码强度不足:" + ",".join(issues) + "(需包含大写字母、小写字母、数字和符号)",
         )
     user.password_hash = hash_password(new_plain)
+    user.password_version = CURRENT_PASSWORD_VERSION
     user.must_change_password = False
     db.commit()
     return {"message": "密码修改成功"}

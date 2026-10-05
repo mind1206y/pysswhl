@@ -1,14 +1,45 @@
 import base64
+import hashlib
+import hmac
 import re
 from datetime import datetime, timedelta, timezone
 from functools import lru_cache
 
 import bcrypt
 import jwt
+from argon2 import PasswordHasher
+from argon2.exceptions import InvalidHashError, VerifyMismatchError
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 
 from app.core.config import settings
+
+# 密码哈希版本:v0 = bcrypt(历史遗留);v1 = Argon2id + pepper(现行)
+# 老用户在下次登录成功时自动升级到 v1,无需重置密码。
+CURRENT_PASSWORD_VERSION = 1
+_ph = PasswordHasher(time_cost=3, memory_cost=65536, parallelism=4)
+
+
+def _peppered(plain: str) -> str:
+    """把 pepper 以 HMAC 方式混入密码;pepper 只存在于后端配置,不进数据库"""
+    return base64.b64encode(
+        hmac.new(settings.PASSWORD_PEPPER.encode(), plain.encode(), hashlib.sha256).digest()
+    ).decode()
+
+
+def hash_password(plain: str) -> str:
+    """生成当前版本(v1)的密码哈希"""
+    return _ph.hash(_peppered(plain))
+
+
+def verify_password(plain: str, hashed: str, version: int = CURRENT_PASSWORD_VERSION) -> bool:
+    """按存储时的版本校验密码"""
+    if version <= 0:
+        return verify_password_legacy(plain, hashed)
+    try:
+        return _ph.verify(hashed, _peppered(plain))
+    except (VerifyMismatchError, InvalidHashError, ValueError):
+        return False
 
 # 复杂密码要求:至少 8 位,且同时包含大写字母、小写字母、数字、符号
 _PASSWORD_RULES = [
@@ -29,11 +60,7 @@ def password_issues(password: str) -> list:
     return issues
 
 
-def hash_password(plain: str) -> str:
-    return bcrypt.hashpw(plain.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
-
-
-def verify_password(plain: str, hashed: str) -> bool:
+def verify_password_legacy(plain: str, hashed: str) -> bool:
     try:
         return bcrypt.checkpw(plain.encode("utf-8"), hashed.encode("utf-8"))
     except ValueError:
