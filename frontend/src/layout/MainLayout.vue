@@ -5,6 +5,7 @@ import { ElMessage } from 'element-plus'
 import { changePassword } from '@/api/auth'
 import { useAuthStore } from '@/stores/auth'
 import { PASSWORD_TIP, passwordRule } from '@/utils/password'
+import { useIdleLogout } from '@/utils/idle'
 
 const router = useRouter()
 const route = useRoute()
@@ -60,6 +61,13 @@ function doLogout() {
   auth.logout()
   router.push('/login')
 }
+
+// 公用电脑防护:30 分钟无任何操作自动退出
+useIdleLogout(() => {
+  ElMessage.warning('超过 30 分钟无操作,已自动退出')
+  auth.logout()
+  router.push('/login')
+}, 30)
 </script>
 
 <template>

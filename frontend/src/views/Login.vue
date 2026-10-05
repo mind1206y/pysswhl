@@ -9,7 +9,10 @@ const route = useRoute()
 
 const formRef = ref()
 const loading = ref(false)
-const form = reactive({ username: '', password: '' })
+// 记住用户名:只记住用户名,密码不落盘
+const savedUsername = localStorage.getItem('remembered_username') || ''
+const rememberName = ref(!!savedUsername)
+const form = reactive({ username: savedUsername, password: '' })
 const rules = {
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
@@ -17,6 +20,11 @@ const rules = {
 
 async function submit() {
   await formRef.value.validate()
+  if (rememberName.value) {
+    localStorage.setItem('remembered_username', form.username)
+  } else {
+    localStorage.removeItem('remembered_username')
+  }
   loading.value = true
   try {
     await auth.login(form)
@@ -42,6 +50,9 @@ async function submit() {
           <el-input v-model="form.password" type="password" show-password placeholder="密码">
             <template #prefix><el-icon><Lock /></el-icon></template>
           </el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-checkbox v-model="rememberName">记住用户名</el-checkbox>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" class="login-btn" :loading="loading" @click="submit">
