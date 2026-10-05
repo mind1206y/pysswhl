@@ -108,6 +108,17 @@ npm run dev
 5. **前端页面**:`frontend/src/api/` 加接口封装,`src/views/` 加页面。
 6. **挂菜单**:`src/router/index.js` 加路由(meta 里带 perm),`src/layout/MainLayout.vue` 的 menuItems 加菜单项。
 
+## 备份(Git 双远程)
+
+参照旧系统的方案,配置了两个远程,日常双击 `E:\pysswhl\push.bat` 一键推送:
+
+| 远程 | 地址 | 推送 |
+|---|---|---|
+| `origin` | `E:/pysswhl-backup.git`(本地裸仓库) | `main` |
+| `github` | `git@github.com:mind1206y/pysswhl.git` | `main:github-clean` |
+
+同时会把 `backend/.env` / `.env.example` 复制一份到 `E:\pysswhl-backup\` 做文件备份(`.env` 含数据库密码,不进 git)。
+
 ## Docker
 
 开发阶段不需要。以后若部署到 Linux 服务器,再补一套 docker-compose(api + mysql + nginx)即可,代码不需要任何改动。
