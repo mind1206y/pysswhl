@@ -4,6 +4,7 @@ import hmac
 import re
 from datetime import datetime, timedelta, timezone
 from functools import lru_cache
+from pathlib import Path
 
 import bcrypt
 import jwt
@@ -82,8 +83,23 @@ def decode_access_token(token: str) -> dict:
 
 @lru_cache(maxsize=1)
 def _rsa_private_key():
-    """进程内生成并缓存 RSA-2048 密钥对;私钥只存在于后端内存,不落盘不入库"""
-    return rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    """加载(首次则生成)RSA-2048 私钥,落盘到 backend/rsa_key.pem。
+
+    落盘是为了多进程部署(如 uvicorn --workers N):各 worker 共用同一对密钥,
+    否则取公钥和验证密文可能落在不同进程导致解密失败。保密级别同 .env。
+    """
+    key_file = Path(__file__).resolve().parents[2] / "rsa_key.pem"
+    if key_file.exists():
+        return serialization.load_pem_private_key(key_file.read_bytes(), password=None)
+    key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    key_file.write_bytes(
+        key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption(),
+        )
+    )
+    return key
 
 
 def get_public_key_pem() -> str:

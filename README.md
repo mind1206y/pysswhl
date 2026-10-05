@@ -34,7 +34,8 @@ pysswhl/
 │       └── views/           # 页面(system/ 下是系统管理)
 └── docs/
     ├── 数据迁移约定.md       # 旧系统数据导入的规则
-    └── 权限控制机制.md       # 权限链路原理 + 新模块接入模板
+    ├── 权限控制机制.md       # 权限链路原理 + 新模块接入模板
+    └── 部署清单.md           # 以后部署到 Linux 服务器时照着勾的清单
 ```
 
 ## 环境要求
@@ -133,4 +134,4 @@ npm run dev
 
 ## Docker
 
-开发阶段不需要。以后若部署到 Linux 服务器,再补一套 docker-compose(api + mysql + nginx)即可,代码不需要任何改动。
+开发阶段不需要。以后若部署到 Linux 服务器,照 [docs/部署清单.md](docs/部署清单.md) 逐项执行(裸机部署步骤 + 安全清单);需要时再补一套 docker-compose(api + mysql + nginx)即可,代码不需要任何改动。
