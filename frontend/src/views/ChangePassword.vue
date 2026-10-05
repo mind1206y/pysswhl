@@ -147,4 +147,24 @@ async function submit() {
 @keyframes waveMove {
   to { background-position-x: -720px; }
 }
+
+/* 手机端适配 */
+@media (max-width: 480px) {
+  .pwd-card {
+    width: 92vw;
+    padding: 28px 22px 18px;
+    border-radius: 12px;
+  }
+  .title {
+    font-size: 20px;
+  }
+  :deep(.el-input__inner) {
+    font-size: 16px; /* ≥16px,避免 iOS 聚焦自动放大 */
+  }
+  .btn {
+    height: 42px;
+    font-size: 15px;
+    letter-spacing: 6px;
+  }
+}
 </style>

@@ -181,4 +181,31 @@ async function submit() {
 @keyframes waveMove {
   to { background-position-x: -720px; }
 }
+
+/* 手机端适配 */
+@media (max-width: 480px) {
+  .login-card {
+    padding: 30px 24px 22px;
+    border-radius: 12px;
+  }
+  .title {
+    font-size: 20px;
+  }
+  .subtitle {
+    font-size: 10px;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+  }
+  :deep(.el-input__wrapper) {
+    padding: 2px 12px;
+  }
+  :deep(.el-input__inner) {
+    font-size: 16px; /* ≥16px,避免 iOS 聚焦自动放大 */
+  }
+  :deep(.el-button--primary) {
+    height: 42px;
+    font-size: 15px;
+    letter-spacing: 6px;
+  }
+}
 </style>
