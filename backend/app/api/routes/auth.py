@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -48,6 +48,10 @@ def public_key():
     return {"publicKey": get_public_key_pem()}
 
 
+LOGIN_LOCK_THRESHOLD = 5
+LOGIN_LOCK_MINUTES = 10
+
+
 @router.post("/login")
 def login(data: LoginIn, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.username == data.username.strip()).first()
@@ -56,10 +60,42 @@ def login(data: LoginIn, db: Session = Depends(get_db)):
     except (ValueError, TypeError):
         # 密文无效:多半是后端重启导致公钥更换,前端刷新后重新获取即可
         raise HTTPException(status_code=400, detail="密码解密失败,请刷新页面后重试")
-    if user is None or not verify_password(plain, user.password_hash):
+    if user is None:
         raise HTTPException(status_code=400, detail="用户名或密码错误")
+
+    # 锁定检查:锁定期内直接拒绝,不再做密码验证
+    now = datetime.now()
+    if user.locked_until:
+        if user.locked_until > now:
+            minutes = int((user.locked_until - now).total_seconds() // 60) + 1
+            raise HTTPException(status_code=403, detail=f"账号已锁定,请 {minutes} 分钟后再试")
+        # 锁定已过期,重新计数
+        user.failed_attempts = 0
+        user.locked_until = None
+
     if not user.is_active:
         raise HTTPException(status_code=403, detail="账号已停用,请联系管理员")
+
+    if not verify_password(plain, user.password_hash):
+        user.failed_attempts = (user.failed_attempts or 0) + 1
+        if user.failed_attempts >= LOGIN_LOCK_THRESHOLD:
+            user.locked_until = now + timedelta(minutes=LOGIN_LOCK_MINUTES)
+            user.failed_attempts = 0
+            db.commit()
+            raise HTTPException(
+                status_code=403,
+                detail=f"密码连续错误 {LOGIN_LOCK_THRESHOLD} 次,账号已锁定 {LOGIN_LOCK_MINUTES} 分钟",
+            )
+        db.commit()
+        left = LOGIN_LOCK_THRESHOLD - user.failed_attempts
+        raise HTTPException(
+            status_code=400,
+            detail=f"用户名或密码错误,已错 {user.failed_attempts} 次(再错 {left} 次将锁定 10 分钟)",
+        )
+
+    # 登录成功,清除错误计数与锁定状态
+    user.failed_attempts = 0
+    user.locked_until = None
     user.last_login_at = datetime.now()
     db.commit()
     return {"token": create_access_token(user.id, user.username), "user": build_user_info(user)}

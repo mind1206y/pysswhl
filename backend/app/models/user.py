@@ -48,6 +48,8 @@ class User(Base):
     is_active = Column(Boolean, default=True, comment="是否启用")
     is_superuser = Column(Boolean, default=False, comment="超级管理员,拥有全部权限")
     must_change_password = Column(Boolean, default=False, comment="登录后是否必须先修改初始密码")
+    failed_attempts = Column(Integer, default=0, comment="连续密码错误次数")
+    locked_until = Column(DateTime, nullable=True, comment="账号锁定截止时间,空为未锁定")
     created_at = Column(DateTime, default=datetime.now)
     last_login_at = Column(DateTime, nullable=True)
 

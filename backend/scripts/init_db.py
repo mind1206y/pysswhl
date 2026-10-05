@@ -48,6 +48,18 @@ def ensure_columns():
                 "NOT NULL DEFAULT 0 COMMENT '登录后是否必须先修改初始密码'"
             ))
             print("已补列 users.must_change_password")
+        if "failed_attempts" not in user_cols:
+            conn.execute(text(
+                "ALTER TABLE users ADD COLUMN failed_attempts INT NOT NULL DEFAULT 0 "
+                "COMMENT '连续密码错误次数'"
+            ))
+            print("已补列 users.failed_attempts")
+        if "locked_until" not in user_cols:
+            conn.execute(text(
+                "ALTER TABLE users ADD COLUMN locked_until DATETIME NULL "
+                "COMMENT '账号锁定截止时间,空为未锁定'"
+            ))
+            print("已补列 users.locked_until")
         if "department" in user_cols:
             # 部门已改为独立表 + 多对多关联:先把旧文本值迁移成关联,再删列
             old_rows = conn.execute(
