@@ -39,7 +39,7 @@ async function submit() {
 <template>
   <div class="login-page">
     <el-card class="login-card">
-      <h2 class="title">水司业务管理系统</h2>
+      <h2 class="title">售水业务管理系统</h2>
       <el-form ref="formRef" :model="form" :rules="rules" size="large" @keyup.enter="submit">
         <el-form-item prop="username">
           <el-input v-model="form.username" placeholder="用户名">

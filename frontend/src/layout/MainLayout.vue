@@ -73,7 +73,7 @@ useIdleLogout(() => {
 <template>
   <el-container class="layout">
     <el-aside width="220px" class="aside">
-      <div class="logo">水司业务管理系统</div>
+      <div class="logo">售水业务管理系统</div>
       <el-menu
         :default-active="activeMenu"
         router

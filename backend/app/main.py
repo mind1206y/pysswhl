@@ -6,7 +6,7 @@ from sqlalchemy.exc import OperationalError
 from app.api.routes import auth, departments, roles, users
 from app.core.config import settings
 
-app = FastAPI(title="水司业务管理系统", version="0.1.0")
+app = FastAPI(title="售水业务管理系统", version="0.1.0")
 
 app.add_middleware(
     CORSMiddleware,
