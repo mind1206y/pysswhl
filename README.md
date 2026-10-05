@@ -32,7 +32,9 @@ pysswhl/
 │       ├── router/          # 路由 + 登录拦截 + 权限拦截
 │       ├── layout/          # 后台布局(侧边菜单)
 │       └── views/           # 页面(system/ 下是系统管理)
-└── docs/数据迁移约定.md      # 旧系统数据导入的规则
+└── docs/
+    ├── 数据迁移约定.md       # 旧系统数据导入的规则
+    └── 权限控制机制.md       # 权限链路原理 + 新模块接入模板
 ```
 
 ## 环境要求
@@ -109,6 +111,8 @@ npm run dev
 4. **注册路由**:`app/main.py` 里 `app.include_router(...)`。
 5. **前端页面**:`frontend/src/api/` 加接口封装,`src/views/` 加页面。
 6. **挂菜单**:`src/router/index.js` 加路由(meta 里带 perm),`src/layout/MainLayout.vue` 的 menuItems 加菜单项。
+
+> 权限链路的完整原理、粒度约定和接入模板见 [docs/权限控制机制.md](docs/权限控制机制.md)。
 
 ## 备份(Git 双远程)
 
