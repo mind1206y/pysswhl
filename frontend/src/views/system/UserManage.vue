@@ -11,7 +11,6 @@ import {
 } from '@/api/user'
 import { listRoles } from '@/api/role'
 import { listDepartments } from '@/api/dept'
-import { buildDeptTree } from '@/utils/dept'
 
 // ===== 列表 =====
 const loading = ref(false)
@@ -47,7 +46,20 @@ const editDialog = ref(false)
 const editingId = ref(null)
 const editFormRef = ref()
 const allDepartments = ref([])
-const deptTree = computed(() => buildDeptTree(allDepartments.value))
+// 部门多选选项:显示完整层级路径,便于区分同名/多级部门
+const deptOptions = computed(() => {
+  const byId = new Map(allDepartments.value.map((d) => [d.id, d]))
+  const pathLabel = (d) => {
+    const names = [d.name]
+    let p = d.parent_id ? byId.get(d.parent_id) : null
+    while (p) {
+      names.unshift(p.name)
+      p = p.parent_id ? byId.get(p.parent_id) : null
+    }
+    return names.join(' / ')
+  }
+  return allDepartments.value.map((d) => ({ id: d.id, label: pathLabel(d) }))
+})
 const editForm = reactive({ username: '', real_name: '', department_ids: [], phone: '' })
 const editRules = {
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
@@ -212,18 +224,16 @@ async function submitRoles() {
         <el-input v-model="editForm.real_name" placeholder="登录后显示的姓名" />
       </el-form-item>
       <el-form-item label="部门">
-        <el-tree-select
+        <el-select
           v-model="editForm.department_ids"
-          :data="deptTree"
-          :props="{ label: 'name' }"
-          node-key="id"
           multiple
           collapse-tags
           collapse-tags-tooltip
-          default-expand-all
           placeholder="可多选,需先在「部门管理」中维护"
           style="width: 100%"
-        />
+        >
+          <el-option v-for="o in deptOptions" :key="o.id" :value="o.id" :label="o.label" />
+        </el-select>
       </el-form-item>
       <el-form-item v-if="editingId != null" label="手机号">
         <el-input v-model="editForm.phone" />

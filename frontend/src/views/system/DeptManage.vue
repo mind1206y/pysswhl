@@ -5,12 +5,14 @@ import { createDepartment, deleteDepartment, listDepartments, updateDepartment }
 import { buildDeptTree } from '@/utils/dept'
 
 const loading = ref(false)
+const flatRows = ref([])
 const treeRows = ref([])
 
 async function load() {
   loading.value = true
   try {
-    treeRows.value = buildDeptTree(await listDepartments())
+    flatRows.value = await listDepartments()
+    treeRows.value = buildDeptTree(flatRows.value)
   } finally {
     loading.value = false
   }
@@ -27,16 +29,35 @@ const rules = {
   name: [{ required: true, message: '请输入部门名称', trigger: 'blur' }],
 }
 
-// 编辑时上级部门候选要排除自己及自己的子树,否则会形成环
-function removeSubtree(nodes, id) {
-  return nodes
-    .filter((n) => n.id !== id)
-    .map((n) => (n.children ? { ...n, children: removeSubtree(n.children, id) } : { ...n }))
-}
-
+// 上级部门下拉选项:显示完整层级路径;编辑时排除自己及所有后代(防环)
 const parentOptions = computed(() => {
-  const tree = editingId.value == null ? treeRows.value : removeSubtree(treeRows.value, editingId.value)
-  return [{ id: 0, name: '作为顶级部门', children: tree }]
+  const byId = new Map(flatRows.value.map((d) => [d.id, d]))
+  const pathLabel = (d) => {
+    const names = [d.name]
+    let p = d.parent_id ? byId.get(d.parent_id) : null
+    while (p) {
+      names.unshift(p.name)
+      p = p.parent_id ? byId.get(p.parent_id) : null
+    }
+    return names.join(' / ')
+  }
+  const excluded = new Set()
+  if (editingId.value != null) {
+    excluded.add(editingId.value)
+    const collectDescendants = (pid) => {
+      for (const d of flatRows.value) {
+        if (d.parent_id === pid) {
+          excluded.add(d.id)
+          collectDescendants(d.id)
+        }
+      }
+    }
+    collectDescendants(editingId.value)
+  }
+  return [
+    { id: 0, label: '作为顶级部门' },
+    ...flatRows.value.filter((d) => !excluded.has(d.id)).map((d) => ({ id: d.id, label: pathLabel(d) })),
+  ]
 })
 
 function openCreate() {
@@ -106,14 +127,9 @@ async function remove(row) {
         <el-input v-model="form.name" placeholder="如:办公室 / 财务科 / 信息中心" />
       </el-form-item>
       <el-form-item label="上级部门">
-        <el-tree-select
-          v-model="form.parent_id"
-          :data="parentOptions"
-          :props="{ label: 'name' }"
-          node-key="id"
-          default-expand-all
-          style="width: 100%"
-        />
+        <el-select v-model="form.parent_id" placeholder="选择上级部门" style="width: 100%">
+          <el-option v-for="o in parentOptions" :key="o.id" :value="o.id" :label="o.label" />
+        </el-select>
       </el-form-item>
       <el-form-item label="备注">
         <el-input v-model="form.remark" type="textarea" />
