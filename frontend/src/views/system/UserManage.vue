@@ -3,6 +3,7 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   createUser,
+  deleteUser,
   listUsers,
   resetUserPassword,
   setUserRoles,
@@ -126,6 +127,22 @@ async function resetPwd(row) {
   load()
 }
 
+// ===== 删除用户(用户名填错等场景:删除后重新创建即可) =====
+async function remove(row) {
+  try {
+    await ElMessageBox.confirm(
+      `确定删除用户「${row.username}」?其角色、部门关联将一并删除,操作不可恢复。`,
+      '删除用户',
+      { type: 'warning', confirmButtonText: '删除', cancelButtonText: '取消' }
+    )
+  } catch {
+    return
+  }
+  await deleteUser(row.id)
+  ElMessage.success('已删除')
+  load()
+}
+
 // ===== 分配角色 =====
 const roleDialog = ref(false)
 const roleTarget = ref(null)
@@ -193,11 +210,12 @@ async function submitRoles() {
       </el-table-column>
       <el-table-column prop="last_login_at" label="最后登录" width="170" />
       <el-table-column prop="created_at" label="创建时间" width="170" />
-      <el-table-column label="操作" width="220" fixed="right">
+      <el-table-column label="操作" width="270" fixed="right">
         <template #default="{ row }">
           <el-button link type="primary" @click="openEdit(row)">编辑</el-button>
           <el-button link type="primary" @click="openRoles(row)">分配角色</el-button>
           <el-button link type="warning" @click="resetPwd(row)">重置密码</el-button>
+          <el-button link type="danger" @click="remove(row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -218,7 +236,11 @@ async function submitRoles() {
   <el-dialog v-model="editDialog" :title="editingId == null ? '新增用户' : '编辑用户'" width="440px">
     <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="80px">
       <el-form-item label="用户名" prop="username">
-        <el-input v-model="editForm.username" :disabled="editingId != null" placeholder="登录账号,创建后不可修改" />
+        <el-input
+          v-model="editForm.username"
+          :disabled="editingId != null"
+          placeholder="登录账号,可用手机号;创建后不可修改,填错可删除重建"
+        />
       </el-form-item>
       <el-form-item label="姓名" prop="real_name">
         <el-input v-model="editForm.real_name" placeholder="登录后显示的姓名" />

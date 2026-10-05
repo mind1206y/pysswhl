@@ -132,6 +132,25 @@ def reset_password(
     return {"message": "已重置为初始密码,该用户下次登录须先修改密码"}
 
 
+@router.delete("/{user_id}")
+def delete_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current: User = Depends(require_permission("system:user:manage")),
+):
+    user = db.get(User, user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail="用户不存在")
+    if user.id == current.id:
+        raise HTTPException(status_code=400, detail="不能删除自己的账号")
+    if user.is_superuser:
+        raise HTTPException(status_code=400, detail="超级管理员账号不能删除,可改为停用")
+    # user_role / user_department 外键均为 CASCADE,角色与部门关联随之清除
+    db.delete(user)
+    db.commit()
+    return {"message": "已删除"}
+
+
 @router.put("/{user_id}/roles")
 def set_user_roles(
     user_id: int,
