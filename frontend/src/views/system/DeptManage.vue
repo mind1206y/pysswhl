@@ -24,7 +24,7 @@ onMounted(load)
 const dialog = ref(false)
 const editingId = ref(null)
 const formRef = ref()
-const form = reactive({ name: '', parent_id: 0, remark: '' })
+const form = reactive({ name: '', parent_id: 0, remark: '', htdaihao: '' })
 const rules = {
   name: [{ required: true, message: '请输入部门名称', trigger: 'blur' }],
 }
@@ -62,13 +62,18 @@ const parentOptions = computed(() => {
 
 function openCreate() {
   editingId.value = null
-  Object.assign(form, { name: '', parent_id: 0, remark: '' })
+  Object.assign(form, { name: '', parent_id: 0, remark: '', htdaihao: '' })
   dialog.value = true
 }
 
 function openEdit(row) {
   editingId.value = row.id
-  Object.assign(form, { name: row.name, parent_id: row.parent_id || 0, remark: row.remark })
+  Object.assign(form, {
+    name: row.name,
+    parent_id: row.parent_id || 0,
+    remark: row.remark,
+    htdaihao: row.htdaihao || '',
+  })
   dialog.value = true
 }
 
@@ -109,6 +114,7 @@ async function remove(row) {
       stripe
     >
       <el-table-column prop="name" label="部门名称" min-width="280" />
+      <el-table-column prop="htdaihao" label="合同代号" width="110" />
       <el-table-column prop="remark" label="备注" min-width="200" />
       <el-table-column prop="created_at" label="创建时间" width="170" />
       <el-table-column label="操作" width="150" fixed="right">
@@ -130,6 +136,9 @@ async function remove(row) {
         <el-select v-model="form.parent_id" placeholder="选择上级部门" style="width: 100%">
           <el-option v-for="o in parentOptions" :key="o.id" :value="o.id" :label="o.label" />
         </el-select>
+      </el-form-item>
+      <el-form-item label="合同代号">
+        <el-input v-model="form.htdaihao" placeholder="如 ssgs,合同编号前缀;留空则用 HT" maxlength="20" />
       </el-form-item>
       <el-form-item label="备注">
         <el-input v-model="form.remark" type="textarea" />

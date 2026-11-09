@@ -1,0 +1,67 @@
+{
+  "generated_at": "2026-11-09T16:08:04.092135",
+  "tables": {
+    "jc_wzlb": 13,
+    "jc_wzdw": 0,
+    "jc_jcxx": 17495,
+    "jc_tupian": 12652,
+    "jc_printcolum": 77,
+    "jcdan": 3,
+    "jcjiangli": 179,
+    "jcjiangliFp": 65
+  },
+  "bmid_unmapped": [],
+  "printcolum_skipped": 51,
+  "sum_checks": {
+    "jc_jcxx.zhuijiaoshuifei": [
+      "40024111.4000",
+      "40024111.4000",
+      true
+    ],
+    "jc_jcxx.zhuijiaogongliaofei": [
+      "12364029.8700",
+      "12364029.8700",
+      true
+    ],
+    "jc_jcxx.jbjiangli": [
+      "867862.0000",
+      "867862.0000",
+      true
+    ],
+    "jc_jcxx.zhuijiaojiangli": [
+      "1942301.8300",
+      "1942301.8300",
+      true
+    ],
+    "jc_jcxx.peibiaofei": [
+      "2565.0000",
+      "2565.0000",
+      true
+    ],
+    "jcjiangli.zjshuifei": [
+      "13788847.6000",
+      "13788847.6000",
+      true
+    ],
+    "jcjiangli.jbjiangli": [
+      "190200.0000",
+      "190200.0000",
+      true
+    ],
+    "jcjiangli.zjbutie": [
+      "784542.1330",
+      "784542.1330",
+      true
+    ],
+    "jcjiangli.jianglijine": [
+      "879642.0000",
+      "879642.0000",
+      true
+    ],
+    "jcjiangliFp.fpjine": [
+      "22287.0000",
+      "22287.0000",
+      true
+    ]
+  }
+}

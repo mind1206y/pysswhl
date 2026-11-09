@@ -29,7 +29,7 @@ def list_all_roles(db: Session = Depends(get_db), _user: User = Depends(get_curr
 @router.get("/permissions")
 def list_all_permissions(db: Session = Depends(get_db), _user: User = Depends(get_current_user)):
     return [
-        {"id": p.id, "code": p.code, "name": p.name, "remark": p.remark}
+        {"id": p.id, "code": p.code, "name": p.name, "category": p.category, "remark": p.remark}
         for p in db.query(Permission).order_by(Permission.id).all()
     ]
 

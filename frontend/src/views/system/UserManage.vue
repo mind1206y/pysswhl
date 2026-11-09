@@ -8,6 +8,7 @@ import {
   resetUserPassword,
   setUserRoles,
   setUserStatus,
+  unlockUser,
   updateUser,
 } from '@/api/user'
 import { listRoles } from '@/api/role'
@@ -111,6 +112,13 @@ async function toggleStatus(row) {
   }
 }
 
+// ===== 解锁登录锁定(密码连续错误触发) =====
+async function doUnlock(row) {
+  const data = await unlockUser(row.id)
+  ElMessage.success(data.message || '已解锁')
+  load()
+}
+
 // ===== 重置密码:重置回初始密码 abc123456,用户下次登录强制修改 =====
 async function resetPwd(row) {
   try {
@@ -203,9 +211,12 @@ async function submitRoles() {
           <span v-if="row.is_superuser" style="color: #e6a23c; font-size: 12px">超级管理员</span>
         </template>
       </el-table-column>
-      <el-table-column label="状态" width="90">
+      <el-table-column label="状态" width="120">
         <template #default="{ row }">
           <el-switch v-model="row.is_active" @change="toggleStatus(row)" />
+          <el-tooltip v-if="row.is_locked" content="密码连续错误被锁定,点击操作列「解锁」立即恢复" placement="top">
+            <el-tag type="danger" size="small" style="margin-left: 6px">已锁定</el-tag>
+          </el-tooltip>
         </template>
       </el-table-column>
       <el-table-column prop="last_login_at" label="最后登录" width="170" />
@@ -214,6 +225,7 @@ async function submitRoles() {
         <template #default="{ row }">
           <el-button link type="primary" @click="openEdit(row)">编辑</el-button>
           <el-button link type="primary" @click="openRoles(row)">分配角色</el-button>
+          <el-button v-if="row.is_locked" link type="warning" @click="doUnlock(row)">解锁</el-button>
           <el-button link type="warning" @click="resetPwd(row)">重置密码</el-button>
           <el-button link type="danger" @click="remove(row)">删除</el-button>
         </template>

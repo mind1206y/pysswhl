@@ -1,7 +1,8 @@
+from collections import defaultdict, deque
 from datetime import datetime, timedelta
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -52,9 +53,35 @@ def public_key():
 LOGIN_LOCK_THRESHOLD = 5
 LOGIN_LOCK_MINUTES = 10
 
+# ===== IP 级登录限速:每 IP 5 分钟内最多 20 次登录尝试(账号锁定之外的第二道闸) =====
+# 仅内存计数:单进程/单机有效;多 worker 时各进程独立计数,阈值按 worker 数上调即可。
+# nginx 反代部署时请配置 real_ip,使此处拿到真实客户端 IP。
+LOGIN_RATE_LIMIT = 20
+LOGIN_RATE_WINDOW = timedelta(minutes=5)
+_login_attempts = defaultdict(deque)
+
+
+def _client_ip(request: Request) -> str:
+    forwarded = request.headers.get("x-forwarded-for")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.client.host if request.client else "unknown"
+
+
+def _check_login_rate(request: Request):
+    ip = _client_ip(request)
+    now = datetime.now()
+    q = _login_attempts[ip]
+    while q and now - q[0] > LOGIN_RATE_WINDOW:
+        q.popleft()
+    if len(q) >= LOGIN_RATE_LIMIT:
+        raise HTTPException(status_code=429, detail="登录尝试过于频繁,请 5 分钟后再试")
+    q.append(now)
+
 
 @router.post("/login")
-def login(data: LoginIn, db: Session = Depends(get_db)):
+def login(data: LoginIn, request: Request, db: Session = Depends(get_db)):
+    _check_login_rate(request)
     user = db.query(User).filter(User.username == data.username.strip()).first()
     try:
         plain = decrypt_password(data.password)

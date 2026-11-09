@@ -1,0 +1,14 @@
+{
+  "shuifeixitong": {
+    "fixed_at": "2026-11-08 00:20:53",
+    "note": "经 import_water_fee 重导时映射"
+  },
+  "shuifeixitongquxiao": {
+    "fixed_at": "2026-11-08 00:20:53",
+    "note": "旧数据 bmid 全空,经重导确认"
+  },
+  "gongchenggl": {
+    "fixed_at": "2026-11-08 00:20:53",
+    "note": "经 fix_waterfee_bmid CASE 映射"
+  }
+}

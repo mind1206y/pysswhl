@@ -33,6 +33,14 @@ async function submit() {
   loading.value = true
   try {
     await changePassword({ old_password: form.old_password, new_password: form.new_password })
+    // 改密成功后旧密码失效,清掉"记住我"里的密码,只保留用户名
+    try {
+      const raw = localStorage.getItem('remembered_login')
+      if (raw) {
+        const { u } = JSON.parse(raw)
+        localStorage.setItem('remembered_login', JSON.stringify({ u, p: '' }))
+      }
+    } catch {}
     await auth.refreshUser()
     ElMessage.success('密码修改成功')
     router.push('/')

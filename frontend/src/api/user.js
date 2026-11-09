@@ -9,3 +9,4 @@ export const setUserStatus = (id, isActive) =>
 export const resetUserPassword = (id) => request.put(`/users/${id}/password`)
 export const setUserRoles = (id, roleIds) =>
   request.put(`/users/${id}/roles`, { role_ids: roleIds })
+export const unlockUser = (id) => request.put(`/users/${id}/unlock`)

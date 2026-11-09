@@ -79,6 +79,21 @@ def decode_access_token(token: str) -> dict:
     return jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
 
 
+def create_short_token(scope: str, payload: dict, minutes: int = 10) -> str:
+    """短时效作用域令牌(如附件下载),避免长期登录令牌出现在 URL/访问日志里。"""
+    expire = datetime.now(timezone.utc) + timedelta(minutes=minutes)
+    body = {**payload, "typ": "short", "scope": scope, "exp": expire}
+    return jwt.encode(body, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+
+
+def decode_short_token(token: str, expected_scope: str) -> dict:
+    """校验短时效令牌;scope 不符视为无效(防止登录令牌/下载令牌互相冒用)。"""
+    payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+    if payload.get("typ") != "short" or payload.get("scope") != expected_scope:
+        raise jwt.PyJWTError("令牌类型不符")
+    return payload
+
+
 # ===== 密码传输加密:前端用 RSA 公钥加密,后端内存私钥解密 =====
 
 @lru_cache(maxsize=1)

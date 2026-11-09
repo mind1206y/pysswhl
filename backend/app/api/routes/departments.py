@@ -13,6 +13,7 @@ class DepartmentIn(BaseModel):
     name: str
     parent_id: int = 0  # 0/空 = 顶级部门
     remark: str = ""
+    htdaihao: str = ""  # 合同编号部门代号(如 ssgs),合同登记用
 
 
 def check_parent(db: Session, parent_id: int, self_id: int = 0) -> int:
@@ -49,7 +50,12 @@ def create_department(
     if db.query(Department).filter(Department.name == name).first():
         raise HTTPException(status_code=400, detail="部门名称已存在")
     parent_id = check_parent(db, data.parent_id)
-    dept = Department(name=name, parent_id=parent_id or None, remark=data.remark.strip())
+    dept = Department(
+        name=name,
+        parent_id=parent_id or None,
+        remark=data.remark.strip(),
+        htdaihao=(data.htdaihao or "").strip(),
+    )
     db.add(dept)
     db.commit()
     db.refresh(dept)
@@ -76,6 +82,7 @@ def update_department(
     dept.name = name
     dept.parent_id = parent_id or None
     dept.remark = data.remark.strip()
+    dept.htdaihao = (data.htdaihao or "").strip()
     db.commit()
     return dept.to_dict()
 

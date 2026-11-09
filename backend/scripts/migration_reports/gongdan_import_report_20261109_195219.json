@@ -1,0 +1,50 @@
+{
+  "at": "2026-11-09T19:52:14",
+  "tables": {
+    "gongdan": {
+      "rows": 76870,
+      "auto_increment": 76871
+    },
+    "gongdan_neirong_dict": {
+      "rows": 72,
+      "auto_increment": 181
+    },
+    "gongdan_caizhi_dict": {
+      "rows": 21,
+      "auto_increment": 22
+    }
+  },
+  "checks": {
+    "rows_gongdan": {
+      "old": 76870,
+      "new": 76870,
+      "ok": true
+    },
+    "rows_gongdan_neirong_dict": {
+      "old": 72,
+      "new": 72,
+      "ok": true
+    },
+    "rows_gongdan_caizhi_dict": {
+      "old": 21,
+      "new": 21,
+      "ok": true
+    },
+    "use_count_gongdan_neirong_dict": {
+      "old": 18583,
+      "new": 18583,
+      "ok": true
+    },
+    "use_count_gongdan_caizhi_dict": {
+      "old": 5973,
+      "new": 5973,
+      "ok": true
+    },
+    "gongdancailiao_untouched": {
+      "old": 19689,
+      "before": 19689,
+      "after": 19689,
+      "ok": true
+    }
+  }
+}

@@ -117,6 +117,24 @@ def set_user_status(
     return user.to_dict()
 
 
+@router.put("/{user_id}/unlock")
+def unlock_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    _user: User = Depends(require_permission("system:user:manage")),
+):
+    """管理员解锁:清空锁定截止时间与失败计数,立即恢复登录。"""
+    user = db.get(User, user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail="用户不存在")
+    if not user.locked_until:
+        return {"message": "该用户未处于锁定状态"}
+    user.locked_until = None
+    user.failed_attempts = 0
+    db.commit()
+    return {"message": f"已解锁 {user.username}"}
+
+
 @router.put("/{user_id}/password")
 def reset_password(
     user_id: int,
@@ -126,12 +144,14 @@ def reset_password(
     user = db.get(User, user_id)
     if user is None:
         raise HTTPException(status_code=404, detail="用户不存在")
-    # 重置回初始密码,并要求用户下次登录先改密码
+    # 重置回初始密码,并要求用户下次登录先改密码;同时解除登录锁定
     user.password_hash = hash_password(settings.INITIAL_PASSWORD)
     user.password_version = CURRENT_PASSWORD_VERSION
     user.must_change_password = True
+    user.locked_until = None
+    user.failed_attempts = 0
     db.commit()
-    return {"message": "已重置为初始密码,该用户下次登录须先修改密码"}
+    return {"message": "已重置为初始密码并解锁,该用户下次登录须先修改密码"}
 
 
 @router.delete("/{user_id}")

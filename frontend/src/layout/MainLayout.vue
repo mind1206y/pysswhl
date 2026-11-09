@@ -13,6 +13,98 @@ const auth = useAuthStore()
 
 const menuItems = computed(() => {
   const items = [{ path: '/dashboard', title: '首页', icon: 'HomeFilled' }]
+  const engineering = []
+  if (auth.hasPerm('project:view')) engineering.push({ path: '/project', title: '工程管理' })
+  if (auth.hasPerm('roadrepair:view')) engineering.push({ path: '/roadrepair', title: '路面修复管理' })
+  if (engineering.length === 1) {
+    items.push({ ...engineering[0], icon: 'OfficeBuilding' })
+  } else if (engineering.length > 1) {
+    items.push({ title: '工程管理', icon: 'OfficeBuilding', children: engineering })
+  }
+  if (auth.hasPerm('waterfee:view')) {
+    items.push({ path: '/waterfee', title: '特殊群体管理', icon: 'User' })
+  }
+  const communication = []
+  if (auth.hasPerm('phone:view')) communication.push({ path: '/phone', title: '手机管理' })
+  if (auth.hasPerm('ipadress:view')) communication.push({ path: '/ipadress', title: 'IP地址管理' })
+  if (auth.hasPerm('simcard:view')) communication.push({ path: '/simcard', title: 'SIM卡管理' })
+  if (auth.hasPerm('simfee:view')) communication.push({ path: '/simfee', title: '通信费' })
+  if (communication.length) {
+    items.push({ title: '通信网络', icon: 'Connection', children: communication })
+  }
+  const vehicle = []
+  if (auth.hasPerm('vehicle:view')) {
+    vehicle.push({ path: '/vehicle', title: '车辆管理' })
+    vehicle.push({ path: '/vehicle/chuxian', title: '车辆出险信息' })
+    vehicle.push({ path: '/vehicle/weizhang', title: '车辆违章信息' })
+    vehicle.push({ path: '/vehicle/baoxian', title: '车辆保险信息' })
+    vehicle.push({ path: '/vehicle/clfeiyong', title: '车辆各类费用表' })
+    vehicle.push({ path: '/vehicle/daily', title: '日常用车' })
+  }
+  if (auth.hasPerm('oilcard:view')) {
+    vehicle.push({ path: '/vehicle/oilcard', title: '油卡管理' })
+  }
+  if (auth.hasPerm('plusoil:view')) {
+    vehicle.push({ path: '/vehicle/plusoil', title: '加油明细' })
+  }
+  if (auth.hasPerm('oiltj:view')) {
+    vehicle.push({ path: '/vehicle/oiltj', title: '车辆油量统计' })
+  }
+  if (auth.hasPerm('repair:view')) {
+    vehicle.push({ path: '/repair', title: '车辆维修' })
+  }
+  if (vehicle.length) {
+    items.push({ title: '车辆管理', icon: 'Van', children: vehicle })
+  }
+  const leak = []
+  if (auth.hasPerm('celou:view')) leak.push({ path: '/celou', title: '测漏成果' })
+  if (auth.hasPerm('leak:view')) leak.push({ path: '/leak', title: '测漏笔记' })
+  if (leak.length) {
+    items.push({ title: '测漏管理', icon: 'DataAnalysis', children: leak })
+  }
+  const contract = []
+  if (auth.hasPerm('contract:view')) contract.push({ path: '/contract/register', title: '合同登记' })
+  if (auth.hasPerm('contract:collect')) contract.push({ path: '/contract/collect', title: '合同归集' })
+  if (contract.length) {
+    items.push({ title: '合同管理', icon: 'Document', children: contract })
+  }
+  // 加班申请对全员开放:页面内各 Tab 由后端下发的权限标记控制显隐
+  items.push({ path: '/overtime', title: '加班申请审批', icon: 'Timer' })
+  // 维抢修加班:独立模块(工单加班台账/工资汇总/附件),与"加班申请审批"互不相干
+  if (auth.hasPerm('jiaban:view')) {
+    items.push({ path: '/jiaban', title: '维抢修加班', icon: 'AlarmClock' })
+  }
+  const jcxt = []
+  if (auth.hasPerm('jcxt:view')) jcxt.push({ path: '/jcxt', title: '稽查系统' })
+  if (auth.hasPerm('spjicha:view')) jcxt.push({ path: '/spjicha', title: '审批稽查' })
+  if (auth.hasPerm('jcdan:view')) jcxt.push({ path: '/jcdan', title: '稽查单' })
+  if (auth.hasPerm('jcjl:view')) jcxt.push({ path: '/jcjl', title: '稽查奖励' })
+  if (jcxt.length) {
+    items.push({ title: '稽查管理', icon: 'Search', children: jcxt })
+  }
+  // 工单系统:工单信息录入 + 领料 + 材料库,后续工单模块继续挂到这一级菜单下
+  const workorder = []
+  if (auth.hasPerm('gongdan:view')) workorder.push({ path: '/gongdan', title: '工单信息录入' })
+  if (auth.hasPerm('workorder:view')) workorder.push({ path: '/workorder', title: '工单领料' })
+  if (auth.hasPerm('lingliao:view')) workorder.push({ path: '/lingliao', title: '领料申请' })
+  if (auth.hasPerm('jiesuandan:view')) workorder.push({ path: '/jiesuandan', title: '领料结算' })
+  if (auth.hasPerm('jiesuan:view')) workorder.push({ path: '/jiesuan', title: '材料结算单查看' })
+  if (auth.hasPerm('material:view')) workorder.push({ path: '/material', title: '工单材料库' })
+  if (workorder.length) {
+    items.push({ title: '工单系统', icon: 'Box', children: workorder })
+  }
+  // 年度计划:营业所发起 -> 实施单表 -> 实施汇总 -> 正式计划
+  const plan = []
+  if (auth.hasPerm('jhyyfaqi:view')) plan.push({ path: '/jhyyfaqi', title: '营业所发起计划' })
+  if (auth.hasPerm('jhssdb:view')) plan.push({ path: '/jhssdb', title: '实施单表' })
+  if (auth.hasPerm('jhsshz:view')) plan.push({ path: '/jhsshz', title: '实施汇总' })
+  if (auth.hasPerm('plan:view')) {
+    plan.push({ path: '/plan', title: '正式计划' })
+    plan.push({ path: '/plan/dashboard', title: '进度看板' })
+  }
+  if (plan.length) {
+    items.push({ title: '年度计划', icon: 'Calendar', children: plan })
+  }
   const system = []
   if (auth.hasPerm('system:user:manage')) system.push({ path: '/system/users', title: '用户管理' })
   if (auth.hasPerm('system:dept:manage')) system.push({ path: '/system/depts', title: '部门管理' })
@@ -77,6 +169,7 @@ useIdleLogout(() => {
       <el-menu
         :default-active="activeMenu"
         router
+        unique-opened
         background-color="#001529"
         text-color="#c8c9cc"
         active-text-color="#ffffff"
@@ -163,6 +256,43 @@ useIdleLogout(() => {
 }
 .menu {
   border-right: none;
+  /* 一级子项 padding-left = 20px + 1 * 40px = 60px;
+     父标题带 24px 图标文字约在 49px,子项文字再向右错开,层级更清楚 */
+  --el-menu-level-padding: 40px;
+}
+/* 展开的子菜单:整块换成比父级(#001529)略亮的蓝黑,一眼能分出层级 */
+.menu :deep(.el-menu--inline) {
+  background-color: #0b2238;
+  padding: 4px 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+}
+.menu :deep(.el-menu--inline .el-menu-item) {
+  color: #b6bfcb;
+}
+/* 缩进后的层级小圆点 */
+.menu :deep(.el-menu--inline .el-menu-item)::before {
+  content: '';
+  position: absolute;
+  left: 46px;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.28);
+}
+.menu :deep(.el-menu--inline .el-menu-item:hover) {
+  color: #fff;
+  background-color: rgba(255, 255, 255, 0.07);
+}
+.menu :deep(.el-menu--inline .el-menu-item.is-active) {
+  color: #fff;
+  background-color: rgba(83, 58, 253, 0.28);
+  box-shadow: inset 3px 0 0 #8b7bff;
+}
+.menu :deep(.el-menu--inline .el-menu-item.is-active)::before {
+  background: #a99dff;
 }
 .header {
   display: flex;

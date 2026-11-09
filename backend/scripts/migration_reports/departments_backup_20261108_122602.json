@@ -1,0 +1,65 @@
+[
+  {
+    "id": 6,
+    "name": "集团",
+    "parent_id": null,
+    "remark": "",
+    "created_at": "2026-10-05 19:27:49"
+  },
+  {
+    "id": 7,
+    "name": "售水事业部",
+    "parent_id": 6,
+    "remark": "",
+    "created_at": "2026-10-05 19:28:04"
+  },
+  {
+    "id": 8,
+    "name": "厦门营业所",
+    "parent_id": 7,
+    "remark": "",
+    "created_at": "2026-10-05 19:28:17"
+  },
+  {
+    "id": 9,
+    "name": "海沧营业所",
+    "parent_id": 7,
+    "remark": "",
+    "created_at": "2026-10-05 19:28:31"
+  },
+  {
+    "id": 10,
+    "name": "集美营业所",
+    "parent_id": 7,
+    "remark": "",
+    "created_at": "2026-10-05 19:54:54"
+  },
+  {
+    "id": 11,
+    "name": "二供部",
+    "parent_id": 7,
+    "remark": "",
+    "created_at": "2026-10-05 19:55:09"
+  },
+  {
+    "id": 12,
+    "name": "同安营业所",
+    "parent_id": 7,
+    "remark": "",
+    "created_at": "2026-10-05 19:55:34"
+  },
+  {
+    "id": 13,
+    "name": "翔安营业所",
+    "parent_id": 7,
+    "remark": "",
+    "created_at": "2026-10-05 19:55:43"
+  },
+  {
+    "id": 14,
+    "name": "水表检定站",
+    "parent_id": 7,
+    "remark": "",
+    "created_at": "2026-10-05 19:56:20"
+  }
+]

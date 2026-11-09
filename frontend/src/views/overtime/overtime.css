@@ -1,0 +1,351 @@
+/* 加班申请审批 - 1:1 复刻旧系统 stripe-cool / otd-win 视觉令牌。
+   主色 #533afd 紫、纸底 #f6f9fc、深墨蓝 #1c1e54。light 主题。 */
+
+.ot-page {
+  --el-color-primary: #533afd;
+  --el-color-primary-light-3: #7b68fd;
+  --el-color-primary-light-5: #a293fe;
+  --el-color-primary-light-7: #cfc7ff;
+  --el-color-primary-light-8: #e2ddff;
+  --el-color-primary-light-9: #f3f1ff;
+  --el-color-primary-dark-2: #4231c4;
+  --ot-purple: #533afd;
+  --ot-ink: #1c1e54;
+  --ot-paper: #f6f9fc;
+  --ot-border: #e3e8ee;
+  --ot-muted: #64748d;
+  padding: 10px 12px 14px;
+  background: var(--ot-paper);
+  min-height: calc(100vh - 112px);
+}
+
+:is(.ot-page, .ot-dialog, .ot-drawer) .ot-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 52px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  font-size: 22px;
+  font-weight: bold;
+  letter-spacing: 3px;
+  color: var(--ot-ink);
+  background: linear-gradient(90deg, #ffffff, #f8fbfd 30%, #f4f8fc 60%, #eef3f9);
+  border: 1px solid var(--ot-border);
+}
+
+/* 页签:选中紫色 */
+:is(.ot-page, .ot-dialog, .ot-drawer) .ot-tabs > .el-tabs__header {
+  margin: 0 0 8px;
+  background: #fff;
+  border-radius: 8px 8px 0 0;
+  padding: 0 8px;
+  border: 1px solid var(--ot-border);
+  border-bottom: none;
+}
+:is(.ot-page, .ot-dialog, .ot-drawer) .ot-tabs > .el-tabs__header .el-tabs__item {
+  color: #5a6b85;
+  font-size: 13px;
+  padding: 0 16px !important;
+  height: 36px;
+  line-height: 36px;
+}
+:is(.ot-page, .ot-dialog, .ot-drawer) .ot-tabs > .el-tabs__header .el-tabs__item.is-active {
+  color: #fff;
+  font-weight: bold;
+  background: var(--ot-purple);
+  border-radius: 6px 6px 0 0;
+}
+:is(.ot-page, .ot-dialog, .ot-drawer) .ot-tabs > .el-tabs__header .el-tabs__active-bar { display: none; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .ot-tabs > .el-tabs__header .el-tabs__nav-wrap::after { display: none; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .ot-tabs > .el-tabs__content { padding: 0; }
+
+:is(.ot-page, .ot-dialog, .ot-drawer) .filter-card { margin-bottom: 8px; border: 1px solid var(--ot-border); border-radius: 8px; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .filter-card .el-card__body { padding: 9px 12px 3px; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .filter-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .filter-group { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; white-space: nowrap; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .filter-group > label { color: #475569; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 8px; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .toolbar .spacer { flex: 1; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .table-card { border: 1px solid var(--ot-border); border-radius: 8px; overflow: hidden; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .el-table th.el-table__cell { background: #f8fbfd !important; color: var(--ot-ink); font-weight: 600; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .el-table .cell { font-size: 12px; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .el-table td.el-table__cell { padding: 4px 0; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .pager { display: flex; justify-content: flex-end; padding: 8px 10px; background: #fff; }
+
+/* 状态标签(旧 .status-tag 配色) */
+:is(.ot-page, .ot-dialog, .ot-drawer) .status-tag {
+  display: inline-block; padding: 2px 9px; border-radius: 10px;
+  font-size: 11px; font-weight: bold; line-height: 16px; white-space: nowrap;
+}
+.status-draft { background: #e3e8ee; color: #666; }
+.status-submitted, .status-printed { background: #d9edf7; color: #31708f; }
+.status-grouped, .status-approved, .status-verified { background: #dff0d8; color: #3c763d; }
+.status-pending { background: #fcf8e3; color: #0d253d; }
+.status-rejected { background: #f2dede; color: #a94442; }
+.status-skipped { background: #eee; color: #999; }
+
+:is(.ot-page, .ot-dialog, .ot-drawer) .grid-link { color: var(--ot-purple); cursor: pointer; text-decoration: underline; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .grid-danger { color: #d9534f; cursor: pointer; text-decoration: underline; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .grid-action {
+  display: inline-block; padding: 1px 7px; border-radius: 3px; font-size: 11px;
+  color: #fff; background: #5cb85c; cursor: pointer;
+}
+:is(.ot-page, .ot-dialog, .ot-drawer) .grid-action-danger {
+  display: inline-block; padding: 1px 7px; border-radius: 3px; font-size: 11px;
+  color: #fff; background: #d9534f; cursor: pointer;
+}
+:is(.ot-page, .ot-dialog, .ot-drawer) .grid-action-subtle {
+  display: inline-block; padding: 1px 7px; border-radius: 3px; font-size: 11px;
+  color: var(--ot-muted); background: #f8fbfd; border: 1px solid var(--ot-border); cursor: pointer;
+}
+:is(.ot-page, .ot-dialog, .ot-drawer) .row-actions { display: flex; flex-wrap: wrap; gap: 4px 7px; align-items: center; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .slots-cell { line-height: 1.5; color: #475569; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .entry-by { float: right; color: var(--ot-purple); font-size: 11px; }
+
+/* 子页签(申请单管理 / 配置管理) */
+:is(.ot-page, .ot-dialog, .ot-drawer) .sub-tabs { display: flex; gap: 3px; margin-bottom: 8px; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .sub-tab {
+  padding: 6px 16px; font-size: 13px; cursor: pointer; border-radius: 4px 4px 0 0;
+  background: #f0f5fa; color: #555; border: 1px solid #cdd9e5; border-bottom: none;
+}
+:is(.ot-page, .ot-dialog, .ot-drawer) .sub-tab.on { background: var(--ot-purple) !important; color: #fff !important; border-color: var(--ot-purple) !important; font-weight: bold; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .hint { color: var(--ot-muted); font-size: 12px; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .badge {
+  display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 12px;
+  background: #fffde7; color: #b8860b; border: 1px solid #f0e68c;
+}
+
+/* ===== 弹窗外观：与「工单信息录入」(.gd-dialog) 同一套视觉 =====
+   52px 紫题头贴顶贴边 + 14px 上圆角、灰底无边框白卡、56px 白底按钮栏。
+   主色沿用加班模块旧 stripe-cool 的 #533afd(工单模块为 #5645d4)，对齐的是尺寸/圆角/布局。
+   注意:所有 el-dialog/el-drawer 都 append-to-body,teleport 到 body 后不再是 .ot-page 的后代,
+   .ot-page 上的 CSS 变量取不到,故在弹窗根节点补齐;组件规则仍用 :is() 同时覆盖页面与弹窗。 */
+.ot-dialog, .ot-drawer {
+  --el-color-primary: #533afd;
+  --ot-purple: #533afd;
+  --ot-ink: #1c1e54;
+  --ot-paper: #f6f9fc;
+  --ot-border: #e3e8ee;
+  --ot-muted: #64748d;
+}
+.ot-dialog {
+  padding: 0 !important; /* 抵消 el-dialog 四周内边距,题头/灰底/按钮栏全部贴边 */
+  border-radius: 14px !important;
+  overflow: hidden !important;
+  background: #f3f2f0;
+  box-shadow: 0 16px 28px rgba(16, 24, 40, .22), 0 2px 6px rgba(16, 24, 40, .08) !important;
+}
+.ot-dialog .el-dialog__header {
+  position: relative; /* 关闭钮 absolute 的基准,否则会相对整个弹窗定位到右侧中部 */
+  height: 52px; box-sizing: border-box;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 !important; width: 100%; padding: 0 16px !important;
+  background: var(--ot-purple) !important;
+  border-radius: 14px 14px 0 0 !important;
+  text-align: center;
+}
+.ot-dialog .el-dialog__title {
+  color: #fff; font-size: 16px; font-weight: 600; letter-spacing: 1px; line-height: 52px;
+}
+.ot-dialog .el-dialog__headerbtn {
+  top: 50% !important; right: 10px !important; transform: translateY(-50%);
+  width: 20px; height: 20px; border-radius: 50%; background: #fff;
+  box-shadow: 0 1px 3px rgba(28, 30, 84, .35);
+}
+.ot-dialog .el-dialog__headerbtn:hover { background: #e9e4ff !important; }
+.ot-dialog .el-dialog__headerbtn .el-dialog__close { color: var(--ot-purple) !important; font-size: 12px; }
+.ot-dialog .el-dialog__body { padding: 10px 14px 8px !important; background: #f3f2f0; }
+.ot-dialog .el-dialog__footer {
+  min-height: 56px; box-sizing: border-box;
+  /* flex 垂直居中:只写 min-height 时按钮贴在按钮栏顶部(上 1px/下 23px) */
+  display: flex; align-items: center; justify-content: flex-end; gap: 8px;
+  padding: 0 16px !important; background: #fff;
+  border-top: 1px solid #efedea !important; text-align: right;
+}
+/* 部分弹窗(明细录入/批量新建)的 footer 内容包了一层 div,给它占满宽度,
+   内部原有的 justify-content:center 才能继续保持按钮居中 */
+.ot-dialog .el-dialog__footer > div { flex: 1 1 auto; min-width: 0; }
+.ot-dialog .el-dialog__footer .el-button {
+  height: 32px; margin: 0; padding: 0 12px; border-radius: 8px; font-size: 13px;
+}
+.ot-dialog .el-dialog__footer .el-button:not([class*="el-button--"]) {
+  background: #fff; border-color: #e0dcd7; color: #3d3a35;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .04);
+}
+.ot-dialog .el-dialog__footer .el-button:not([class*="el-button--"]):hover {
+  background: #faf9f7; border-color: #cfcabf; color: #3d3a35;
+}
+.ot-dialog .el-dialog__footer .el-button--primary:not(.is-plain),
+.ot-dialog .el-dialog__footer .el-button--primary:not(.is-plain):hover {
+  background: linear-gradient(135deg, #6a55ff, #533afd) !important;
+  border-color: #4a33e0 !important; color: #fff !important;
+  box-shadow: 0 2px 8px rgba(83, 58, 253, .32);
+}
+:is(.ot-page, .ot-dialog, .ot-drawer) .form-card {
+  background: #fff; border: 1px solid #e6ebf2; border-radius: 8px;
+  padding: 12px 16px 4px; margin-bottom: 10px;
+}
+:is(.ot-page, .ot-dialog, .ot-drawer) .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 16px; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .form-grid .span2 { grid-column: span 2; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .form-sep { grid-column: span 2; border-top: 1px dashed #e6ebf2; margin: 6px 0; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .sumbox {
+  background: #f8f7ff; border: 1px solid #e6e2fb; border-radius: 6px;
+  padding: 8px 12px; margin: 6px 0 10px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+}
+:is(.ot-page, .ot-dialog, .ot-drawer) .sumbox .big { font-size: 18px; font-weight: bold; color: #d9534f; }
+/* 批量新建两步向导:两步共用同一条提示条,避免第 1 步没有标题区、第 2 步才突然出现 */
+:is(.ot-page, .ot-dialog, .ot-drawer) .batch-step-tip {
+  background: #f3f1ff; color: var(--ot-purple); border: 1px solid #e6e2fb;
+  border-radius: 5px; padding: 6px 10px; margin-bottom: 8px; font-size: 12px;
+}
+:is(.ot-page, .ot-dialog, .ot-drawer) .mul-tag {
+  display: inline-block; padding: 2px 9px; margin-left: 4px; border-radius: 10px;
+  font-size: 12px; cursor: pointer; background: rgba(83, 58, 253, .08); color: var(--ot-purple);
+}
+:is(.ot-page, .ot-dialog, .ot-drawer) .mul-tag.active { background: rgba(83, 58, 253, .35); font-weight: bold; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .weekday-chip { background: #f3f1ff; color: var(--ot-purple); padding: 2px 8px; border-radius: 10px; font-size: 12px; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .e-tip { font-size: 11px; color: var(--ot-muted); }
+:is(.ot-page, .ot-dialog, .ot-drawer) .required::after { content: ' *'; color: #d9534f; }
+
+/* 明细录入弹窗:旧版单列逐行布局(与批量弹窗的两列网格区分,复刻 stripe-cool 定式) */
+:is(.ot-page, .ot-dialog, .ot-drawer) .entry-form-wrap { padding: 12px 18px 6px; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .entry-form-wrap .form-row { display: flex; align-items: center; margin-bottom: 10px; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .entry-form-wrap .form-label {
+  width: 96px; text-align: right; margin-right: 12px; flex-shrink: 0; white-space: nowrap;
+  font-size: 13px; color: #0d253d;
+}
+:is(.ot-page, .ot-dialog, .ot-drawer) .entry-form-wrap .form-value {
+  flex: 1; min-width: 0; display: flex; align-items: center; flex-wrap: wrap;
+  gap: 4px 8px; font-size: 13px;
+}
+:is(.ot-page, .ot-dialog, .ot-drawer) .entry-form-wrap .form-sep { border-top: 1px dashed #e3e8ee; margin: 11px 0; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .e-sumbox {
+  background: #f8f7ff; border: 1px solid #e6e2fb; border-radius: 8px;
+  padding: 10px 12px 2px; margin: 2px 0 11px;
+}
+:is(.ot-page, .ot-dialog, .ot-drawer) .e-result { min-width: 80px; font-weight: bold; font-size: 15px; color: #333; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .e-result-lg { min-width: 80px; font-weight: bold; font-size: 18px; color: #d9534f; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .e-unit { font-size: 12px; color: #888; margin-left: 6px; }
+
+/* 抽屉 */
+.ot-drawer .el-drawer__header { margin-bottom: 0; padding: 12px 18px; border-bottom: 1px solid var(--ot-border); color: var(--ot-ink); font-weight: bold; }
+.ot-drawer .el-drawer__body { padding: 0; background: var(--ot-paper); }
+:is(.ot-page, .ot-dialog, .ot-drawer) .ad-info { padding: 10px 16px; background: #fff; border-bottom: 1px solid var(--ot-border); display: flex; flex-wrap: wrap; gap: 8px 24px; font-size: 13px; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .ad-body { padding: 10px 16px; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .ad-footer { padding: 10px 16px; background: #fff; border-top: 1px solid var(--ot-border); }
+
+/* 日历看板 */
+:is(.ot-page, .ot-dialog, .ot-drawer) .cal-wrap { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(620px, 100%), 1fr)); gap: 16px; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .cal-month { background: #fff; border: 1px solid var(--ot-border); border-radius: 6px; padding: 8px; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .cal-month-title { text-align: center; font-weight: bold; color: var(--ot-ink); margin-bottom: 6px; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .cal-weekhead, :is(.ot-page, .ot-dialog, .ot-drawer) .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
+:is(.ot-page, .ot-dialog, .ot-drawer) .cal-wh { text-align: center; font-size: 12px; color: var(--ot-muted); padding: 3px 0; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .cal-wh-we { color: #8f83d9; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .cal-cell { min-height: 68px; border: 1px solid #f0eefb; padding: 3px; font-size: 11px; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .cal-cell-blank { background: #faf9fe; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .cal-daynum { text-align: right; color: #94a3b8; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .cal-entry { border-radius: 3px; padding: 1px 4px; margin-top: 2px; cursor: default; }
+.cal-lv0 { background: #f1f0f6; color: #a5a1b8; }
+.cal-lv1 { background: #f3f1fe; color: #533afd; }
+.cal-lv2 { background: #e5e1fd; color: #4231c4; }
+.cal-lv3 { background: #c9c0f9; color: #2c2090; }
+.cal-lv4 { background: #7c5cf5; color: #fff; }
+.cal-lv5 { background: #533afd; color: #fff; }
+
+/* 批量日期网格 */
+:is(.ot-page, .ot-dialog, .ot-drawer) .date-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; max-height: 210px; overflow: auto; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .date-cell { border: 1px solid var(--ot-border); border-radius: 4px; padding: 3px; text-align: center; font-size: 11px; background: #fff; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .date-cell.we { background: #f8fbfd; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .date-cell.blank { border: none; background: transparent; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .date-cell label { display: block; cursor: pointer; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .sun { color: #d9534f; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .sat { color: #1e9e50; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .slot-row { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
+
+/* 穿梭框 */
+:is(.ot-page, .ot-dialog, .ot-drawer) .transfer-body { display: flex; gap: 10px; align-items: stretch; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .transfer-panel { flex: 1; border: 1px solid var(--ot-border); border-radius: 6px; background: #fff; overflow: hidden; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .transfer-title { padding: 5px 10px; background: #f8fbfd; border-bottom: 1px solid var(--ot-border); font-size: 12px; font-weight: bold; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .transfer-list { height: 250px; overflow: auto; padding: 4px 8px; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .transfer-btns { display: flex; flex-direction: column; justify-content: center; gap: 8px; }
+
+/* 打印页 */
+.ot-print { font-family: 'SimSun', 'Microsoft YaHei', serif; font-size: 14px; padding: 30px 40px; color: #000; background: #fff; }
+.ot-print h1 { text-align: center; font-size: 22px; letter-spacing: 6px; margin-bottom: 24px; }
+.ot-print h3 { font-size: 15px; margin: 14px 0 8px; }
+.ot-print table { width: 100%; border-collapse: collapse; margin-bottom: 18px; }
+.ot-print table.info td { padding: 6px 10px; border: 1px solid #000; font-size: 14px; }
+.ot-print td.label { background: #f0f0f0; width: 90px; text-align: center; font-weight: bold; }
+.ot-print table.data th { padding: 7px 5px; background: #f0f0f0; font-size: 13px; border: 1px solid #000; }
+.ot-print table.data td { font-size: 12px; text-align: center; padding: 5px; border: 1px solid #000; }
+.ot-print .col-name { min-width: 72px; }
+.ot-print .col-date { min-width: 96px; }
+.ot-print .col-reason { min-width: 130px; text-align: left; }
+.ot-print td.sig { height: 50px; vertical-align: bottom; }
+.ot-print .no-print { text-align: right; margin-bottom: 12px; }
+@media print {
+  .ot-print .no-print { display: none; }
+  .ot-print { padding: 10px 20px; }
+  thead { display: table-header-group; }
+  tr { page-break-inside: avoid; }
+  @page { size: A4 portrait; margin: 16mm 12mm 20mm 12mm; }
+}
+
+/* ===== 加班弹窗表单控件：与「工单信息录入」弹框对齐 =====
+   放在文件末尾,确保覆盖上方 :is(.ot-page,.ot-dialog,.ot-drawer) 的同名规则。
+   所有 el-dialog append-to-body,故用 .ot-dialog 前缀(页面/抽屉不受影响)。 */
+.ot-dialog .el-dialog__body > .el-form,
+.ot-dialog .el-dialog__body .entry-form-wrap,
+.ot-dialog .el-dialog__body .form-card {
+  background: #fff; border: none; border-radius: 12px;
+  padding: 14px 16px;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .04), 0 4px 14px rgba(16, 24, 40, .05);
+}
+.ot-dialog .el-dialog__body .form-card { margin-bottom: 0; }
+
+/* 控件:32px 高、16px 胶囊(同 .gd-dialog)。
+   ⚠️ .el-input__wrapper 默认 content-box,不加 border-box 会被上下 padding 撑成 34px。
+   不覆盖 padding:日期框的前缀图标、input-number 的加减钮依赖各自默认内边距。 */
+.ot-dialog .el-input__wrapper,
+.ot-dialog .el-select__wrapper {
+  min-height: 32px !important; height: 32px; box-sizing: border-box;
+  border-radius: 16px !important; background: #fff;
+  box-shadow: 0 0 0 1px #ddd9d3 inset !important;
+}
+.ot-dialog .el-input__wrapper:hover,
+.ot-dialog .el-select__wrapper:hover,
+.ot-dialog .el-input__wrapper.is-focus,
+.ot-dialog .el-select__wrapper.is-focused {
+  box-shadow: 0 0 0 1px var(--ot-purple) inset, 0 0 5px rgba(83, 58, 253, .25) !important;
+}
+.ot-dialog .el-input__inner,
+.ot-dialog .el-select__placeholder {
+  height: 30px; line-height: 30px; font-size: 13px; color: #1b1d21;
+}
+/* 已选值保持深色;未选值时的占位提示必须是灰色(.is-transparent) */
+.ot-dialog .el-select__placeholder.is-transparent,
+.ot-dialog .el-input__inner::placeholder {
+  color: var(--el-text-color-placeholder, #a8abb2);
+}
+.ot-dialog .el-textarea__inner {
+  border-radius: 8px !important; padding: 8px 10px;
+  font-size: 13px; line-height: 1.6; color: #1b1d21;
+  box-shadow: 0 0 0 1px #ddd9d3 inset !important;
+}
+.ot-dialog .el-textarea__inner:focus {
+  box-shadow: 0 0 0 1px var(--ot-purple) inset, 0 0 6px rgba(83, 58, 253, .4) !important;
+}
+.ot-dialog .el-form-item__label {
+  height: 32px; line-height: 32px;
+}
+.ot-dialog .el-form-item__content {
+  min-height: 32px; line-height: 32px;
+}
+.ot-dialog .entry-form-wrap .form-label {
+  height: 32px; line-height: 32px;
+}
+/* 控件由 24px 提到 32px 后压缩行距,弹窗总高度基本不变,避免超出视口 */
+.ot-dialog .el-form-item { margin-bottom: 8px; }
+.ot-dialog .entry-form-wrap .form-row { margin-bottom: 4px; }
+.ot-dialog .entry-form-wrap .form-sep { margin: 6px 0; }

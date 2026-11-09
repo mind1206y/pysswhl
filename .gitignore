@@ -7,3 +7,11 @@ node_modules/
 dist/
 .DS_Store
 rsa_key.pem
+
+# 编辑器 / 工具本地目录
+.vscode/
+.zcode/
+
+# 临时与备份文件
+*.bak
+*.log

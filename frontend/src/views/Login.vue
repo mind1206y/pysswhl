@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref } from 'vue'
+import { onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
@@ -9,31 +9,83 @@ const route = useRoute()
 
 const formRef = ref()
 const loading = ref(false)
-// 记住用户名:只记住用户名,密码不落盘
-const savedUsername = localStorage.getItem('remembered_username') || ''
-const rememberName = ref(!!savedUsername)
-const form = reactive({ username: savedUsername, password: '' })
+// 记住我:用户名和密码一起记住,下次打开自动回填,直接回车即可登录。
+// 密码仅做 base64 混淆后存 localStorage,且只在登录成功后落盘。
+const STORAGE_KEY = 'remembered_login'
+const LEGACY_KEY = 'remembered_username'
+
+function encodeText(s) {
+  return btoa(String.fromCharCode(...new TextEncoder().encode(s)))
+}
+function decodeText(s) {
+  return new TextDecoder().decode(Uint8Array.from(atob(s), (c) => c.charCodeAt(0)))
+}
+function loadSaved() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (!raw) return null
+    const { u, p } = JSON.parse(raw)
+    return { username: u || '', password: p ? decodeText(p) : '' }
+  } catch {
+    return null
+  }
+}
+
+const saved = loadSaved()
+// 兼容旧版"只记用户名"的存储
+const legacyUsername = localStorage.getItem(LEGACY_KEY) || ''
+const rememberMe = ref(!!(saved?.username || legacyUsername))
+const form = reactive({
+  username: saved?.username || legacyUsername,
+  password: saved?.password || '',
+})
+// 自动回填的密码不显示"小眼睛",防止公共电脑上被点开看到明文。
+// 只删改部分字符仍视为回填内容;清空后重新输入才恢复小眼睛。
+const autoFilledPassword = ref(!!saved?.password)
+watch(
+  () => form.password,
+  (val) => {
+    if (!val) autoFilledPassword.value = false
+  }
+)
 const rules = {
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
 }
 
 async function submit() {
-  await formRef.value.validate()
-  if (rememberName.value) {
-    localStorage.setItem('remembered_username', form.username)
-  } else {
-    localStorage.removeItem('remembered_username')
+  if (loading.value) return
+  try {
+    await formRef.value.validate()
+  } catch {
+    return
   }
   loading.value = true
   try {
     await auth.login(form)
+    // 登录成功才落盘,避免把输错的密码记下来
+    if (rememberMe.value) {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({ u: form.username, p: encodeText(form.password) })
+      )
+    } else {
+      localStorage.removeItem(STORAGE_KEY)
+    }
+    localStorage.removeItem(LEGACY_KEY)
     // 用初始密码登录的用户,先跳去修改密码
     router.push(auth.user?.must_change_password ? '/change-password' : route.query.redirect || '/')
   } finally {
     loading.value = false
   }
 }
+
+// 页面加载后无需先点击输入框,任意位置按回车即可登录
+function onKeydown(e) {
+  if (e.key === 'Enter') submit()
+}
+onMounted(() => window.addEventListener('keydown', onKeydown))
+onUnmounted(() => window.removeEventListener('keydown', onKeydown))
 </script>
 
 <template>
@@ -43,19 +95,24 @@ async function submit() {
     <div class="login-card">
       <h2 class="title">售水业务管理系统</h2>
       <p class="subtitle">WATER SUPPLY MANAGEMENT SYSTEM</p>
-      <el-form ref="formRef" :model="form" :rules="rules" size="large" @keyup.enter="submit">
+      <el-form ref="formRef" :model="form" :rules="rules" size="large">
         <el-form-item prop="username">
           <el-input v-model="form.username" placeholder="用户名">
             <template #prefix><el-icon><User /></el-icon></template>
           </el-input>
         </el-form-item>
         <el-form-item prop="password">
-          <el-input v-model="form.password" type="password" show-password placeholder="密码">
+          <el-input
+            v-model="form.password"
+            type="password"
+            :show-password="!autoFilledPassword"
+            placeholder="密码"
+          >
             <template #prefix><el-icon><Lock /></el-icon></template>
           </el-input>
         </el-form-item>
         <div class="row-between">
-          <el-checkbox v-model="rememberName">记住用户名</el-checkbox>
+          <el-checkbox v-model="rememberMe">记住我</el-checkbox>
           <span class="hint">忘记密码请联系管理员重置</span>
         </div>
         <el-form-item>
