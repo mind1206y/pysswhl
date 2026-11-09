@@ -101,8 +101,8 @@ def send_sms(db, sender: str, mobile: str, content: str, category: str, recname:
                 status = decrypt(raw)
                 ok = True
             except ValueError:
-                status = raw
-                ok = bool(raw)
+                status = raw or "网关返回无法解密"
+                ok = False
         except Exception as exc:  # 网络错误/网关异常不影响业务
             status = f"发送失败:{type(exc).__name__}:{exc}"
 

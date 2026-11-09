@@ -56,8 +56,10 @@ export const batchTodoZb = (ids, bumid) => request.post('/jhssdb/batch/zb', { id
 export const batchTodoJhlb = (ids, value) => request.post('/jhssdb/batch/jhlb', { ids, value })
 export const batchTodoLeibie = (ids, value) => request.post('/jhssdb/batch/leibie', { ids, value })
 export const getTodoLogs = (id) => request.get(`/jhssdb/logs/${id}`)
-export const exportTodo = (params) => download('/jhssdb/export', params, '计划明细.xlsx')
-export const exportTodoPage = (ids) => download('/jhssdb/export-page', { ids: ids.join(',') }, '当前页计划.xlsx')
+export const sendTodoSms = (data) => request.post('/jhssdb/sms', data)
+export const exportTodo = (params) => download('/jhssdb/export', params, '售水事业部计划.xlsx')
+export const exportTodoPage = (ids, lb = '') =>
+  download('/jhssdb/export-page', { ids: ids.join(','), lb }, '当前页计划.xlsx')
 
 // ==================== 实施汇总 ====================
 export const getSummaryDicts = () => request.get('/jhsshz/dicts')
@@ -78,8 +80,9 @@ export const setPlanLock = (key, value) => request.post('/jhsshz/locks', { key, 
 export const getSummaryLogs = (id) => request.get(`/jhsshz/logs/${id}`)
 export const downloadSummaryTemplate = () => download('/jhsshz/template', {}, '计划.xlsx')
 export const importSummary = (file) => upload('/jhsshz/import', file)
-export const exportSummary = (params) => download('/jhsshz/export', params, '计划汇总.xlsx')
-export const exportSummaryPage = (ids) => download('/jhsshz/export-page', { ids: ids.join(',') }, '当前页计划.xlsx')
+export const exportSummary = (params) => download('/jhsshz/export', params, '售水事业部计划.xlsx')
+export const exportSummaryPage = (ids, lb = '') =>
+  download('/jhsshz/export-page', { ids: ids.join(','), lb }, '当前页计划.xlsx')
 
 // ==================== 营业所发起 ====================
 export const getApplyDicts = () => request.get('/jhyyfaqi/dicts')

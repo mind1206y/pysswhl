@@ -4,9 +4,10 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   batchTodoJhlb, batchTodoLeibie, batchTodoZb, changeTodoStatus, createTodo,
   deleteTodo, exportTodo, exportTodoPage, getTodoDicts, getTodoItem, getTodoLogs,
-  listTodo, updateTodo,
+  listTodo, sendTodoSms, updateTodo,
 } from '@/api/plan'
 import PlanFormDialog from './PlanFormDialog.vue'
+import SmsConfirmDialog from './SmsConfirmDialog.vue'
 import { TODO_STATUS, money, statusText, statusType, tzInfo } from './common'
 
 const dicts = reactive({
@@ -126,29 +127,78 @@ async function onSave(payload, action) {
   load()
 }
 
-// ===== 批量操作 =====
-async function doSubmit() {
-  if (!selectedIds.value.length) return ElMessage.warning('请选择要提交的计划')
-  try { await ElMessageBox.confirm('确定要提交到售水待汇总吗？', '提交汇总', { type: 'info' }) } catch { return }
-  const r = await changeTodoStatus({ ids: selectedIds.value, zt: '售水待汇总', iftel: false })
-  if (!r.ok) return ElMessage.warning(r.message)
-  ElMessage.success(r.message)
-  load()
+// ===== 确认弹窗(短信通知/批注) =====
+const confirmState = reactive({
+  visible: false, title: '', message: '', smsLabel: '', showComment: false,
+})
+let confirmHandler = null
+function askConfirm(options, handler) {
+  Object.assign(confirmState, {
+    visible: true, title: '', message: '', smsLabel: '', showComment: false, ...options,
+  })
+  confirmHandler = handler
+}
+async function onConfirm({ sms, comment }) {
+  const handler = confirmHandler
+  confirmHandler = null
+  if (handler) await handler(sms, comment)
 }
 
-async function doReturn() {
+// ===== 批量操作 =====
+function doSubmit() {
+  if (!selectedIds.value.length) return ElMessage.warning('请选择要提交的计划')
+  askConfirm({
+    title: '提交汇总', message: '确定要提交到售水待汇总吗？', smsLabel: '计划汇总',
+  }, async (sms) => {
+    const r = await changeTodoStatus({ ids: selectedIds.value, zt: '售水待汇总', iftel: sms })
+    if (!r.ok) return ElMessage.warning(r.message)
+    ElMessage.success(r.message)
+    load()
+  })
+}
+
+function doReturn() {
   if (!selectedIds.value.length) return ElMessage.warning('请选择要回退的计划')
-  let pizhu = ''
-  try {
-    const { value } = await ElMessageBox.prompt('可填写回退批注（选填）', '回退营业所', {
-      inputPlaceholder: '回退批注', confirmButtonText: '确定回退', cancelButtonText: '取消', inputValue: '',
+  askConfirm({
+    title: '回退营业所', message: '确定要回退到营业所吗？',
+    smsLabel: '营业所', showComment: true,
+  }, async (sms, comment) => {
+    const r = await changeTodoStatus({
+      ids: selectedIds.value, zt: '已回退', iftel: sms, pizhu: comment,
     })
-    pizhu = value || ''
-  } catch { return }
-  const r = await changeTodoStatus({ ids: selectedIds.value, zt: '已回退', iftel: false, pizhu })
-  if (!r.ok) return ElMessage.warning(r.message)
-  ElMessage.success(r.message)
-  load()
+    if (!r.ok) return ElMessage.warning(r.message)
+    ElMessage.success(r.message)
+    load()
+  })
+}
+
+// ===== 发送提醒短信(照旧 jhssdb/SendMsm) =====
+const SMS_PRESETS = [
+  '我转了计划给您，请及时处理！',
+  '您有未提交的计划，请尽快提交！',
+  '如有未报的计划，请尽快提交！',
+]
+const smsDialog = ref(false)
+const smsTarget = ref('')
+const smsContent = ref(SMS_PRESETS[0])
+const smsSending = ref(false)
+function openSms(row) {
+  if (!row?.username) return ElMessage.warning('该计划没有专管员')
+  smsTarget.value = row.username
+  smsContent.value = SMS_PRESETS[0]
+  smsDialog.value = true
+}
+async function submitSms() {
+  if (!smsContent.value) return ElMessage.warning('请选择短信内容')
+  smsSending.value = true
+  try {
+    const r = await sendTodoSms({ zgy: smsTarget.value, nr: smsContent.value })
+    if (!r.ok) return ElMessage.warning(r.message)
+    ElMessage.success(r.message)
+    smsDialog.value = false
+  } finally {
+    smsSending.value = false
+  }
 }
 
 const zbDialog = ref(false)
@@ -214,7 +264,8 @@ async function openLogs(row) {
 async function doExport() { await exportTodo(buildParams(false)); ElMessage.success('已导出') }
 async function doExportPage() {
   if (!selectedIds.value.length) return ElMessage.warning('请选择记录')
-  await exportTodoPage(selectedIds.value); ElMessage.success('已导出当前页选中记录')
+  await exportTodoPage(selectedIds.value, filters.jhlb)
+  ElMessage.success('已导出当前页选中记录')
 }
 
 onMounted(async () => {
@@ -316,7 +367,13 @@ onMounted(async () => {
       </el-table-column>
       <el-table-column prop="zb" label="主办" width="110" show-overflow-tooltip />
       <el-table-column prop="fzr" label="负责人" width="80" />
-      <el-table-column prop="username" label="专管员" width="90" />
+      <el-table-column label="专管员" width="118">
+        <template #default="{ row }">
+          <span>{{ row.username }}</span>
+          <el-button v-if="row.username" link type="primary" size="small"
+            style="margin-left: 4px" @click.stop="openSms(row)">短信</el-button>
+        </template>
+      </el-table-column>
       <el-table-column prop="kgny" label="开工" width="80" />
       <el-table-column prop="jgny" label="竣工" width="80" />
       <el-table-column prop="xjxl" label="新建/续建" width="90" />
@@ -348,6 +405,21 @@ onMounted(async () => {
 
     <PlanFormDialog v-model="formOpen" :initial="formItem" :dicts="dicts" mode="todo"
       :editing="formEditing" @save="onSave" />
+
+    <SmsConfirmDialog v-model="confirmState.visible" :title="confirmState.title"
+      :message="confirmState.message" :sms-label="confirmState.smsLabel"
+      :show-comment="confirmState.showComment" @confirm="onConfirm" />
+
+    <el-dialog v-model="smsDialog" title="发送提醒短信" width="420px">
+      <p class="sms-to">发送给：{{ smsTarget }}</p>
+      <el-select v-model="smsContent" style="width: 100%">
+        <el-option v-for="msg in SMS_PRESETS" :key="msg" :label="msg" :value="msg" />
+      </el-select>
+      <template #footer>
+        <el-button @click="smsDialog = false">关闭</el-button>
+        <el-button type="primary" :loading="smsSending" @click="submitSms">发送</el-button>
+      </template>
+    </el-dialog>
 
     <el-dialog v-model="zbDialog" title="更改主办部门" width="380px">
       <el-select v-model="zbValue" filterable style="width: 100%" placeholder="选择主办部门">

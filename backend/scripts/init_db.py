@@ -214,6 +214,12 @@ def ensure_columns():
                 "COMMENT '密码哈希版本:0=bcrypt,1=Argon2id+pepper'"
             ))
             print("已补列 users.password_version")
+        if "zw" not in user_cols:
+            conn.execute(text(
+                "ALTER TABLE users ADD COLUMN zw VARCHAR(50) NOT NULL DEFAULT '' "
+                "COMMENT '职务(旧系统 bb_user.zw,如专管员)'"
+            ))
+            print("已补列 users.zw")
         if "department" in user_cols:
             # 部门已改为独立表 + 多对多关联:先把旧文本值迁移成关联,再删列
             old_rows = conn.execute(

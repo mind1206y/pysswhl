@@ -6,6 +6,7 @@ import {
   getApplyDetail, getApplyDicts, getApplyItem, importApply, listApply, listReported,
   submitApply, updateApply,
 } from '@/api/plan'
+import SmsConfirmDialog from './SmsConfirmDialog.vue'
 import { CATEGORIES, MIDDLE_CATEGORIES, money, statusText, statusType, tzInfo } from './common'
 
 const dicts = reactive({
@@ -134,13 +135,14 @@ async function doDelete() {
   ElMessage.success(r.message); load()
 }
 
-async function doSubmit() {
+const smsConfirmVisible = ref(false)
+function doSubmit() {
   if (!selectedIds.value.length) return ElMessage.warning('请选择要提交的计划')
   if (dicts.locked) return ElMessage.warning('售水计划提交已锁定，现无法提交计划')
-  try {
-    await ElMessageBox.confirm('确定要把选中的计划提交给售水专管员吗？', '提交售水', { type: 'info' })
-  } catch { return }
-  const r = await submitApply(selectedIds.value, false)
+  smsConfirmVisible.value = true
+}
+async function onConfirmSubmit({ sms }) {
+  const r = await submitApply(selectedIds.value, sms)
   if (!r.ok) return ElMessage.warning(r.message)
   ElMessage.success(r.message); load()
 }
@@ -372,6 +374,10 @@ onMounted(async () => {
     </el-dialog>
 
     <!-- 明细抽屉 -->
+    <SmsConfirmDialog v-model="smsConfirmVisible" title="提交售水"
+      message="确定要把选中的计划提交给售水专管员吗？" sms-label="专管员"
+      confirm-text="确定提交" @confirm="onConfirmSubmit" />
+
     <el-drawer v-model="detailDrawer" :title="detailId" size="620px">
       <template v-if="detail?.current">
         <div class="detail-card">

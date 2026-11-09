@@ -46,6 +46,7 @@ class User(Base):
     password_version = Column(Integer, default=0, comment="密码哈希版本:0=bcrypt旧版,1=Argon2id+pepper")
     real_name = Column(String(50), default="", comment="姓名")
     phone = Column(String(20), default="", comment="手机号")
+    zw = Column(String(50), default="", comment="职务(旧系统 bb_user.zw,如专管员)")
     is_active = Column(Boolean, default=True, comment="是否启用")
     is_superuser = Column(Boolean, default=False, comment="超级管理员,拥有全部权限")
     must_change_password = Column(Boolean, default=False, comment="登录后是否必须先修改初始密码")
@@ -73,6 +74,7 @@ class User(Base):
             "real_name": self.real_name,
             "departments": [{"id": d.id, "name": d.name} for d in self.departments],
             "phone": self.phone,
+            "zw": self.zw or "",
             "is_active": self.is_active,
             "is_superuser": self.is_superuser,
             "must_change_password": self.must_change_password,

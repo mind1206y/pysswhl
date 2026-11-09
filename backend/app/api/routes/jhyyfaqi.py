@@ -86,7 +86,7 @@ def dicts(
             {"id": d.id, "name": d.name} for d in
             db.query(Department).filter(Department.dnnum == 0).order_by(Department.id).all()
         ] if summary else [],
-        "zgys": zgy_options(db),
+        "zgys": zgy_options(db, only_zgy=True),
         "categories": JHLB_OPTIONS,
         "default_bmid": primary_dept_id(db, current),
         "locked": get_lock(db, LOCK_APPLY),
@@ -529,7 +529,7 @@ def export_apply(
         mohu=mohu, reported=ck, summary=summary,
     )
     rows = yyfq_rows(db, q.order_by(JhYyfq.bmid, JhYyfq.fqtimep.desc()).all())
-    data = export_yyfq(rows)
+    data = export_yyfq(rows, nd)
     return Response(
         content=data,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

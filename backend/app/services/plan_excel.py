@@ -48,6 +48,7 @@ def _merge(ws, row1, row2, col1, col2):
 
 
 def to_bytes(wb) -> bytes:
+    wb.calculation.fullCalcOnLoad = True
     buf = io.BytesIO()
     wb.save(buf)
     return buf.getvalue()
@@ -338,10 +339,9 @@ def _write_plan_sheet(ws, rows, year, lb, styles):
 
     subtotal_rows = []
     for dept_name, items in groups:
+        for c in range(1, ncol + 1):
+            _put(ws, row, c, dept_name if c == 1 else None, styles["center"])
         _merge(ws, row, row, 1, ncol)
-        _put(ws, row, 1, dept_name, styles["center"])
-        for c in range(2, ncol + 1):
-            _put(ws, row, c, None, styles["center"])
         ws.row_dimensions[row].height = 24.95
         row += 1
 
@@ -431,58 +431,12 @@ def export_plan_workbook(rows_by_category: dict, year, categories=None) -> bytes
 
 
 def export_plan_sheet(rows: list[dict], year, lb: str = "更新改造") -> bytes:
-    """当前页/单类别计划(同一版式,单 sheet)。"""
+    """当前页/单类别计划:与完整计划同一版式(含部门分组/小计/合计)。"""
     lb = lb if lb in LAYOUTS else "更新改造"
     wb = Workbook()
     ws = wb.active
     ws.title = f"{year}年度计划"
-    styles = _styles_for(wb)
-    layout = LAYOUTS[lb]
-    ws.sheet_view.showGridLines = False
-    for i, w in enumerate(layout["widths"], start=1):
-        ws.column_dimensions[get_column_letter(i)].width = w
-
-    title = (
-        f"{year}年更新改造项目中期调整表" if lb == "中期更新"
-        else f"{year}年大修理项目中期调整表" if lb == "中期大修"
-        else f"厦门市政水务集团有限公司售水事业部{year}年{lb}计划"
-    )
-    _merge(ws, 1, 1, 1, len(layout["headers"]))
-    _put(ws, 1, 1, title, styles["title"])
-    ws.row_dimensions[1].height = layout["title_h"]
-    _put(ws, 2, 1, "编制单位：售水事业部", styles["subtitle"])
-    _put(ws, 2, len(layout["headers"]), "金额单位：万元", styles["unit"])
-    ws.row_dimensions[2].height = layout["sub_h"]
-    for i, h in enumerate(layout["headers"], start=1):
-        _put(ws, 3, i, h, styles["head"])
-    ws.row_dimensions[3].height = layout["head_h"]
-
-    row = 4
-    if layout.get("mid"):
-        for r in rows:
-            _plan_data_row(ws, row, r, lb, layout, styles)
-            row += 1
-        _sum_row(ws, row, "合  计", layout, styles)
-        for c in (3, 4, 5):
-            letter = get_column_letter(c)
-            _put(ws, row, c, f"=SUM({letter}4:{letter}{row - 1})" if row > 4 else 0, styles["center"])
-        return to_bytes(wb)
-
-    for r in rows:
-        _plan_data_row(ws, row, r, lb, layout, styles)
-        row += 1
-    total_row = row
-    _sum_row(ws, total_row, "合  计", layout, styles)
-    col = layout["sum_col"] + 1
-    letter = get_column_letter(col)
-    if total_row > 4:
-        _put(ws, total_row, col, f"=SUM({letter}4:{letter}{total_row - 1})", styles["center"])
-        if lb == "更新改造":
-            le = get_column_letter(layout["jine_col"] + 1)
-            _put(ws, total_row, layout["jine_col"] + 1,
-                 f"=SUM({le}4:{le}{total_row - 1})", styles["center"])
-    else:
-        _put(ws, total_row, col, 0, styles["center"])
+    _write_plan_sheet(ws, rows, year, lb, _styles_for(wb))
     return to_bytes(wb)
 
 

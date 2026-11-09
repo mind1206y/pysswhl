@@ -10,6 +10,7 @@
 
 from datetime import datetime
 from typing import Optional
+from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response
@@ -24,8 +25,8 @@ from app.models.user import Department, User
 from app.services.plan_common import (
     JHLB_OPTIONS, LEIBIE_OPTIONS, STATUS_APPROVED, STATUS_DELETED, STATUS_RETURNED,
     STATUS_SUBMITTED, STATUS_TODO, YY_RETURNED, add_log, dept_options, fill_gxgz_defaults,
-    has_perm, log_rows, parse_xuhao, plan_year, resolve_user_id, snapshot_ssdb, ssdb_base_query,
-    ssdb_rows, ssdb_totals, zgy_options,
+    has_perm, log_rows, parse_xuhao, plan_year, resolve_user_id, snapshot_ssdb, sort_ssdb_plans,
+    ssdb_base_query, ssdb_rows, ssdb_totals, zgy_options,
 )
 from app.services import sms as sms_service
 from app.services.plan_excel import export_plan_sheet, export_plan_workbook
@@ -540,28 +541,40 @@ def export_all(
     db: Session = Depends(get_db),
     current: User = Depends(require_permission("jhssdb:view")),
 ):
-    q = _export_query(db, current, nd=nd, mohu=mohu, jhlb=jhlb, bumenid=bumenid,
+    year = nd or plan_year()
+    q = _export_query(db, current, nd=year, mohu=mohu, jhlb=jhlb, bumenid=bumenid,
                       zb=zb, zt=zt, all_zgy=all_zgy, zgy=zgy)
-    plans = q.order_by(JhSsdb.dbtimep.desc()).all()
-    data = export_ssdb(ssdb_rows(db, plans))
+    plans = sort_ssdb_plans(db, q.all())
+    by_cat = {}
+    for p in plans:
+        lb = p.jhlb if p.jhlb in ("更新改造", "大修理", "科技项目", "长期待摊", "管道工程", "中期更新", "中期大修") else "更新改造"
+        by_cat.setdefault(lb, []).append(p)
+    rows_by_cat = {lb: ssdb_rows(db, items) for lb, items in by_cat.items()}
+    data = export_plan_workbook(rows_by_cat, year)
+    fname = f"{year}年度售水事业部更新改造、大修理、科技项目计划.xlsx"
     return Response(
         content=data,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={"Content-Disposition": "attachment; filename*=UTF-8''%E8%AE%A1%E5%88%92%E6%98%8E%E7%BB%86.xlsx"},
+        headers={"Content-Disposition": f"attachment; filename*=UTF-8''{quote(fname)}"},
     )
 
 
 @router.get("/export-page")
 def export_page(
     ids: str,
+    lb: str = "",
     db: Session = Depends(get_db),
     current: User = Depends(require_permission("jhssdb:view")),
 ):
     id_list = [int(x) for x in (ids or "").split(",") if x.strip()]
     plans = db.query(JhSsdb).filter(JhSsdb.id.in_(id_list)).all() if id_list else []
-    data = export_ssdb(ssdb_rows(db, plans), "当前页计划")
+    plans = sort_ssdb_plans(db, plans)
+    category = lb or (plans[0].jhlb if plans and plans[0].jhlb else "更新改造")
+    year = plans[0].niandu if plans and plans[0].niandu else plan_year()
+    data = export_plan_sheet(ssdb_rows(db, plans), year, category)
+    fname = f"{year}年度售水事业部计划（当前类别）.xlsx"
     return Response(
         content=data,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={"Content-Disposition": "attachment; filename*=UTF-8''%E5%BD%93%E5%89%8D%E9%A1%B5%E8%AE%A1%E5%88%92.xlsx"},
+        headers={"Content-Disposition": f"attachment; filename*=UTF-8''{quote(fname)}"},
     )

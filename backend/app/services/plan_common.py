@@ -20,6 +20,7 @@ from app.models.plan import (
     ConsolTb, GxGxgz, GxJilu, GxJindu, GxUserGxgz,
     JhSsdb, JhSsdbPz, JhYyfq,
 )
+from app.models.sms import SmsContact
 from app.models.user import Department, User
 from app.models.water_fee import ShuifeixitongLog
 
@@ -103,8 +104,26 @@ def primary_dept_id(db: Session, user: User) -> Optional[int]:
     return ids[0] if ids else None
 
 
-def zgy_options(db: Session) -> list[str]:
-    """专管员候选:新系统用户 + 历史计划里出现过的旧用户名快照。"""
+def zgy_options(db: Session, *, only_zgy: bool = False) -> list[str]:
+    """专管员候选。
+
+    默认:新系统启用用户 + 历史计划里出现过的旧用户名快照。
+    only_zgy=True(营业所发起,照旧 bb_user.zw == "专管员"):只取职务为
+    「专管员」的新用户,以及旧 bb_user 联系人目录里职务为「专管员」的人。
+    """
+    if only_zgy:
+        names = {
+            (u.username or "").strip()
+            for u in db.query(User).filter(User.is_active == True).all()  # noqa: E712
+            if (u.zw or "").strip() == "专管员"
+        }
+        for c in db.query(SmsContact).all():
+            if (c.zw or "").strip() == "专管员":
+                name = (c.username or c.real_name or "").strip()
+                if name:
+                    names.add(name)
+        return sorted(n for n in names if n)
+
     names = {u.username for u in db.query(User.username).filter(User.is_active == True).all()}  # noqa: E712
     for (v,) in db.query(JhSsdb.zhuanguan_name).filter(JhSsdb.zhuanguan_name != "").distinct():
         names.add(v)
@@ -492,6 +511,18 @@ def ssdb_totals(q) -> dict:
         "tongjizongtouzi": round(total_zongtouzi, 4),
         "tongjitzy": round(total_jine - total_start, 4),
     }
+
+
+def sort_ssdb_plans(db: Session, plans: list[JhSsdb]) -> list[JhSsdb]:
+    """计划文档顺序:部门排序号 -> 部门 -> 计划类别 -> 数字序号 -> 最后操作时间。"""
+    depts = {d.id: d for d in db.query(Department).all()}
+    return sorted(plans, key=lambda p: (
+        (depts[p.bumenid].xuhaotou if p.bumenid in depts and depts[p.bumenid].xuhaotou is not None else 10**6),
+        p.bumenid or 0,
+        p.jhlb or "",
+        p.nxuhao if p.nxuhao is not None else 10**9,
+        p.dbtimep or datetime.min,
+    ))
 
 
 def ssdb_rows(db: Session, plans: list[JhSsdb]) -> list[dict]:

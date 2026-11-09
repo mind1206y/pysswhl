@@ -12,6 +12,7 @@ import os
 import uuid
 from datetime import date, datetime
 from typing import List, Optional
+from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse, Response
@@ -500,11 +501,13 @@ def export_plan(
         khbj_only=khbj, gxgzid=gxgzid,
     )
     rows = official_rows(db, q.all(), current)
-    data = export_official(rows)
+    data = export_official(rows, nd, lb)
+    year_label = str(nd or (rows[0].get("nd") if rows else "") or "")
+    fname = f"{year_label + '年度' if year_label else ''}{lb}正式计划.xlsx"
     return Response(
         content=data,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={"Content-Disposition": f"attachment; filename*=UTF-8''%E6%AD%A3%E5%BC%8F%E8%AE%A1%E5%88%92.xlsx"},
+        headers={"Content-Disposition": f"attachment; filename*=UTF-8''{quote(fname)}"},
     )
 
 

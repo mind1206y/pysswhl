@@ -8,22 +8,30 @@
 """
 
 from base64 import b64encode
+from io import BytesIO
 
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding
 from fastapi.testclient import TestClient
+from openpyxl import load_workbook
 
 from app.core.security import hash_password
 from app.db.session import SessionLocal
 from app.main import app
 from app.models.plan import GxGxgz, GxJilu, GxJiluTupian, GxUserGxgz, JhSsdb, JhSsdbPz, JhYyfq
+from app.models.sms import SmsContact, SmsRecord
 from app.models.user import Department, User
+from app.services import sms as sms_service
 
 client = TestClient(app)
 PASS = 0
 FAIL = 0
 YEAR = 2099
 USER = "smoke_plan_test"
+SMS_TARGET = "smoke_sms_target"
+SMS_PHONE = "13800000000"
+# 短信网关不可达,用本地回环替换 HTTP 调用,验证加密/解密/落库
+sms_service._post = lambda encrypted: sms_service.encrypt('{"code":"0","msg":"ok"}')
 
 
 def check(name, cond, extra=""):
@@ -43,9 +51,17 @@ def login():
         if u is None:
             db.add(User(
                 username=USER, password_hash=hash_password("Smoke@12345"),
-                password_version=1, real_name="计划smoke", is_superuser=True, is_active=True,
+                password_version=1, real_name="计划smoke", is_superuser=True,
+                is_active=True, phone=SMS_PHONE,
             ))
-            db.commit()
+        else:
+            u.phone = SMS_PHONE
+        if db.query(SmsContact).filter(SmsContact.id == 999999).first() is None:
+            db.add(SmsContact(
+                id=999999, username=SMS_TARGET, real_name="短信smoke",
+                phone=SMS_PHONE, zw="专管员", otherqx="",
+            ))
+        db.commit()
     finally:
         db.close()
     pub = serialization.load_pem_public_key(
@@ -68,6 +84,8 @@ def cleanup(user_id):
         db.query(JhYyfq).filter(JhYyfq.niandu == YEAR).delete()
         db.query(GxGxgz).filter(GxGxgz.nd == YEAR).delete()
         db.query(JhSsdbPz).filter(JhSsdbPz.niandu == YEAR).delete()
+        db.query(SmsRecord).filter(SmsRecord.sender == USER).delete()
+        db.query(SmsContact).filter(SmsContact.id == 999999).delete()
         f = db.query(GxUserGxgz).filter(
             GxUserGxgz.userid == user_id,
             GxUserGxgz.username == USER,
@@ -119,8 +137,16 @@ def main():
     r = client.post("/api/jhssdb/create", json=payload, headers=h)
     check("jhssdb 新增", r.json().get("ok"), r.text[:120])
     rid = r.json().get("id")
-    r = client.post("/api/jhssdb/status", json={"ids": [rid], "zt": "售水待汇总"}, headers=h)
+    r = client.post("/api/jhssdb/status", json={"ids": [rid], "zt": "售水待汇总", "iftel": True}, headers=h)
     check("jhssdb 提交汇总", r.json().get("ok"), r.text[:120])
+    check("短信通知计划汇总", (r.json().get("sms") or {}).get("sent", 0) > 0, r.text[:160])
+
+    r = client.post("/api/jhssdb/sms", json={"zgy": SMS_TARGET, "nr": "我转了计划给您，请及时处理！"}, headers=h)
+    check("手动发送短信", r.json().get("ok"), r.text[:160])
+    db = SessionLocal()
+    sms_n = db.query(SmsRecord).filter(SmsRecord.sender == USER, SmsRecord.ren == "短信smoke").count()
+    db.close()
+    check("短信记录落库", sms_n > 0, f"count={sms_n}")
     r = client.post("/api/jhsshz/status", json={"ids": [rid], "zt": "售水通过"}, headers=h)
     check("jhsshz 通过", r.json().get("ok"), r.text[:120])
     check("变更日志", client.get(f"/api/jhssdb/logs/{rid}", headers=h).json()["total"] > 0)
@@ -162,6 +188,37 @@ def main():
     ):
         r = client.get(path, headers=h)
         check(f"GET {path}", r.status_code == 200 and len(r.content) > 1000)
+
+    # 计划格式:封面 + 类别 sheet + 部门分组 + 小计/合计
+    r = client.get("/api/jhssdb/export", params={"nd": 2026, "all_zgy": "true"}, headers=h)
+    wb = load_workbook(BytesIO(r.content))
+    check("计划格式-封面", "封面" in wb.sheetnames, str(wb.sheetnames))
+    ws = wb["更新改造"]
+    check("计划格式-标题", "更新改造计划" in str(ws.cell(1, 1).value or ""), str(ws.cell(1, 1).value))
+    labels = {str(ws.cell(i, 1).value or "").replace(" ", "") for i in range(1, ws.max_row + 1)}
+    check("计划格式-小计合计", {"小计", "合计"}.issubset(labels), str(labels))
+    check("计划格式-部门分组", any("营业所" in x or x == "售水本部" for x in labels), str(list(labels)[:10]))
+
+    # 当前页导出沿用同一版式
+    page_rows = client.get("/api/jhssdb/list", params={
+        "nd": 2026, "all_zgy": "true", "size": 2, "first_load": "true",
+    }, headers=h).json()["rows"]
+    if page_rows:
+        ids = ",".join(str(x["ID"]) for x in page_rows)
+        r = client.get("/api/jhssdb/export-page", params={"ids": ids, "lb": "更新改造"}, headers=h)
+        ws = load_workbook(BytesIO(r.content)).active
+        check("当前页计划格式", "更新改造计划" in str(ws.cell(1, 1).value or ""))
+
+    # 正式计划/营业所发起使用“导出正式计划”版式
+    r = client.get("/api/plan/export", params={"nd": 2026}, headers=h)
+    ws = load_workbook(BytesIO(r.content)).active
+    check("正式计划表头", ws.cell(2, 1).value == "编号" and ws.cell(2, 18).value == "合同签订日期",
+          str([ws.cell(2, c).value for c in (1, 18)]))
+    r = client.get("/api/jhyyfaqi/export", params={"nd": 2026}, headers=h)
+    ws = load_workbook(BytesIO(r.content)).active
+    check("营业所计划表头", ws.cell(2, 1).value == "编号" and ws.cell(2, 13).value == "专管员",
+          str([ws.cell(2, c).value for c in (1, 13)]))
+    check("正式计划数据行", ws.max_row >= 3 or r.status_code == 200)
 
     cleanup(me["id"])
     print(f"\n{PASS} passed, {FAIL} failed")

@@ -62,7 +62,7 @@ const deptOptions = computed(() => {
   }
   return allDepartments.value.map((d) => ({ id: d.id, label: pathLabel(d) }))
 })
-const editForm = reactive({ username: '', real_name: '', department_ids: [], phone: '' })
+const editForm = reactive({ username: '', real_name: '', department_ids: [], phone: '', zw: '' })
 const editRules = {
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
   real_name: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
@@ -71,7 +71,7 @@ const editRules = {
 function openCreate() {
   editingId.value = null
   // 创建时只填姓名/用户名并勾选部门,密码用初始密码,用户首次登录强制修改
-  Object.assign(editForm, { username: '', real_name: '', department_ids: [], phone: '' })
+  Object.assign(editForm, { username: '', real_name: '', department_ids: [], phone: '', zw: '' })
   editDialog.value = true
 }
 
@@ -82,6 +82,7 @@ function openEdit(row) {
     real_name: row.real_name,
     department_ids: (row.departments || []).map((d) => d.id),
     phone: row.phone,
+    zw: row.zw || '',
   })
   editDialog.value = true
 }
@@ -95,6 +96,7 @@ async function submitEdit() {
       real_name: editForm.real_name,
       department_ids: editForm.department_ids,
       phone: editForm.phone,
+      zw: editForm.zw,
     })
   }
   ElMessage.success(editingId.value == null ? '已创建,初始密码 abc123456' : '保存成功')
@@ -179,7 +181,7 @@ async function submitRoles() {
     <div class="toolbar">
       <el-input
         v-model="keyword"
-        placeholder="用户名 / 姓名"
+        placeholder="用户名 / 姓名 / 职务"
         clearable
         style="width: 220px"
         @keyup.enter="search"
@@ -200,6 +202,12 @@ async function submitRoles() {
             {{ d.name }}
           </el-tag>
           <span v-if="!(row.departments || []).length" style="color: #c0c4cc">未分配</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="zw" label="职务" min-width="100">
+        <template #default="{ row }">
+          <span v-if="row.zw">{{ row.zw }}</span>
+          <span v-else style="color: #c0c4cc">未设置</span>
         </template>
       </el-table-column>
       <el-table-column prop="phone" label="手机号" min-width="130" />
@@ -269,8 +277,11 @@ async function submitRoles() {
           <el-option v-for="o in deptOptions" :key="o.id" :value="o.id" :label="o.label" />
         </el-select>
       </el-form-item>
+      <el-form-item label="职务">
+        <el-input v-model="editForm.zw" maxlength="50" placeholder="如：专管员" />
+      </el-form-item>
       <el-form-item v-if="editingId != null" label="手机号">
-        <el-input v-model="editForm.phone" />
+        <el-input v-model="editForm.phone" maxlength="20" />
       </el-form-item>
       <el-alert
         v-if="editingId == null"

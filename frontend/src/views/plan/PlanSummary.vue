@@ -8,6 +8,7 @@ import {
   getSummaryLogs, importSummary, listSummary, renumber, setPlanLock, updateSummary,
 } from '@/api/plan'
 import PlanFormDialog from './PlanFormDialog.vue'
+import SmsConfirmDialog from './SmsConfirmDialog.vue'
 import { SUMMARY_STATUS, money, statusText, statusType, tzInfo } from './common'
 
 const dicts = reactive({
@@ -137,6 +138,23 @@ async function onReturnFromForm(payload) {
   load()
 }
 
+// ===== 确认弹窗(短信通知/批注) =====
+const confirmState = reactive({
+  visible: false, title: '', message: '', smsLabel: '', showComment: false, type: 'info',
+})
+let confirmHandler = null
+function askConfirm(options, handler) {
+  Object.assign(confirmState, {
+    visible: true, title: '', message: '', smsLabel: '', showComment: false, type: 'info', ...options,
+  })
+  confirmHandler = handler
+}
+async function onConfirm({ sms, comment }) {
+  const handler = confirmHandler
+  confirmHandler = null
+  if (handler) await handler(sms, comment)
+}
+
 // ===== 批量流转 =====
 async function doApprove() {
   if (!selectedIds.value.length) return ElMessage.warning('请选择记录')
@@ -146,27 +164,33 @@ async function doApprove() {
   ElMessage.success(r.message); load()
 }
 
-async function doReturnBumen() {
+function doReturnBumen() {
   if (!selectedIds.value.length) return ElMessage.warning('请选择记录')
-  let pizhu = ''
-  try {
-    const { value } = await ElMessageBox.prompt(
-      selectedIds.value.length > 1 ? `已选择 ${selectedIds.value.length} 条，将回退能回退的记录。可填写批注：` : '可填写回退批注（选填）',
-      '回退营业所', { inputPlaceholder: '回退批注' },
-    )
-    pizhu = value || ''
-  } catch { return }
-  const r = await changeSummaryStatus({ ids: selectedIds.value, zt: '已回退', iftel: false, pizhu })
-  if (!r.ok) return ElMessage.warning(r.message)
-  ElMessage.success(r.message); load()
+  askConfirm({
+    title: '回退营业所',
+    message: selectedIds.value.length > 1
+      ? `已选择 ${selectedIds.value.length} 条，将回退能回退的记录。`
+      : '确定要回退到营业所吗？',
+    smsLabel: '营业所', showComment: true,
+  }, async (sms, comment) => {
+    const r = await changeSummaryStatus({
+      ids: selectedIds.value, zt: '已回退', iftel: sms, pizhu: comment,
+    })
+    if (!r.ok) return ElMessage.warning(r.message)
+    ElMessage.success(r.message); load()
+  })
 }
 
-async function doReturnZgy() {
+function doReturnZgy() {
   if (!selectedIds.value.length) return ElMessage.warning('请选择记录')
-  try { await ElMessageBox.confirm('确定要回退专管员吗？', '回退专管员', { type: 'warning' }) } catch { return }
-  const r = await changeSummaryStatus({ ids: selectedIds.value, zt: '专管员落实', iftel: false })
-  if (!r.ok) return ElMessage.warning(r.message)
-  ElMessage.success(r.message); load()
+  askConfirm({
+    title: '回退专管员', message: '确定要回退专管员吗？',
+    smsLabel: '专管员', type: 'warning',
+  }, async (sms) => {
+    const r = await changeSummaryStatus({ ids: selectedIds.value, zt: '专管员落实', iftel: sms })
+    if (!r.ok) return ElMessage.warning(r.message)
+    ElMessage.success(r.message); load()
+  })
 }
 
 async function doRevert() {
@@ -272,7 +296,7 @@ async function doImport() {
 async function doExport() { await exportSummary(buildParams(false)); ElMessage.success('已导出') }
 async function doExportPage() {
   if (!selectedIds.value.length) return ElMessage.warning('请选择记录')
-  await exportSummaryPage(selectedIds.value); ElMessage.success('已导出选中记录')
+  await exportSummaryPage(selectedIds.value, filters.jhlb); ElMessage.success('已导出选中记录')
 }
 
 // ===== 变更记录 =====
@@ -439,6 +463,10 @@ onMounted(async () => {
 
     <PlanFormDialog v-model="formOpen" :initial="formItem" :dicts="dicts" mode="summary"
       :editing="formEditing" @save="onSave" @return="onReturnFromForm" />
+
+    <SmsConfirmDialog v-model="confirmState.visible" :title="confirmState.title"
+      :message="confirmState.message" :sms-label="confirmState.smsLabel"
+      :show-comment="confirmState.showComment" :type="confirmState.type" @confirm="onConfirm" />
 
     <el-dialog v-model="zbDialog" title="更改主办部门" width="380px">
       <el-select v-model="zbValue" filterable style="width: 100%" placeholder="选择主办部门">

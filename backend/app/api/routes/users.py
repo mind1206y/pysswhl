@@ -19,6 +19,7 @@ class UserCreate(BaseModel):
     real_name: str = ""
     department_ids: List[int] = []
     phone: str = ""
+    zw: str = ""
     is_active: bool = True
 
 
@@ -26,6 +27,7 @@ class UserUpdate(BaseModel):
     real_name: str = ""
     department_ids: Optional[List[int]] = None
     phone: str = ""
+    zw: str = ""
 
 
 class StatusIn(BaseModel):
@@ -47,7 +49,9 @@ def list_users(
     query = db.query(User)
     if keyword.strip():
         kw = f"%{keyword.strip()}%"
-        query = query.filter(or_(User.username.like(kw), User.real_name.like(kw)))
+        query = query.filter(or_(
+            User.username.like(kw), User.real_name.like(kw), User.zw.like(kw),
+        ))
     total = query.count()
     users = query.order_by(User.id.desc()).offset((page - 1) * size).limit(size).all()
     return {"total": total, "items": [u.to_dict() for u in users]}
@@ -72,6 +76,7 @@ def create_user(
         must_change_password=True,
         real_name=data.real_name.strip(),
         phone=data.phone.strip(),
+        zw=data.zw.strip(),
         is_active=data.is_active,
     )
     if data.department_ids:
@@ -96,6 +101,7 @@ def update_user(
     if data.department_ids is not None:
         user.departments = db.query(Department).filter(Department.id.in_(data.department_ids)).all()
     user.phone = data.phone.strip()
+    user.zw = data.zw.strip()
     db.commit()
     return user.to_dict()
 
