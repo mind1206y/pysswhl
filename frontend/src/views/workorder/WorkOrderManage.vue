@@ -253,7 +253,7 @@ const orderSize = ref(10) // 与库存同为 10 条,列表区不出现纵向滚�
 const orderLoading = ref(false)
 const filters = reactive({
   searchText: '', startDate: '', endDate: '', dakoujing: false,
-  lingliaotype: '全部类别', unusedOnly: false, bmid: null,
+  lingliaotype: '', unusedOnly: false, bmid: null,
 })
 const fullscreen = ref(false)
 
@@ -290,7 +290,7 @@ function searchOrders() {
 function resetFilters() {
   Object.assign(filters, {
     searchText: '', startDate: '', endDate: '', dakoujing: false,
-    lingliaotype: '全部类别', unusedOnly: false, bmid: null,
+    lingliaotype: '', unusedOnly: false, bmid: null,
   })
   searchOrders()
 }
@@ -639,7 +639,7 @@ onBeforeUnmount(() => {
         <span>工单列表</span>
         <div class="wo-list-tools">
           <el-select v-model="filters.lingliaotype" size="small" style="width: 180px"
-                     @change="searchOrders">
+                     clearable placeholder="全部类别" @change="searchOrders">
             <el-option v-for="t in dicts.filterTypes" :key="t" :label="t" :value="t" />
           </el-select>
           <el-input v-model="filters.searchText" size="small" clearable style="width: 170px"
@@ -895,12 +895,13 @@ onBeforeUnmount(() => {
   flex: 1 1 45%;
   min-height: 0;
 }
-/* 紧凑行高:10 行 + 表头约 292px,常规视口内两张表都不需要滚动条 */
+/* 紧凑行高:10 行 + 表头约 292px,常规视口内两张表都不需要滚动条。
+   行内边距/行高略增以容纳更高的步进输入框(26px),行高预算基本不变 */
 .wo-page :deep(.el-table--small .el-table__cell) {
-  padding: 2px 0;
+  padding: 3px 0;
 }
 .wo-page :deep(.el-table .cell) {
-  line-height: 20px;
+  line-height: 22px;
   padding: 0 4px;
 }
 .wo-page :deep(.el-table__header-wrapper th) {
@@ -958,6 +959,21 @@ onBeforeUnmount(() => {
   color: #606266;
   white-space: nowrap;
 }
+/* 输入框/下拉/日期选择器加高:原 size="small" 仅 24px,太矮难点击 → 32px,
+   仅作用于工单信息区与列表筛选区,不动表格内紧凑步进框(会变高被 cell 裁切) */
+.wo-header-row :deep(.el-input__wrapper),
+.wo-header-row :deep(.el-select__wrapper),
+.wo-list-tools :deep(.el-input__wrapper),
+.wo-list-tools :deep(.el-select__wrapper),
+.wo-header-row :deep(.el-date-editor),
+.wo-list-tools :deep(.el-date-editor) {
+  height: 32px;
+}
+/* 同区按钮同步到 32px,避免和输入框高低不齐 */
+.wo-header-row :deep(.el-button),
+.wo-list-tools :deep(.el-button) {
+  height: 32px;
+}
 .wo-address {
   display: flex;
   align-items: center;
@@ -985,8 +1001,8 @@ onBeforeUnmount(() => {
 .wo-qty-btn {
   box-sizing: border-box;
   width: 18px;
-  height: 22px;
-  line-height: 18px;
+  height: 26px;
+  line-height: 22px;
   border: 1px solid #dcdfe6;
   background: #f5f7fa;
   color: #606266;
@@ -1001,7 +1017,7 @@ onBeforeUnmount(() => {
 .wo-qty-input {
   box-sizing: border-box;
   width: 42px;
-  height: 22px;
+  height: 26px;
   text-align: center;
   border: 1px solid #dcdfe6;
   border-radius: 3px;
@@ -1016,7 +1032,7 @@ onBeforeUnmount(() => {
   box-sizing: border-box;
   flex: 0 0 auto;
   white-space: nowrap;
-  height: 22px;
+  height: 26px;
   margin-left: 3px;
   padding: 0 7px;
   border: 1px solid #533afd;

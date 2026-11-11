@@ -606,7 +606,7 @@ def list_leak(
 
     total = query.count()
     data = (
-        query.order_by(LeakRecord.id.desc())
+        query.order_by(LeakRecord.detect_time.desc(), LeakRecord.id.desc())
         .offset((page - 1) * rows)
         .limit(rows)
         .all()

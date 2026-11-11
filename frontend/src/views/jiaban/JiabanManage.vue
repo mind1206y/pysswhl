@@ -741,31 +741,31 @@ onBeforeUnmount(() => {
 
     <!-- ==================== 查询带 ==================== -->
     <div class="jb-search">
-      <el-input v-model="query.mohu" size="small" clearable placeholder="模糊查询(姓名/工单号/地址)"
+      <el-input v-model="query.mohu" size="default" clearable placeholder="模糊查询(姓名/工单号/地址)"
                 class="jb-kw" @keyup.enter="doSearch" @clear="doSearch">
         <template #append>
-          <el-button size="small" :icon="'Search'" @click="doSearch" />
+          <el-button size="default" :icon="'Search'" @click="doSearch" />
         </template>
       </el-input>
-      <el-select v-model="query.periodType" size="small" style="width: 110px"
+      <el-select v-model="query.periodType" size="default" style="width: 110px"
                  @change="onPeriodChange">
         <el-option v-for="p in PERIODS" :key="p.value" :label="p.text" :value="p.value" />
       </el-select>
       <span v-if="query.periodType === 'custom'" class="jb-custom">
-        <el-date-picker v-model="query.startDate" type="date" size="small"
+        <el-date-picker v-model="query.startDate" type="date" size="default"
                         value-format="YYYY-MM-DD" style="width: 130px"
                         @change="onCustomDateChange" />
         <span class="jb-label">至</span>
-        <el-date-picker v-model="query.endDate" type="date" size="small"
+        <el-date-picker v-model="query.endDate" type="date" size="default"
                         value-format="YYYY-MM-DD" style="width: 130px"
                         @change="onCustomDateChange" />
       </span>
-      <el-select v-model="query.bmlb" size="small" multiple collapse-tags
+      <el-select v-model="query.bmlb" size="default" multiple collapse-tags
                  clearable placeholder="选择部门类别" style="width: 160px"
                  @change="onBmlbChange">
         <el-option v-for="o in bmlbOptions" :key="o.id" :label="o.text" :value="o.id" />
       </el-select>
-      <el-select v-model="query.leiType" size="small" style="width: 130px"
+      <el-select v-model="query.leiType" size="default" style="width: 130px"
                  @change="onLeiTypeChange">
         <el-option label="全部" value="all" />
         <el-option label="以地址统计" value="address" />
@@ -779,20 +779,20 @@ onBeforeUnmount(() => {
 
     <!-- ==================== 工具栏 ==================== -->
     <div class="jb-toolbar">
-      <el-button size="small" type="primary" :icon="'Plus'" @click="openAdd">添加</el-button>
-      <el-button size="small" :icon="'Delete'" @click="deleteRow">删除</el-button>
-      <el-button size="small" :icon="'User'" @click="openRenyuan">加班人员</el-button>
-      <el-button size="small" :icon="'Download'" @click="openExportDialog('excel')">导出 Excel</el-button>
-      <el-button size="small" :icon="'Download'" @click="doExportSummary">导出汇总Excel</el-button>
-      <el-button size="small" :icon="'Download'" @click="openExportDialog('address')">按地址导出</el-button>
-      <el-button size="small" :icon="'Download'" @click="doExportForOvertime">导出给加班申请</el-button>
-      <el-button size="small" :icon="'FolderOpened'" @click="openAttachments">附件</el-button>
+      <el-button size="default" type="primary" :icon="'Plus'" @click="openAdd">添加</el-button>
+      <el-button size="default" :icon="'Delete'" @click="deleteRow">删除</el-button>
+      <el-button size="default" :icon="'User'" @click="openRenyuan">加班人员</el-button>
+      <el-button size="default" :icon="'Download'" @click="openExportDialog('excel')">导出 Excel</el-button>
+      <el-button size="default" :icon="'Download'" @click="doExportSummary">导出汇总Excel</el-button>
+      <el-button size="default" :icon="'Download'" @click="openExportDialog('address')">按地址导出</el-button>
+      <el-button size="default" :icon="'Download'" @click="doExportForOvertime">导出给加班申请</el-button>
+      <el-button size="default" :icon="'FolderOpened'" @click="openAttachments">附件</el-button>
       <span class="jb-tip">双击行可编辑；点击工单号查看工单详情</span>
     </div>
 
     <!-- ==================== 主表 ==================== -->
     <div ref="tableWrap" class="jb-table-wrap">
-      <el-table v-loading="loading" :data="rows" size="small" border stripe :height="tableH"
+      <el-table v-loading="loading" :data="rows" size="default" border stripe :height="tableH"
                 highlight-current-row row-key="ID"
                 @row-click="(r) => (selected = r)" @row-dblclick="openEdit">
         <el-table-column prop="name" label="姓名" width="90" align="center" />

@@ -371,8 +371,8 @@ onMounted(async () => {
         </template>
       </el-table-column>
       <el-table-column prop="xh" label="计划号" width="75" />
-      <el-table-column prop="name" label="项目名称" min-width="240" show-overflow-tooltip />
-      <el-table-column prop="bz" label="项目说明" min-width="300" show-overflow-tooltip>
+      <el-table-column prop="name" label="项目名称" min-width="240" />
+      <el-table-column prop="bz" label="项目说明" min-width="450">
         <template #default="{ row }"><span class="bz-cell">{{ row.bz }}</span></template>
       </el-table-column>
       <el-table-column label="金额(万元)" width="100" align="right">
@@ -505,7 +505,7 @@ onMounted(async () => {
 .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .hint { margin-left: auto; color: #909399; font-size: 12px; }
 .pager { display: flex; justify-content: flex-end; }
-.bz-cell { display: inline-block; background: rgba(28, 30, 84, 0.06); border: 1px solid rgba(164, 180, 201, 0.35); border-radius: 6px; padding: 2px 6px; text-indent: 1em; line-height: 1.5; }
+.bz-cell { display: inline-block; background: rgba(28, 30, 84, 0.06); border: 1px solid rgba(164, 180, 201, 0.35); border-radius: 6px; padding: 2px 6px; text-indent: 1em; line-height: 1.5; white-space: normal; word-break: break-word; }
 .latest-status { display: flex; flex-direction: column; gap: 2px; }
 .status-bar { width: 100%; }
 .mini-bar { margin-top: 2px; }

@@ -12,6 +12,7 @@
 
 import math
 from collections import Counter
+from datetime import datetime
 from decimal import Decimal
 from pathlib import Path
 from typing import List, Optional
@@ -45,6 +46,12 @@ router = APIRouter()
 
 class IdsIn(BaseModel):
     ids: List[int]
+
+
+class CoordUpdate(BaseModel):
+    id: int
+    jingdu: float
+    weidu: float
 
 
 # ==================== 列表 / 字典 ====================
@@ -123,6 +130,31 @@ def batch_non_yuding(
         {CelouTb.yudingliang: False}, synchronize_session=False)
     db.commit()
     return {"ok": True, "updated": n}
+
+
+@router.post("/update-coord")
+def update_coord(
+    data: CoordUpdate,
+    db: Session = Depends(get_db),
+    user: User = Depends(require_permission("celou:manage")),
+):
+    """表格内联编辑单条记录的经度/纬度,并记录修改人与修改时间。"""
+    r = db.query(CelouTb).filter(CelouTb.id == data.id).first()
+    if not r:
+        raise HTTPException(status_code=404, detail="记录不存在")
+    r.zuobiao_jingdu = data.jingdu
+    r.zuobiao_weidu = data.weidu
+    r.xgusername = (user.username or user.real_name or "") or None
+    r.xgdatetime = datetime.now()
+    db.commit()
+    return {
+        "ok": True,
+        "id": r.id,
+        "jingdu": float(r.zuobiao_jingdu),
+        "weidu": float(r.zuobiao_weidu),
+        "xgusername": r.xgusername or "",
+        "xgdatetime": r.xgdatetime.isoformat(sep=" ", timespec="seconds") if r.xgdatetime else None,
+    }
 
 
 @router.post("/upload")
@@ -353,7 +385,9 @@ def heatmap_stats(
         "maxDiameter": max(dias) if dias else 0,
         "radius": radius,
         "details": [{"didian": r.didian, "louliang": float(r.louliang or 0),
-                     "guanjing": r.guanjing, "gjsmall": r.gjsmall, "distance": round(d, 1)}
+                     "guanjing": r.guanjing, "gjsmall": r.gjsmall,
+                     "jingdu": float(r.zuobiao_jingdu), "weidu": float(r.zuobiao_weidu),
+                     "distance": round(d, 1)}
                     for d, r in hits[:10]],
     }
 

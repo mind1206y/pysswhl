@@ -469,7 +469,8 @@ def build_cg_excel(
             float(item["danjia"] or 0),
             float(item["jine"] or 0),
         ]
-        values.append("" if is_ys else item["beizhu"])
+        # 验收单「验收情况」列统一写「完成」；申请单无此列，直接写备注
+        values.append("完成" if is_ys else item["beizhu"])
         if is_ys:
             values.append(item["beizhu"])
         for idx, value in enumerate(values, start=1):
@@ -489,13 +490,15 @@ def build_cg_excel(
         ws.cell(row=row_no, column=idx).border = BORDER
     row_no += 1
 
-    # 签字行
+    # 签字行：申请单三栏 审批 / 审核 / 申请人，验收单仍两栏 验收 / 经办
     if is_ys:
         ws.cell(row=row_no, column=1, value="验收：")
         ws.cell(row=row_no, column=6, value="经办：")
     else:
-        ws.cell(row=row_no, column=2, value="审核：")
-        ws.cell(row=row_no, column=6, value="申请人：")
+        ws.row_dimensions[row_no].height = 28
+        ws.cell(row=row_no, column=1, value="审批：").alignment = LEFT
+        ws.cell(row=row_no, column=3, value="审核：").alignment = LEFT
+        ws.cell(row=row_no, column=6, value="申请人：").alignment = LEFT
 
     buf = BytesIO()
     wb.save(buf)

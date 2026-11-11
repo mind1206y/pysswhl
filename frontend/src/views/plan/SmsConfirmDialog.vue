@@ -38,18 +38,18 @@ function confirm() {
 </script>
 
 <template>
-  <el-dialog :model-value="modelValue" :title="title" width="430px" append-to-body
+  <el-dialog :model-value="modelValue" :title="title" width="430px" append-to-body class="std-dialog"
     @update:model-value="emit('update:modelValue', $event)">
-    <p class="sms-message">{{ message }}</p>
-    <el-form v-if="showComment" label-width="52px" class="sms-form">
-      <el-form-item :label="commentLabel">
+    <el-form class="sms-form" label-width="52px">
+      <p class="sms-message">{{ message }}</p>
+      <el-form-item v-if="showComment" :label="commentLabel">
         <el-input v-model="state.comment" type="textarea" :rows="2"
           :placeholder="commentPlaceholder" maxlength="500" show-word-limit />
       </el-form-item>
+      <el-checkbox v-if="showSms" v-model="state.sms" class="sms-check">
+        短信通知{{ smsLabel }}
+      </el-checkbox>
     </el-form>
-    <el-checkbox v-if="showSms" v-model="state.sms" class="sms-check">
-      短信通知{{ smsLabel }}
-    </el-checkbox>
     <template #footer>
       <el-button @click="close">取消</el-button>
       <el-button type="primary" @click="confirm">{{ confirmText }}</el-button>

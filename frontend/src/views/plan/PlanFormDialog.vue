@@ -82,7 +82,7 @@ defineExpose({ payload })
 
 <template>
   <el-dialog :model-value="modelValue" :title="editing ? '编辑计划' : '添加计划'"
-    width="980px" :close-on-click-modal="false" @update:model-value="emit('update:modelValue', $event)">
+    width="980px" :close-on-click-modal="false" class="std-dialog" @update:model-value="emit('update:modelValue', $event)">
     <el-form label-width="126px" class="plan-form">
       <div class="form-grid">
         <el-form-item label="计划类别" class="span2">
@@ -134,7 +134,7 @@ defineExpose({ payload })
         <el-form-item label="计划总投资(万)">
           <el-input-number v-model="form.jine" :precision="2" :min="0" style="width: 100%" />
         </el-form-item>
-        <el-form-item v-if="isGxgz" label="本年计划投资(万)">
+        <el-form-item v-if="isGxgz" label="本年投资(万)">
           <el-input-number v-model="form.zongtouzi" :precision="2" :min="0" style="width: 100%" />
         </el-form-item>
         <el-form-item v-if="isGxgz" label="开工年月">
@@ -153,7 +153,7 @@ defineExpose({ payload })
           <el-input v-model="form.pizhu" />
         </el-form-item>
         <el-form-item label="项目说明" class="span2">
-          <el-input v-model="form.bz" type="textarea" :rows="4" />
+          <el-input v-model="form.bz" type="textarea" :rows="8" />
         </el-form-item>
         <el-form-item v-if="editing && dicts.__opname" label="上报员">
           <el-input :model-value="dicts.__opname" disabled />

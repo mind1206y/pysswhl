@@ -20,6 +20,7 @@ export const getCelouUsernames = () => request.get('/celou/usernames')
 // ===== 管理操作 =====
 export const deleteCelou = (ids) => request.post('/celou/delete', { ids })
 export const batchNonYuding = (ids) => request.post('/celou/batch-non-yuding', { ids })
+export const updateCelouCoord = (data) => request.post('/celou/update-coord', data)
 export const uploadCelou = (formData) =>
   request.post('/celou/upload', formData, { timeout: 120000 })
 

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   batchSummaryJhlb, batchSummaryLeibie, batchSummaryZb, changeSummaryStatus,
@@ -28,6 +28,10 @@ const size = ref(30)
 const loading = ref(false)
 const selection = ref([])
 let firstLoad = true
+
+// 导出数据范围：含去年(上一年度) / 今年，本地记忆，兼容旧系统 jhsshz_qunian
+const exportIncludeLastYear = ref(localStorage.getItem('jhsshz_qunian') === '1')
+watch(exportIncludeLastYear, (v) => localStorage.setItem('jhsshz_qunian', v ? '1' : '0'))
 
 const selectedIds = computed(() => selection.value.map((r) => r.ID || r.id))
 
@@ -212,6 +216,13 @@ async function doDelete() {
 // ===== 批量修改 =====
 const zbDialog = ref(false); const zbValue = ref(null)
 function openBatchZb() { if (!selectedIds.value.length) return ElMessage.warning('请选择记录'); zbValue.value = null; zbDialog.value = true }
+
+// 工具栏「更多操作 / 导出」下拉分发
+function onMoreCmd(cmd) {
+  const map = { zb: openBatchZb, jhlb: openBatchJhlb, xlb: openBatchXlb, renumber: openRenumber, copy: openCopy }
+  map[cmd] && map[cmd]()
+}
+function onExportCmd(cmd) { cmd === 'page' ? doExportPage() : doExport() }
 async function submitBatchZb() {
   if (!zbValue.value) return ElMessage.warning('请选择主办部门')
   const r = await batchSummaryZb(selectedIds.value, zbValue.value)
@@ -293,7 +304,7 @@ async function doImport() {
     ElMessage.success(r.message); importFile.value = null; load()
   } finally { uploading.value = false }
 }
-async function doExport() { await exportSummary(buildParams(false)); ElMessage.success('已导出') }
+async function doExport() { await exportSummary({ ...buildParams(false), qunian: exportIncludeLastYear.value }); ElMessage.success('已导出') }
 async function doExportPage() {
   if (!selectedIds.value.length) return ElMessage.warning('请选择记录')
   await exportSummaryPage(selectedIds.value, filters.jhlb); ElMessage.success('已导出选中记录')
@@ -319,9 +330,11 @@ onMounted(async () => {
 <template>
   <div class="plan-page">
     <el-card shadow="never" class="top-card">
-      <div class="title-row">
+      <!-- 第 1 行：标题 / 汇总 / 锁定开关 -->
+      <div class="bar">
         <div class="title">{{ filters.nd }}年度售水事业部计划汇总表</div>
         <div class="stats">总计金额：<b>{{ money(tj) }}</b> 万元　中期调整数：<b>{{ money(tjtz) }}</b> 万元</div>
+        <el-checkbox v-model="filters.px" class="sort-px" @change="search">按序号排序</el-checkbox>
         <div v-if="dicts.perms.admin" class="lock-row">
           <el-switch v-model="dicts.locks.apply" inline-prompt active-text="锁定申报" inactive-text="申报开"
             @change="(v) => toggleLock('apply', v)" />
@@ -329,77 +342,113 @@ onMounted(async () => {
             @change="(v) => toggleLock('summary', v)" />
         </div>
       </div>
-      <div class="status-row">
-        <el-button size="small" :type="filters.zt === '' ? 'primary' : 'default'" plain
-          @click="filters.zt = ''; search()">不限</el-button>
-        <el-button v-for="s in dicts.statuses" :key="s.value" size="small"
-          :type="filters.zt === s.value ? s.type : 'default'" :plain="filters.zt !== s.value"
-          @click="switchStatus(s.value)">{{ s.label }}</el-button>
-        <el-checkbox v-model="filters.px" @change="search">按序号排序</el-checkbox>
-      </div>
-      <div class="cat-row">
-        <el-button v-for="c in dicts.categories" :key="c" size="small"
-          :type="filters.jhlb === c ? 'primary' : 'default'" plain
-          @click="filters.jhlb = c; search()">{{ catLabel(c) }}</el-button>
-      </div>
-      <el-form inline class="filter-form">
-        <el-form-item label="关键字">
-          <el-input v-model="filters.mohu" clearable style="width: 190px" @keyup.enter="search" />
-        </el-form-item>
-        <el-form-item label="年度">
-          <el-select v-model="filters.nd" style="width: 100px" @change="search">
+      <!-- 第 2 行：查询条件 -->
+      <div class="bar">
+        <div class="grp">
+          <el-input v-model="filters.mohu" size="small" clearable placeholder="计划模糊查询" class="w-kw"
+            @keyup.enter="search" @clear="search" />
+          <el-button size="small" @click="search">查询</el-button>
+          <el-button size="small" @click="resetFilters">重置</el-button>
+        </div>
+        <span class="sep" />
+        <div class="field">
+          <span class="lbl">年度</span>
+          <el-select v-model="filters.nd" size="small" class="w-year" @change="search">
             <el-option v-for="y in dicts.years" :key="y" :label="y" :value="y" />
           </el-select>
-        </el-form-item>
-        <el-form-item label="部门">
-          <el-select v-model="filters.bumenid" clearable filterable style="width: 140px" @change="search">
+        </div>
+        <div class="field">
+          <span class="lbl">部门</span>
+          <el-select v-model="filters.bumenid" size="small" clearable filterable class="w-dept"
+            placeholder="全部" @change="search">
             <el-option v-for="d in dicts.departments" :key="d.id" :label="d.name" :value="d.id" />
           </el-select>
-        </el-form-item>
-        <el-form-item label="专管员">
-          <el-select v-model="filters.zgy" clearable filterable style="width: 130px" @change="search">
+        </div>
+        <div class="field">
+          <span class="lbl">专管员</span>
+          <el-select v-model="filters.zgy" size="small" clearable filterable class="w-zgy"
+            placeholder="全部" @change="search">
             <el-option v-for="z in dicts.zgys" :key="z" :label="z" :value="z" />
           </el-select>
-        </el-form-item>
-        <el-form-item label="主办">
-          <el-select v-model="filters.zb" clearable filterable style="width: 150px" @change="search">
+        </div>
+        <div class="field">
+          <span class="lbl">主办</span>
+          <el-select v-model="filters.zb" size="small" clearable filterable class="w-zb"
+            placeholder="全部" @change="search">
             <el-option v-for="d in dicts.hosts" :key="d.id" :label="d.name" :value="d.id" />
           </el-select>
-        </el-form-item>
-        <el-form-item>
-          <el-button @click="resetFilters">重置</el-button>
-        </el-form-item>
-      </el-form>
+        </div>
+      </div>
+      <!-- 第 3 行：状态 / 计划类别 快捷筛选 -->
+      <div class="bar">
+        <div class="field">
+          <span class="lbl">状态</span>
+          <div class="tags">
+            <el-button size="small" :type="filters.zt === '' ? 'primary' : 'default'"
+              :plain="filters.zt !== ''" @click="filters.zt = ''; search()">不限</el-button>
+            <el-button v-for="s in dicts.statuses" :key="s.value" size="small"
+              :type="filters.zt === s.value ? s.type : 'default'" :plain="filters.zt !== s.value"
+              @click="switchStatus(s.value)">{{ s.label }}</el-button>
+          </div>
+        </div>
+        <span class="sep" />
+        <div class="field">
+          <span class="lbl">类别</span>
+          <div class="tags">
+            <el-button v-for="c in dicts.categories" :key="c" size="small"
+              :type="filters.jhlb === c ? 'primary' : 'default'" :plain="filters.jhlb !== c"
+              @click="filters.jhlb = c; search()">{{ catLabel(c) }}</el-button>
+          </div>
+        </div>
+      </div>
     </el-card>
 
-    <div class="toolbar">
-      <el-button size="small" type="primary" @click="openAdd">添加计划</el-button>
+    <div class="toolbar summary-toolbar">
+      <el-button size="small" type="primary" plain @click="openAdd">添加计划</el-button>
       <el-button size="small" @click="openEdit(null)">编辑</el-button>
-      <el-button size="small" type="success" @click="doApprove">通过计划</el-button>
-      <el-button size="small" type="danger" plain @click="doReturnBumen">回退营业所</el-button>
+      <el-button size="small" type="success" plain @click="doApprove">通过计划</el-button>
+      <el-button size="small" type="warning" plain @click="doReturnBumen">回退营业所</el-button>
       <el-button size="small" type="warning" plain @click="doReturnZgy">回退专管员</el-button>
       <el-button size="small" @click="doRevert">收回通过</el-button>
-      <el-button size="small" type="danger" @click="doDelete">删除</el-button>
-      <el-button size="small" @click="openBatchZb">更改主办</el-button>
-      <el-button size="small" @click="openBatchJhlb">更改计划类别</el-button>
-      <el-button size="small" @click="openBatchXlb">批量改小类</el-button>
-      <el-button size="small" @click="openRenumber">编序号</el-button>
-      <el-button v-if="dicts.perms.admin" size="small" @click="openCopy">复制到正式计划</el-button>
-      <span class="hint">共 {{ total }} 条 · 双击行编辑</span>
-    </div>
-    <div class="toolbar">
+      <el-button size="small" type="danger" plain @click="doDelete">删除</el-button>
+      <span class="sep" />
+      <el-dropdown trigger="click" @command="onMoreCmd">
+        <el-button size="small">更多操作 <span class="caret">▾</span></el-button>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item command="zb">更改主办</el-dropdown-item>
+            <el-dropdown-item command="jhlb">更改计划类别</el-dropdown-item>
+            <el-dropdown-item command="xlb">批量改小类</el-dropdown-item>
+            <el-dropdown-item command="renumber">编序号</el-dropdown-item>
+            <el-dropdown-item v-if="dicts.perms.admin" command="copy" divided>复制到正式计划</el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
+      <span class="sep" />
       <el-upload :auto-upload="false" :limit="1" :show-file-list="true" :on-change="onImportChange"
         accept=".xls,.xlsx" class="inline-upload">
         <el-button size="small">选择计划文件</el-button>
       </el-upload>
       <el-button size="small" :loading="uploading" @click="doImport">上传导入</el-button>
       <el-button size="small" @click="downloadSummaryTemplate">下载模板</el-button>
-      <el-button size="small" @click="doExport">导出</el-button>
-      <el-button size="small" @click="doExportPage">导出当前页</el-button>
+      <span class="sep" />
+      <el-dropdown trigger="click" @command="onExportCmd">
+        <el-button size="small">导出 <span class="caret">▾</span></el-button>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item command="all">导出全部</el-dropdown-item>
+            <el-dropdown-item command="page">导出当前页</el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
+      <span class="range-switch" title="导出数据范围：开启后导出包含上一年度计划">
+        <span class="range-label">导出范围</span>
+        <el-switch v-model="exportIncludeLastYear" inline-prompt active-text="含去年" inactive-text="今年" />
+      </span>
     </div>
 
     <el-table v-loading="loading" :data="rows" border stripe size="small" row-key="ID"
-      height="calc(100vh - 420px)" @selection-change="onSelectionChange" @row-dblclick="openEdit">
+      height="calc(100vh - 340px)" @selection-change="onSelectionChange" @row-dblclick="openEdit">
       <el-table-column type="selection" width="42" fixed />
       <el-table-column label="历史" width="60" fixed>
         <template #default="{ row }">
@@ -409,8 +458,8 @@ onMounted(async () => {
       <el-table-column prop="xuhao" label="计划号" width="80" />
       <el-table-column prop="ssbm" label="所属部门" width="110" show-overflow-tooltip />
       <el-table-column prop="leibie" label="小类别" width="80" />
-      <el-table-column prop="daibanname" label="项目名称" min-width="220" show-overflow-tooltip />
-      <el-table-column prop="bz" label="项目说明" min-width="300" show-overflow-tooltip>
+      <el-table-column prop="daibanname" label="项目名称" min-width="220" />
+      <el-table-column prop="bz" label="项目说明" min-width="450">
         <template #default="{ row }"><span class="bz-cell">{{ row.bz }}</span></template>
       </el-table-column>
       <el-table-column label="计划总投资" width="100" align="right">
@@ -456,6 +505,7 @@ onMounted(async () => {
     </div>
 
     <div class="pager">
+      <span class="hint">双击行编辑</span>
       <el-pagination v-model:current-page="page" v-model:page-size="size" :total="total"
         :page-sizes="[30, 400, 1200]" layout="total, sizes, prev, pager, next, jumper"
         @current-change="load" @size-change="search" />
@@ -468,51 +518,59 @@ onMounted(async () => {
       :message="confirmState.message" :sms-label="confirmState.smsLabel"
       :show-comment="confirmState.showComment" :type="confirmState.type" @confirm="onConfirm" />
 
-    <el-dialog v-model="zbDialog" title="更改主办部门" width="380px">
-      <el-select v-model="zbValue" filterable style="width: 100%" placeholder="选择主办部门">
-        <el-option v-for="d in dicts.hosts" :key="d.id" :label="d.name" :value="d.id" />
-      </el-select>
+    <el-dialog v-model="zbDialog" title="更改主办部门" width="380px" class="std-dialog">
+      <el-form>
+        <el-select v-model="zbValue" filterable style="width: 100%" placeholder="选择主办部门">
+          <el-option v-for="d in dicts.hosts" :key="d.id" :label="d.name" :value="d.id" />
+        </el-select>
+      </el-form>
       <template #footer>
         <el-button @click="zbDialog = false">取消</el-button>
         <el-button type="primary" @click="submitBatchZb">确定</el-button>
       </template>
     </el-dialog>
 
-    <el-dialog v-model="jhlbDialog" title="更改计划类别" width="380px">
-      <el-select v-model="jhlbValue" style="width: 100%">
-        <el-option v-for="c in dicts.categories" :key="c" :label="c" :value="c" />
-      </el-select>
+    <el-dialog v-model="jhlbDialog" title="更改计划类别" width="380px" class="std-dialog">
+      <el-form>
+        <el-select v-model="jhlbValue" style="width: 100%">
+          <el-option v-for="c in dicts.categories" :key="c" :label="c" :value="c" />
+        </el-select>
+      </el-form>
       <template #footer>
         <el-button @click="jhlbDialog = false">取消</el-button>
         <el-button type="primary" @click="submitBatchJhlb">确定</el-button>
       </template>
     </el-dialog>
 
-    <el-dialog v-model="xlbDialog" title="批量更改小类别" width="380px">
-      <el-select v-model="xlbValue" style="width: 100%">
-        <el-option v-for="l in dicts.leibie" :key="l" :label="l" :value="l" />
-      </el-select>
+    <el-dialog v-model="xlbDialog" title="批量更改小类别" width="380px" class="std-dialog">
+      <el-form>
+        <el-select v-model="xlbValue" style="width: 100%">
+          <el-option v-for="l in dicts.leibie" :key="l" :label="l" :value="l" />
+        </el-select>
+      </el-form>
       <template #footer>
         <el-button @click="xlbDialog = false">取消</el-button>
         <el-button type="primary" @click="submitBatchXlb">确定</el-button>
       </template>
     </el-dialog>
 
-    <el-dialog v-model="renumberDialog" title="编序号" width="480px">
-      <el-alert type="info" :closable="false" show-icon class="mb10"
-        title="将对当前年度「售水通过」的计划重新编号，是否继续？" />
-      <p class="renumber-tip">
-        售水本部大修理计划共 <b>{{ renumberInfo.count }}</b> 条，
-        {{ renumberInfo.allFilled ? '已全部编号' : '存在未编号记录' }}
-      </p>
-      <el-checkbox v-model="skipBenbu">跳过售水本部大修理计划</el-checkbox>
+    <el-dialog v-model="renumberDialog" title="编序号" width="480px" class="std-dialog">
+      <el-form>
+        <el-alert type="info" :closable="false" show-icon class="mb10"
+          title="将对当前年度「售水通过」的计划重新编号，是否继续？" />
+        <p class="renumber-tip">
+          售水本部大修理计划共 <b>{{ renumberInfo.count }}</b> 条，
+          {{ renumberInfo.allFilled ? '已全部编号' : '存在未编号记录' }}
+        </p>
+        <el-checkbox v-model="skipBenbu">跳过售水本部大修理计划</el-checkbox>
+      </el-form>
       <template #footer>
         <el-button @click="renumberDialog = false">取消</el-button>
         <el-button type="primary" @click="submitRenumber">开始编号</el-button>
       </template>
     </el-dialog>
 
-    <el-dialog v-model="copyDialog" title="复制到正式计划" width="420px">
+    <el-dialog v-model="copyDialog" title="复制到正式计划" width="420px" class="std-dialog">
       <el-form label-width="80px">
         <el-form-item label="年度">
           <el-select v-model="copyForm.nd" style="width: 100%">
@@ -547,19 +605,54 @@ onMounted(async () => {
 <style scoped>
 .plan-page { display: flex; flex-direction: column; gap: 8px; }
 .top-card :deep(.el-card__body) { padding: 10px 14px; }
-.title-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
-.title { font-size: 16px; font-weight: 700; color: #1c1e54; }
-.stats { font-size: 13px; color: #385f8a; }
-.lock-row { display: flex; gap: 12px; align-items: center; }
-.status-row, .cat-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px; }
-.filter-form { margin-top: 8px; }
-.filter-form :deep(.el-form-item) { margin-bottom: 4px; margin-right: 10px; }
-.toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
-.inline-upload { display: inline-block; }
+/* ===== 紧凑三行：标题行 / 查询行 / 状态+类别标签行（与售水计划申报页同一套栅格）
+   统一栅格：控件高 28px、圆角 6px、字号 13px；组内间距 8px、组间距 12px ===== */
+.bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; min-height: 28px; }
+.bar + .bar { margin-top: 8px; }
+.grp { display: flex; align-items: center; gap: 8px; }
+.field { display: flex; align-items: center; gap: 8px; }
+.tags { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.bar :deep(.el-input__wrapper),
+.bar :deep(.el-select__wrapper) { min-height: 28px; box-sizing: border-box; border-radius: 6px; }
+.bar :deep(.el-input__inner),
+.bar :deep(.el-select__wrapper),
+.bar :deep(.el-select__placeholder),
+.bar :deep(.el-select__selected-item),
+.bar :deep(.el-button),
+.toolbar :deep(.el-button) { font-size: 13px; }
+.bar :deep(.el-button),
+.toolbar :deep(.el-button) { height: 28px; min-height: 28px; padding: 0 8px; border-radius: 6px; }
+/* Element 相邻按钮默认 margin-left:12px，会与 flex gap 叠加，统一清零由 gap 控制间距 */
+.grp :deep(.el-button + .el-button),
+.tags :deep(.el-button + .el-button),
+.toolbar :deep(.el-button + .el-button) { margin-left: 0; }
+.title { font-size: 15px; font-weight: 700; color: #1c1e54; white-space: nowrap; }
+.bar .stats { margin-left: auto; }
+.stats { font-size: 13px; color: #385f8a; white-space: nowrap; }
+.lock-row { display: flex; gap: 10px; align-items: center; flex-shrink: 0; height: 28px; }
+/* el-switch 根节点自带 32px 高（药丸 20px 居中，上下是透明留白），
+   直接压高度会挤掉 inline-prompt 文字，改成把外层容器锁 28px 让其自然溢出 */
+.range-switch { height: 28px; }
+.sort-px { height: 28px; }
+.sort-px :deep(.el-checkbox__label) { font-size: 13px; color: #385f8a; }
+.lbl { font-size: 13px; color: #5b6b7f; white-space: nowrap; }
+.sep { width: 1px; height: 16px; background: rgba(164, 180, 201, 0.55); flex-shrink: 0; }
+.w-kw { width: 200px; }
+.w-year { width: 96px; }
+.w-dept { width: 132px; }
+.w-zgy { width: 116px; }
+.w-zb { width: 142px; }
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.toolbar :deep(.el-button--small.is-plain) { --el-button-bg-color: #fff; }
+.caret { font-size: 10px; color: #909399; margin-left: 2px; }
+.inline-upload { display: inline-flex; align-items: center; }
+.range-switch { display: inline-flex; align-items: center; gap: 6px; }
+.range-label { font-size: 13px; color: #5b6b7f; }
 .hint { margin-left: auto; color: #909399; font-size: 12px; }
 .footer-bar { display: flex; flex-wrap: wrap; gap: 16px; padding: 6px 10px; background: #f5f7fa; border-radius: 4px; font-size: 13px; }
-.pager { display: flex; justify-content: flex-end; }
-.bz-cell { display: inline-block; background: rgba(28, 30, 84, 0.06); border: 1px solid rgba(164, 180, 201, 0.35); border-radius: 6px; padding: 2px 6px; text-indent: 1em; line-height: 1.5; }
+.pager { display: flex; justify-content: space-between; align-items: center; }
+.pager .hint { margin-left: 0; }
+.bz-cell { display: inline-block; background: rgba(28, 30, 84, 0.06); border: 1px solid rgba(164, 180, 201, 0.35); border-radius: 6px; padding: 2px 6px; text-indent: 1em; line-height: 1.5; white-space: normal; word-break: break-word; }
 .log-field { font-weight: 600; color: #1c1e54; }
 .log-line { font-size: 13px; margin: 3px 0; }
 .log-line .old { color: #c0392b; text-decoration: line-through; }

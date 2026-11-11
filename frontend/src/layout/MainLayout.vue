@@ -50,6 +50,9 @@ const menuItems = computed(() => {
   if (auth.hasPerm('oiltj:view')) {
     vehicle.push({ path: '/vehicle/oiltj', title: '车辆油量统计' })
   }
+  if (auth.hasPerm('chelfytj:view')) {
+    vehicle.push({ path: '/vehicle/chelfytj', title: '车辆费用明细统计' })
+  }
   if (auth.hasPerm('repair:view')) {
     vehicle.push({ path: '/repair', title: '车辆维修' })
   }
@@ -70,10 +73,7 @@ const menuItems = computed(() => {
   }
   // 加班申请对全员开放:页面内各 Tab 由后端下发的权限标记控制显隐
   items.push({ path: '/overtime', title: '加班申请审批', icon: 'Timer' })
-  // 维抢修加班:独立模块(工单加班台账/工资汇总/附件),与"加班申请审批"互不相干
-  if (auth.hasPerm('jiaban:view')) {
-    items.push({ path: '/jiaban', title: '维抢修加班', icon: 'AlarmClock' })
-  }
+  // 维抢修加班已并入「工单系统」子菜单(见下方 workorder)
   const jcxt = []
   if (auth.hasPerm('jcxt:view')) jcxt.push({ path: '/jcxt', title: '稽查系统' })
   if (auth.hasPerm('spjicha:view')) jcxt.push({ path: '/spjicha', title: '审批稽查' })
@@ -85,6 +85,7 @@ const menuItems = computed(() => {
   // 工单系统:工单信息录入 + 领料 + 材料库,后续工单模块继续挂到这一级菜单下
   const workorder = []
   if (auth.hasPerm('gongdan:view')) workorder.push({ path: '/gongdan', title: '工单信息录入' })
+  if (auth.hasPerm('jiaban:view')) workorder.push({ path: '/jiaban', title: '维抢修加班' })
   if (auth.hasPerm('workorder:view')) workorder.push({ path: '/workorder', title: '工单领料' })
   if (auth.hasPerm('lingliao:view')) workorder.push({ path: '/lingliao', title: '领料申请' })
   if (auth.hasPerm('jiesuandan:view')) workorder.push({ path: '/jiesuandan', title: '领料结算' })
@@ -96,8 +97,8 @@ const menuItems = computed(() => {
   // 年度计划:营业所发起 -> 实施单表 -> 实施汇总 -> 正式计划
   const plan = []
   if (auth.hasPerm('jhyyfaqi:view')) plan.push({ path: '/jhyyfaqi', title: '营业所发起计划' })
-  if (auth.hasPerm('jhssdb:view')) plan.push({ path: '/jhssdb', title: '实施单表' })
-  if (auth.hasPerm('jhsshz:view')) plan.push({ path: '/jhsshz', title: '实施汇总' })
+  if (auth.hasPerm('jhssdb:view')) plan.push({ path: '/jhssdb', title: '售水计划申报' })
+  if (auth.hasPerm('jhsshz:view')) plan.push({ path: '/jhsshz', title: '售水汇总' })
   if (auth.hasPerm('plan:view')) {
     plan.push({ path: '/plan', title: '正式计划' })
     plan.push({ path: '/plan/dashboard', title: '进度看板' })
@@ -109,6 +110,16 @@ const menuItems = computed(() => {
   if (auth.hasPerm('system:user:manage')) system.push({ path: '/system/users', title: '用户管理' })
   if (auth.hasPerm('system:dept:manage')) system.push({ path: '/system/depts', title: '部门管理' })
   if (auth.hasPerm('system:role:manage')) system.push({ path: '/system/roles', title: '角色权限' })
+  // 财务管理:固定资产 / 清理报告 / 物资采购申请(旧系统同属 bb_quanx.bz='财务管理')
+  const finance = []
+  if (auth.hasPerm('gdzc:view')) finance.push({ path: '/gdzc', title: '固定资产' })
+  if (auth.hasPerm('baofeizc:view')) finance.push({ path: '/baofeizc', title: '清理报告' })
+  if (auth.hasPerm('wzcgsq:view')) finance.push({ path: '/wzcgsq', title: '物资采购申请' })
+  if (finance.length === 1) {
+    items.push({ ...finance[0], icon: 'Wallet' })
+  } else if (finance.length > 1) {
+    items.push({ title: '财务管理', icon: 'Wallet', children: finance })
+  }
   if (system.length) {
     items.push({ title: '系统管理', icon: 'Setting', children: system })
   }
@@ -256,6 +267,10 @@ useIdleLogout(() => {
 }
 .menu {
   border-right: none;
+  /* 紧凑:一级项/分组标题 40px(默认 56px),展开子项 34px(默认 50px);
+     用官方变量,line-height/居中/折叠动画会自动跟随,勿写死 height */
+  --el-menu-item-height: 40px;
+  --el-menu-sub-item-height: 34px;
   /* 一级子项 padding-left = 20px + 1 * 40px = 60px;
      父标题带 24px 图标文字约在 49px,子项文字再向右错开,层级更清楚 */
   --el-menu-level-padding: 40px;
@@ -263,7 +278,7 @@ useIdleLogout(() => {
 /* 展开的子菜单:整块换成比父级(#001529)略亮的蓝黑,一眼能分出层级 */
 .menu :deep(.el-menu--inline) {
   background-color: #0b2238;
-  padding: 4px 0;
+  padding: 2px 0;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08),
     inset 0 -1px 0 rgba(0, 0, 0, 0.2);
 }

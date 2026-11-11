@@ -107,7 +107,8 @@ def primary_dept_id(db: Session, user: User) -> Optional[int]:
 def zgy_options(db: Session, *, only_zgy: bool = False) -> list[str]:
     """专管员候选。
 
-    默认:新系统启用用户 + 历史计划里出现过的旧用户名快照。
+    默认:新系统职务为「专管员」的启用用户 + 历史计划里出现过的
+    专管员名快照(不含普通登录账号,避免 admin/测试账号混入)。
     only_zgy=True(营业所发起,照旧 bb_user.zw == "专管员"):只取职务为
     「专管员」的新用户,以及旧 bb_user 联系人目录里职务为「专管员」的人。
     """
@@ -124,7 +125,11 @@ def zgy_options(db: Session, *, only_zgy: bool = False) -> list[str]:
                     names.add(name)
         return sorted(n for n in names if n)
 
-    names = {u.username for u in db.query(User.username).filter(User.is_active == True).all()}  # noqa: E712
+    names = {
+        (u.username or "").strip()
+        for u in db.query(User).filter(User.is_active == True).all()  # noqa: E712
+        if (u.zw or "").strip() == "专管员"
+    }
     for (v,) in db.query(JhSsdb.zhuanguan_name).filter(JhSsdb.zhuanguan_name != "").distinct():
         names.add(v)
     for (v,) in db.query(JhYyfq.zgy_name).filter(JhYyfq.zgy_name != "").distinct():

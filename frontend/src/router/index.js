@@ -20,6 +20,7 @@ import VehicleDaily from '@/views/vehicle/VehicleDaily.vue'
 import OilCardManage from '@/views/vehicle/OilCardManage.vue'
 import PlusOilManage from '@/views/vehicle/PlusOilManage.vue'
 import OilTj from '@/views/vehicle/OilTj.vue'
+import ChelFyTj from '@/views/vehicle/ChelFyTj.vue'
 import RepairManage from '@/views/repair/RepairManage.vue'
 import SimCardManage from '@/views/simcard/SimCardManage.vue'
 import SimFeeManage from '@/views/simfee/SimFeeManage.vue'
@@ -39,6 +40,10 @@ import WorkOrderManage from '@/views/workorder/WorkOrderManage.vue'
 import LingliaoManage from '@/views/lingliao/LingliaoManage.vue'
 import JiesuanDanManage from '@/views/jiesuandan/JiesuanDanManage.vue'
 import JiesuanPrint from '@/views/jiesuandan/JiesuanPrint.vue'
+import GdzcManage from '@/views/finance/GdzcManage.vue'
+import BaofeizcManage from '@/views/finance/BaofeizcManage.vue'
+import WzcgsqManage from '@/views/finance/WzcgsqManage.vue'
+import WzcgsqPrint from '@/views/finance/WzcgsqPrint.vue'
 import JiesuanView from '@/views/jiesuan/JiesuanView.vue'
 import GongdanManage from '@/views/gongdan/GongdanManage.vue'
 import RoadRepairManage from '@/views/roadrepair/RoadRepairManage.vue'
@@ -129,6 +134,11 @@ const router = createRouter({
           path: 'vehicle/oiltj',
           component: OilTj,
           meta: { title: '车辆油量统计', perm: 'oiltj:view' },
+        },
+        {
+          path: 'vehicle/chelfytj',
+          component: ChelFyTj,
+          meta: { title: '车辆费用明细统计', perm: 'chelfytj:view' },
         },
         {
           path: 'repair',
@@ -230,12 +240,12 @@ const router = createRouter({
         {
           path: 'jhssdb',
           component: PlanTodo,
-          meta: { title: '实施单表', perm: 'jhssdb:view' },
+          meta: { title: '售水计划申报', perm: 'jhssdb:view' },
         },
         {
           path: 'jhsshz',
           component: PlanSummary,
-          meta: { title: '实施汇总', perm: 'jhsshz:view' },
+          meta: { title: '售水汇总', perm: 'jhsshz:view' },
         },
         {
           path: 'plan',
@@ -251,6 +261,22 @@ const router = createRouter({
           path: 'jiesuan',
           component: JiesuanView,
           meta: { title: '材料结算单查看', perm: 'jiesuan:view' },
+        },
+        // 财务管理:固定资产 → 清理报告 → 物资采购申请(旧系统三个独立菜单,归到同一分组)
+        {
+          path: 'gdzc',
+          component: GdzcManage,
+          meta: { title: '固定资产', perm: 'gdzc:view' },
+        },
+        {
+          path: 'baofeizc',
+          component: BaofeizcManage,
+          meta: { title: '清理报告', perm: 'baofeizc:view' },
+        },
+        {
+          path: 'wzcgsq',
+          component: WzcgsqManage,
+          meta: { title: '物资采购申请', perm: 'wzcgsq:view' },
         },
         {
           path: 'system/users',
@@ -273,6 +299,7 @@ const router = createRouter({
     { path: '/overtime/print', component: OvertimePrint, meta: { title: '加班审批单' } },
     { path: '/phone/print', component: PhonePrint, meta: { title: '手机签收单' } },
     { path: '/jiesuandan/print', component: JiesuanPrint, meta: { title: '采购申请单/验收单' } },
+    { path: '/wzcgsq/print', component: WzcgsqPrint, meta: { title: '物资采购申请单/验收单' } },
     { path: '/:pathMatch(.*)*', redirect: '/dashboard' },
   ],
 })

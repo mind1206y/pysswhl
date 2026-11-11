@@ -59,6 +59,8 @@ class CelouTb(Base):
     zuobiao_leibie = Column(String(100), comment="坐标类别")
     zuobiao_jingdu = Column(Numeric(18, 10), comment="经度")
     zuobiao_weidu = Column(Numeric(18, 10), comment="纬度")
+    xgusername = Column(String(15), default="", comment="坐标修改人")
+    xgdatetime = Column(DateTime, comment="坐标修改时间")
 
     __table_args__ = (
         Index("ix_celouTb_nian_yue", "nian", "yue"),
@@ -94,6 +96,8 @@ class CelouTb(Base):
             "zuobiao_leibie": _s(self.zuobiao_leibie),
             "zuobiao_jingdu": _f(self.zuobiao_jingdu),
             "zuobiao_weidu": _f(self.zuobiao_weidu),
+            "xgusername": _s(self.xgusername),
+            "xgdatetime": _dt(self.xgdatetime),
             "bmid": self.bmid,
             "bm": _s(self.bm),
         }

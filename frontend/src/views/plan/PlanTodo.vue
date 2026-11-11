@@ -280,54 +280,73 @@ onMounted(async () => {
 <template>
   <div class="plan-page">
     <el-card shadow="never" class="top-card">
-      <div class="title-row">
+      <!-- 第 1 行：标题 / 汇总 / 所有专管员计划 -->
+      <div class="bar">
         <div class="title">{{ filters.nd }}年度售水事业部计划申报明细表</div>
         <div class="stats">总计金额：<b>{{ money(tj) }}</b> 万元　中期调整数：<b>{{ money(tjtz) }}</b> 万元</div>
+        <el-checkbox v-model="allZgy" class="all-zgy" @change="search">所有专管员计划</el-checkbox>
       </div>
-      <div class="status-row">
-        <el-button v-for="s in statusTabs" :key="s.value" size="small"
-          :type="filters.zt === s.value ? s.type : 'default'"
-          :plain="filters.zt !== s.value" @click="switchStatus(s.value)">
-          {{ s.label }}
-        </el-button>
+      <!-- 第 2 行：查询条件 -->
+      <div class="bar">
+        <div class="grp">
+          <el-input v-model="filters.mohu" size="small" clearable placeholder="计划模糊查询" class="w-kw"
+            @keyup.enter="search" @clear="search" />
+          <el-button size="small" @click="search">查询</el-button>
+          <el-button size="small" @click="resetFilters">重置</el-button>
+        </div>
         <span class="sep" />
-        <el-checkbox v-model="allZgy" @change="search">所有专管员计划</el-checkbox>
-      </div>
-      <div class="cat-row">
-        <el-button v-for="c in dicts.categories" :key="c" size="small"
-          :type="filters.jhlb === c ? 'primary' : 'default'" plain
-          @click="filters.jhlb = filters.jhlb === c ? '' : c; search()">
-          {{ catLabel(c) }}
-        </el-button>
-      </div>
-      <el-form inline class="filter-form">
-        <el-form-item label="关键字">
-          <el-input v-model="filters.mohu" clearable style="width: 190px" @keyup.enter="search" />
-        </el-form-item>
-        <el-form-item label="年度">
-          <el-select v-model="filters.nd" style="width: 100px" @change="search">
+        <div class="field">
+          <span class="lbl">年度</span>
+          <el-select v-model="filters.nd" size="small" class="w-year" @change="search">
             <el-option v-for="y in dicts.years" :key="y" :label="y" :value="y" />
           </el-select>
-        </el-form-item>
-        <el-form-item label="部门">
-          <el-select v-model="filters.bumenid" clearable filterable style="width: 140px" @change="search">
+        </div>
+        <div class="field">
+          <span class="lbl">部门</span>
+          <el-select v-model="filters.bumenid" size="small" clearable filterable class="w-dept"
+            placeholder="全部" @change="search">
             <el-option v-for="d in dicts.departments" :key="d.id" :label="d.name" :value="d.id" />
           </el-select>
-        </el-form-item>
-        <el-form-item label="主办">
-          <el-select v-model="filters.zb" clearable filterable style="width: 150px" @change="search">
+        </div>
+        <div class="field">
+          <span class="lbl">主办</span>
+          <el-select v-model="filters.zb" size="small" clearable filterable class="w-zb"
+            placeholder="全部" @change="search">
             <el-option v-for="d in dicts.hosts" :key="d.id" :label="d.name" :value="d.id" />
           </el-select>
-        </el-form-item>
-        <el-form-item label="专管员">
-          <el-select v-model="filters.zgy" clearable filterable style="width: 130px" @change="search">
+        </div>
+        <div class="field">
+          <span class="lbl">专管员</span>
+          <el-select v-model="filters.zgy" size="small" clearable filterable class="w-zgy"
+            placeholder="全部" @change="search">
             <el-option v-for="z in dicts.zgys" :key="z" :label="z" :value="z" />
           </el-select>
-        </el-form-item>
-        <el-form-item>
-          <el-button @click="resetFilters">重置</el-button>
-        </el-form-item>
-      </el-form>
+        </div>
+      </div>
+      <!-- 第 3 行：状态 / 计划类别 快捷筛选 -->
+      <div class="bar">
+        <div class="field">
+          <span class="lbl">状态</span>
+          <div class="tags">
+            <el-button v-for="s in statusTabs" :key="s.value" size="small"
+              :type="filters.zt === s.value ? s.type : 'default'"
+              :plain="filters.zt !== s.value" @click="switchStatus(s.value)">
+              {{ s.label }}
+            </el-button>
+          </div>
+        </div>
+        <span class="sep" />
+        <div class="field">
+          <span class="lbl">类别</span>
+          <div class="tags">
+            <el-button v-for="c in dicts.categories" :key="c" size="small"
+              :type="filters.jhlb === c ? 'primary' : 'default'" :plain="filters.jhlb !== c"
+              @click="filters.jhlb = filters.jhlb === c ? '' : c; search()">
+              {{ catLabel(c) }}
+            </el-button>
+          </div>
+        </div>
+      </div>
     </el-card>
 
     <div class="toolbar">
@@ -345,7 +364,7 @@ onMounted(async () => {
     </div>
 
     <el-table v-loading="loading" :data="rows" border stripe size="small" row-key="ID"
-      height="calc(100vh - 360px)" @selection-change="onSelectionChange" @row-dblclick="openEdit">
+      height="calc(100vh - 320px)" @selection-change="onSelectionChange" @row-dblclick="openEdit">
       <el-table-column type="selection" width="42" fixed />
       <el-table-column label="历史" width="60" fixed>
         <template #default="{ row }">
@@ -355,8 +374,8 @@ onMounted(async () => {
       <el-table-column prop="xuhao" label="计划号" width="80" />
       <el-table-column prop="leibie" label="小类别" width="80" />
       <el-table-column prop="ssbm" label="所属部门" width="110" show-overflow-tooltip />
-      <el-table-column prop="daibanname" label="项目名称" min-width="220" show-overflow-tooltip />
-      <el-table-column prop="bz" label="项目说明" min-width="300" show-overflow-tooltip>
+      <el-table-column prop="daibanname" label="项目名称" min-width="220" />
+      <el-table-column prop="bz" label="项目说明" min-width="450">
         <template #default="{ row }"><span class="bz-cell">{{ row.bz }}</span></template>
       </el-table-column>
       <el-table-column label="计划总投资" width="100" align="right">
@@ -467,17 +486,43 @@ onMounted(async () => {
 <style scoped>
 .plan-page { display: flex; flex-direction: column; gap: 8px; }
 .top-card :deep(.el-card__body) { padding: 10px 14px; }
-.title-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
-.title { font-size: 16px; font-weight: 700; color: #1c1e54; }
-.stats { font-size: 13px; color: #385f8a; }
-.status-row, .cat-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px; }
-.sep { width: 1px; height: 18px; background: #dcdfe6; margin: 0 6px; }
-.filter-form { margin-top: 8px; }
-.filter-form :deep(.el-form-item) { margin-bottom: 4px; margin-right: 10px; }
-.toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+/* ===== 紧凑三行：标题行 / 查询行 / 状态+类别标签行（参考旧系统 jhssdb 的 north 区）
+   统一栅格：控件高 28px、圆角 6px、字号 13px；组内间距 8px、组间距 12px ===== */
+.bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; min-height: 28px; }
+.bar + .bar { margin-top: 8px; }
+.grp { display: flex; align-items: center; gap: 8px; }
+.field { display: flex; align-items: center; gap: 8px; }
+.tags { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.bar :deep(.el-input__wrapper),
+.bar :deep(.el-select__wrapper) { min-height: 28px; box-sizing: border-box; border-radius: 6px; }
+.bar :deep(.el-input__inner),
+.bar :deep(.el-select__wrapper),
+.bar :deep(.el-select__placeholder),
+.bar :deep(.el-select__selected-item),
+.bar :deep(.el-button),
+.toolbar :deep(.el-button) { font-size: 13px; }
+.bar :deep(.el-button),
+.toolbar :deep(.el-button) { height: 28px; min-height: 28px; padding: 0 10px; border-radius: 6px; }
+/* Element 相邻按钮默认 margin-left:12px，会与 flex gap 叠加，统一清零由 gap 控制间距 */
+.grp :deep(.el-button + .el-button),
+.tags :deep(.el-button + .el-button),
+.toolbar :deep(.el-button + .el-button) { margin-left: 0; }
+.title { font-size: 15px; font-weight: 700; color: #1c1e54; white-space: nowrap; }
+.bar .stats { margin-left: auto; }
+.stats { font-size: 13px; color: #385f8a; white-space: nowrap; }
+.all-zgy { flex-shrink: 0; height: 28px; margin-right: 0; }
+.all-zgy :deep(.el-checkbox__label) { font-size: 13px; color: #385f8a; }
+.lbl { font-size: 13px; color: #5b6b7f; white-space: nowrap; }
+.sep { width: 1px; height: 16px; background: rgba(164, 180, 201, 0.55); flex-shrink: 0; }
+.w-kw { width: 200px; }
+.w-year { width: 96px; }
+.w-dept { width: 132px; }
+.w-zb { width: 142px; }
+.w-zgy { width: 116px; }
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .hint { margin-left: auto; color: #909399; font-size: 12px; }
 .pager { display: flex; justify-content: flex-end; }
-.bz-cell { display: inline-block; background: rgba(28, 30, 84, 0.06); border: 1px solid rgba(164, 180, 201, 0.35); border-radius: 6px; padding: 2px 6px; text-indent: 1em; line-height: 1.5; }
+.bz-cell { display: inline-block; background: rgba(28, 30, 84, 0.06); border: 1px solid rgba(164, 180, 201, 0.35); border-radius: 6px; padding: 2px 6px; text-indent: 1em; line-height: 1.5; white-space: normal; word-break: break-word; }
 .log-field { font-weight: 600; color: #1c1e54; }
 .log-line { font-size: 13px; margin: 3px 0; }
 .log-line .old { color: #c0392b; text-decoration: line-through; }

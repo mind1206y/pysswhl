@@ -306,12 +306,18 @@ def main():
         ws = load_workbook(io.BytesIO(r.content)).active
         check("申请单标题含申请部门", "物资采购申请单" in str(ws["A1"].value)
               and ws["A4"].value == "序号")
+        check("申请单底部三栏签字 审批/审核/申请人",
+              ws["A7"].value == "审批：" and ws["C7"].value == "审核："
+              and ws["F7"].value == "申请人：",
+              str([ws.cell(row=7, column=c).value for c in range(1, 9)]))
         r = client.get(f"/api/jiesuandan/orders/{order_id}/cg-excel", headers=h,
                        params={"type": 2, "sgbm": "测试部门"})
         check("下载验收单 200", r.status_code == 200, r.text[:200])
         ws = load_workbook(io.BytesIO(r.content)).active
         check("验收单表头含验收情况", "物资采购验收单" in str(ws["A1"].value)
               and ws["H3"].value == "验收情况")
+        check("验收单明细验收情况=完成", ws["H4"].value == "完成",
+              str(ws["H4"].value))
         r = client.get(f"/api/jiesuandan/orders/{order_id}/print-data", headers=h,
                        params={"sgbm": "测试部门", "sgyy": "测试原因"})
         check("打印数据 200 且有明细", r.status_code == 200

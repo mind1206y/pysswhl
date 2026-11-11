@@ -188,70 +188,83 @@ onMounted(async () => {
 <template>
   <div class="plan-page">
     <el-card shadow="never" class="top-card">
-      <div class="title-row">
+      <!-- 第 1 行：标题 / 汇总 / 提交状态 / 视图切换 -->
+      <div class="bar">
         <div class="title">
           {{ filters.nd }}年度{{ dicts.perms.summary ? (filters.bmid ? dicts.all_departments.find(d => d.id === filters.bmid)?.name : '全部部门') : (dicts.departments[0]?.name || '') }}计划申报明细表
           <span v-if="mode === 'water'" class="water-tag">售水填报记录（只读）</span>
         </div>
         <div class="stats">总计金额：<b>{{ money(tj) }}</b> 万元　中期调整数：<b>{{ money(tjtz) }}</b> 万元</div>
-        <el-tag :type="dicts.locked ? 'danger' : 'success'" size="small">
+        <el-tag :type="dicts.locked ? 'danger' : 'success'" size="small" class="lock-tag">
           {{ dicts.locked ? '售水计划提交已锁定' : '现可提交计划' }}
         </el-tag>
-      </div>
-      <div class="mode-row">
-        <el-radio-group v-model="mode" @change="switchMode">
+        <el-radio-group v-model="mode" size="small" class="mode-switch" @change="switchMode">
           <el-radio-button label="unreported">未报售水计划</el-radio-button>
           <el-radio-button label="reported">已报售水计划</el-radio-button>
           <el-radio-button label="water">售水填报记录</el-radio-button>
         </el-radio-group>
       </div>
-      <div class="cat-row">
-        <el-button v-for="c in dicts.categories" :key="c" size="small"
-          :type="filters.jhlb === c ? 'primary' : 'default'" plain
-          @click="filters.jhlb = c; search()">{{ c }}</el-button>
-      </div>
-      <el-form inline class="filter-form">
-        <el-form-item label="关键字">
-          <el-input v-model="filters.mohu" clearable style="width: 200px" @keyup.enter="search" />
-        </el-form-item>
-        <el-form-item label="年度">
-          <el-select v-model="filters.nd" style="width: 100px" @change="search">
+      <!-- 第 2 行：查询条件 -->
+      <div class="bar">
+        <div class="grp">
+          <el-input v-model="filters.mohu" size="small" clearable placeholder="计划模糊查询" class="w-kw"
+            @keyup.enter="search" @clear="search" />
+          <el-button size="small" @click="search">查询</el-button>
+          <el-button size="small" @click="resetFilters">重置</el-button>
+        </div>
+        <span class="sep" />
+        <div class="field">
+          <span class="lbl">年度</span>
+          <el-select v-model="filters.nd" size="small" class="w-year" @change="search">
             <el-option v-for="y in dicts.years" :key="y" :label="y" :value="y" />
           </el-select>
-        </el-form-item>
-        <el-form-item v-if="dicts.perms.summary" label="部门">
-          <el-select v-model="filters.bmid" clearable filterable style="width: 160px" @change="search">
+        </div>
+        <div v-if="dicts.perms.summary" class="field">
+          <span class="lbl">部门</span>
+          <el-select v-model="filters.bmid" size="small" clearable filterable class="w-dept"
+            placeholder="全部部门" @change="search">
             <el-option v-for="d in dicts.all_departments" :key="d.id" :label="d.name" :value="d.id" />
           </el-select>
-        </el-form-item>
-        <el-form-item>
-          <el-button @click="resetFilters">重置</el-button>
-        </el-form-item>
-      </el-form>
+        </div>
+      </div>
+      <!-- 第 3 行：计划类别快捷筛选 -->
+      <div class="bar">
+        <div class="field">
+          <span class="lbl">类别</span>
+          <div class="tags">
+            <el-button v-for="c in dicts.categories" :key="c" size="small"
+              :type="filters.jhlb === c ? 'primary' : 'default'" :plain="filters.jhlb !== c"
+              @click="filters.jhlb = c; search()">{{ c }}</el-button>
+          </div>
+        </div>
+      </div>
     </el-card>
 
     <div class="toolbar">
       <template v-if="mode !== 'water' && !dicts.perms.readonly">
-        <el-button size="small" type="primary" @click="openAdd">添加计划</el-button>
-        <el-button size="small" @click="openEdit(null)">编辑</el-button>
-        <el-button size="small" type="danger" @click="doDelete">删除</el-button>
-        <el-button size="small" type="success" :disabled="dicts.locked" @click="doSubmit">提交售水</el-button>
-        <el-button size="small" @click="clearSelection">取消所有勾选</el-button>
-      </template>
-      <template v-if="mode !== 'water' && !dicts.perms.readonly">
-        <el-upload :auto-upload="false" :limit="1" :on-change="onImportChange" accept=".xls,.xlsx"
-          class="inline-upload">
-          <el-button size="small">选择更新改造计划</el-button>
-        </el-upload>
-        <el-button size="small" :loading="uploading" @click="doImport">上传导入</el-button>
-        <el-button size="small" @click="downloadApplyTemplate">下载模板</el-button>
+        <div class="grp">
+          <el-button size="small" type="primary" plain @click="openAdd">添加计划</el-button>
+          <el-button size="small" @click="openEdit(null)">编辑</el-button>
+          <el-button size="small" type="danger" plain @click="doDelete">删除</el-button>
+          <el-button size="small" type="success" plain :disabled="dicts.locked" @click="doSubmit">提交售水</el-button>
+          <el-button size="small" @click="clearSelection">取消所有勾选</el-button>
+        </div>
+        <span class="sep" />
+        <div class="grp">
+          <el-upload :auto-upload="false" :limit="1" :on-change="onImportChange" accept=".xls,.xlsx"
+            class="inline-upload">
+            <el-button size="small">选择更新改造计划</el-button>
+          </el-upload>
+          <el-button size="small" :loading="uploading" @click="doImport">上传导入</el-button>
+          <el-button size="small" @click="downloadApplyTemplate">下载模板</el-button>
+        </div>
+        <span class="sep" />
       </template>
       <el-button size="small" @click="doExport">{{ mode === 'water' ? '导出填报记录' : '导出计划记录' }}</el-button>
-      <span class="hint">共 {{ total }} 条 · 双击行编辑 · 点击「售水处理」查看明细</span>
     </div>
 
     <el-table v-loading="loading" :data="rows" border stripe size="small" row-key="ID"
-      height="calc(100vh - 370px)" :row-class-name="rowClass"
+      height="calc(100vh - 330px)" :row-class-name="rowClass"
       @selection-change="onSelectionChange" @row-dblclick="(row) => !readonly && openEdit(row)">
       <el-table-column v-if="!dicts.perms.readonly && mode !== 'water'" type="selection" width="42" fixed />
       <el-table-column label="售水处理" width="80" fixed>
@@ -260,8 +273,8 @@ onMounted(async () => {
         </template>
       </el-table-column>
       <el-table-column v-if="mode === 'water'" prop="xuhao" label="计划号" width="80" />
-      <el-table-column prop="faqiname" label="项目名称" min-width="220" show-overflow-tooltip />
-      <el-table-column prop="bz" label="项目说明" min-width="300" show-overflow-tooltip>
+      <el-table-column prop="faqiname" label="项目名称" min-width="220" />
+      <el-table-column prop="bz" label="项目说明" min-width="450">
         <template #default="{ row }"><span class="bz-cell">{{ row.bz }}</span></template>
       </el-table-column>
       <el-table-column label="计划总投资" width="100" align="right">
@@ -305,6 +318,7 @@ onMounted(async () => {
     </el-table>
 
     <div class="pager">
+      <span class="hint">双击行编辑 · 点击「售水处理」查看明细</span>
       <el-pagination v-model:current-page="page" v-model:page-size="size" :total="total"
         :page-sizes="[30, 60, 90]" layout="total, sizes, prev, pager, next, jumper"
         @current-change="load" @size-change="search" />
@@ -312,7 +326,7 @@ onMounted(async () => {
 
     <!-- 添加/编辑 -->
     <el-dialog v-model="formOpen" :title="formEditing ? '编辑计划' : '添加计划'" width="900px"
-      :close-on-click-modal="false">
+      :close-on-click-modal="false" class="std-dialog">
       <el-form label-width="110px">
         <div class="form-grid">
           <el-form-item label="计划类别" class="span2">
@@ -338,7 +352,7 @@ onMounted(async () => {
           <el-form-item label="计划总投资(万)">
             <el-input-number v-model="form.jine" :precision="2" :min="0" style="width: 100%" />
           </el-form-item>
-          <el-form-item v-if="isGxgz" label="本年计划投资(万)">
+          <el-form-item v-if="isGxgz" label="本年投资(万)">
             <el-input-number v-model="form.zongtouzi" :precision="2" :min="0" style="width: 100%" />
           </el-form-item>
           <el-form-item v-if="isGxgz" label="开工年月">
@@ -363,7 +377,7 @@ onMounted(async () => {
             <el-input v-model="form.pizhu" disabled />
           </el-form-item>
           <el-form-item label="项目说明" class="span2">
-            <el-input v-model="form.bz" type="textarea" :rows="4" />
+            <el-input v-model="form.bz" type="textarea" :rows="8" />
           </el-form-item>
         </div>
       </el-form>
@@ -434,19 +448,50 @@ onMounted(async () => {
 <style scoped>
 .plan-page { display: flex; flex-direction: column; gap: 8px; }
 .top-card :deep(.el-card__body) { padding: 10px 14px; }
-.title-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
-.title { font-size: 16px; font-weight: 700; color: #1c1e54; }
+/* ===== 紧凑三行：标题行 / 查询行 / 类别标签行（与 PlanTodo、PlanSummary 同一套栅格）
+   统一栅格：控件高 28px、圆角 6px、字号 13px；组内间距 8px、组间距 12px ===== */
+.bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; min-height: 28px; }
+.bar + .bar { margin-top: 8px; }
+.grp { display: flex; align-items: center; gap: 8px; }
+.field { display: flex; align-items: center; gap: 8px; }
+.tags { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.bar :deep(.el-input__wrapper),
+.bar :deep(.el-select__wrapper) { min-height: 28px; box-sizing: border-box; border-radius: 6px; }
+.bar :deep(.el-input__inner),
+.bar :deep(.el-select__wrapper),
+.bar :deep(.el-select__placeholder),
+.bar :deep(.el-select__selected-item),
+.bar :deep(.el-button),
+.toolbar :deep(.el-button) { font-size: 13px; }
+.bar :deep(.el-button),
+.toolbar :deep(.el-button) { height: 28px; min-height: 28px; padding: 0 10px; border-radius: 6px; }
+/* Element 相邻按钮默认 margin-left:12px，会与 flex gap 叠加，统一清零由 gap 控制间距 */
+.grp :deep(.el-button + .el-button),
+.tags :deep(.el-button + .el-button),
+.toolbar :deep(.el-button + .el-button) { margin-left: 0; }
+.title { font-size: 15px; font-weight: 700; color: #1c1e54; }
 .water-tag { margin-left: 8px; font-size: 12px; color: #1e7e34; font-weight: 500; }
-.stats { font-size: 13px; color: #385f8a; }
-.mode-row { margin-top: 8px; }
-.cat-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-.filter-form { margin-top: 8px; }
-.filter-form :deep(.el-form-item) { margin-bottom: 4px; margin-right: 10px; }
-.toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
-.inline-upload { display: inline-block; }
-.hint { margin-left: auto; color: #909399; font-size: 12px; }
-.pager { display: flex; justify-content: flex-end; }
-.bz-cell { display: inline-block; background: rgba(28, 30, 84, 0.06); border: 1px solid rgba(164, 180, 201, 0.35); border-radius: 6px; padding: 2px 6px; text-indent: 1em; line-height: 1.5; }
+.bar .stats { margin-left: auto; }
+.stats { font-size: 13px; color: #385f8a; white-space: nowrap; }
+.lock-tag { flex-shrink: 0; height: 22px; }
+/* el-radio-button 默认 32px 高、4px 圆角，压到 28px 并改成 6px 与控件行齐 */
+.mode-switch { flex-shrink: 0; }
+.mode-switch :deep(.el-radio-button__inner) {
+  height: 28px; display: inline-flex; align-items: center; padding: 0 12px;
+  font-size: 13px; border-radius: 0; box-shadow: none;
+}
+.mode-switch :deep(.el-radio-button:first-child .el-radio-button__inner) { border-radius: 6px 0 0 6px; }
+.mode-switch :deep(.el-radio-button:last-child .el-radio-button__inner) { border-radius: 0 6px 6px 0; }
+.lbl { font-size: 13px; color: #5b6b7f; white-space: nowrap; }
+.sep { width: 1px; height: 16px; background: rgba(164, 180, 201, 0.55); flex-shrink: 0; }
+.w-kw { width: 200px; }
+.w-year { width: 96px; }
+.w-dept { width: 150px; }
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.inline-upload { display: inline-flex; align-items: center; }
+.pager { display: flex; justify-content: space-between; align-items: center; }
+.hint { color: #909399; font-size: 12px; }
+.bz-cell { display: inline-block; background: rgba(28, 30, 84, 0.06); border: 1px solid rgba(164, 180, 201, 0.35); border-radius: 6px; padding: 2px 6px; text-indent: 1em; line-height: 1.5; white-space: normal; word-break: break-word; }
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 18px; }
 .span2 { grid-column: span 2; }
 .detail-card { background: #f8f9fc; border-radius: 8px; padding: 12px; }

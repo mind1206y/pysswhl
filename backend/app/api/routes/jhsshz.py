@@ -743,18 +743,22 @@ def export_all(
     zgy: str = "",
     zt: str = "",
     px: bool = False,
+    qunian: bool = False,
     db: Session = Depends(get_db),
     current: User = Depends(require_permission("jhsshz:view")),
 ):
     year = nd or plan_year()
     plans = sort_ssdb_plans(db, _export_rows(db, nd=year, mohu=mohu, jhlb=jhlb, bumenid=bumenid, zb=zb, zgy=zgy, zt=zt))
+    if qunian:
+        # 导出数据范围=含去年：同时导出上一年度同过滤条件的计划
+        plans = plans + sort_ssdb_plans(db, _export_rows(db, nd=year - 1, mohu=mohu, jhlb=jhlb, bumenid=bumenid, zb=zb, zgy=zgy, zt=zt))
     by_cat = {}
     for p in plans:
         lb = p.jhlb if p.jhlb in ("更新改造", "大修理", "科技项目", "长期待摊", "管道工程", "中期更新", "中期大修") else "更新改造"
         by_cat.setdefault(lb, []).append(p)
     rows_by_cat = {lb: ssdb_rows(db, items) for lb, items in by_cat.items()}
     data = export_plan_workbook(rows_by_cat, year)
-    fname = f"{year}年度售水事业部更新改造、大修理、科技项目计划.xlsx"
+    fname = f"{year}年度售水事业部更新改造、大修理、科技项目计划（含去年）.xlsx" if qunian else f"{year}年度售水事业部更新改造、大修理、科技项目计划.xlsx"
     return Response(
         content=data,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

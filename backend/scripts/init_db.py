@@ -12,6 +12,9 @@ from app.core.security import hash_password, verify_password
 from app.db.session import Base, SessionLocal, engine
 from app.models.celou import CelouTb, CLdui  # noqa: F401  测漏成果
 from app.models.contract import HtAdd, HtTp, HtZbSupplier  # noqa: F401  合同登记/归集
+from app.models.finance import (  # noqa: F401  财务管理(固定资产/清理报告/物资采购申请 7 表)
+    Wzcgsq, WzcgsqMx, ZcBaofeidan, ZcBaofeitp, ZcCw, ZcLb, ZcNd,
+)
 from app.models.gongdan import (  # noqa: F401  工单信息录入(热线工单镜像 + 2 张字典表)
     Gongdan, GongdanCaizhiDict, GongdanNeirongDict,
 )
@@ -99,6 +102,8 @@ DEFAULT_PERMISSIONS = [
     ("oilcard:manage", "油卡管理", "车辆业务"),
     ("plusoil:view", "加油明细查看", "车辆业务"),
     ("oiltj:view", "油量统计查看", "车辆业务"),
+    # 车辆费用明细统计:旧系统仅菜单控制访问,只读报表,单个 view 码
+    ("chelfytj:view", "车辆费用统计查看", "车辆业务"),
     ("repair:view", "车辆维修查看", "车辆业务"),
     ("repair:manage", "车辆维修管理", "车辆业务"),
     ("repair:audit", "车辆维修审批", "车辆业务"),
@@ -164,6 +169,10 @@ DEFAULT_PERMISSIONS = [
     ("jhyyfaqi:view", "营业所发起查看", "年度计划"),
     ("jhyyfaqi:manage", "营业所发起管理", "年度计划"),
     ("jhyyfaqi:summary", "营业所发起计划汇总", "年度计划"),
+    # 财务管理:旧系统三个模块都只有菜单级权限,各用一个 view 码覆盖查询/增删改/导入导出
+    ("gdzc:view", "固定资产查看", "财务管理"),
+    ("baofeizc:view", "清理报告查看", "财务管理"),
+    ("wzcgsq:view", "物资采购申请查看", "财务管理"),
 ]
 
 
@@ -318,6 +327,24 @@ def ensure_columns():
                     "COMMENT '所属分类,角色权限页面按此分组展示'"
                 ))
             print("已补列 permissions.category")
+
+    # 测漏成果:坐标内联编辑后记录修改人/时间
+    if "celouTb" in inspect(engine).get_table_names():
+        celou_cols = {c["name"] for c in inspect(engine).get_columns("celouTb")}
+        if "xgusername" not in celou_cols:
+            with engine.begin() as conn:
+                conn.execute(text(
+                    "ALTER TABLE celouTb ADD COLUMN xgusername VARCHAR(15) NOT NULL DEFAULT '' "
+                    "COMMENT '坐标修改人'"
+                ))
+            print("已补列 celouTb.xgusername")
+        if "xgdatetime" not in celou_cols:
+            with engine.begin() as conn:
+                conn.execute(text(
+                    "ALTER TABLE celouTb ADD COLUMN xgdatetime DATETIME NULL "
+                    "COMMENT '坐标修改时间'"
+                ))
+            print("已补列 celouTb.xgdatetime")
 
 
 def flag_initial_password_users():

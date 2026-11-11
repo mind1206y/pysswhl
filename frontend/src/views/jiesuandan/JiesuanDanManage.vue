@@ -768,9 +768,9 @@ async function doExportDetail(row) {
   padding: 6px 8px; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column;
 }
 .jsd-detail-wrap { flex: 1 1 auto; min-height: 0; overflow: hidden; }
-.jsd-page :deep(.el-table--small .el-table__cell) { padding: 2px 0; }
-.jsd-page :deep(.el-table .cell) { line-height: 20px; padding: 0 4px; }
-.jsd-page :deep(.el-table__header-wrapper th) { padding: 3px 0; }
+.jsd-page :deep(.el-table--small .el-table__cell) { padding: 5px 0; }
+.jsd-page :deep(.el-table .cell) { line-height: 26px; padding: 0 4px; }
+.jsd-page :deep(.el-table__header-wrapper th) { padding: 5px 0; }
 .text-muted { color: #909399; }
 .cand-toolbar {
   display: flex; align-items: center; gap: 10px; margin-bottom: 8px;

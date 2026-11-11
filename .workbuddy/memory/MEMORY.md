@@ -1,7 +1,7 @@
 # 项目长期记忆（pysswhl 旧系统迁移）
 
 > 旧库 SQL Server `db_plan` / 新库 MySQL `sswhl_new` / 新系统 FastAPI+Vue3 / 旧源码 `sswhl/`。复刻 = 1:1 还原旧功能 + 旧数据全量迁移。
-> **模块表（15 个已复刻模块的行数/SUM/权限）、踩坑清单、冒烟基线 全在 `memory/MODULES.md` —— 动某个模块前先读它。**
+> **模块表（19 个已复刻模块的行数/SUM/权限）、踩坑清单、冒烟基线 全在 `memory/MODULES.md` —— 动某个模块前先读它。**
 
 ## 一、全局约定
 
@@ -26,7 +26,8 @@
 - ⛔别统一设深 `.el-select__placeholder`：只对 `.is-transparent` 设 placeholder 色，已选值仍 `#1b1d21`。`.gd-dialog` 必须 `padding:0`、header `position:relative`；⛔弹窗不放部门下拉（旧系统无），`bmid` 由后端 `_default_bmid(...,None)` 兜底、编辑不改。加班主色 `#533afd`，工单 `#5645d4`（对齐尺寸/布局而非主色）。Gongdan 日期框缩短 + 74px「时:分」按钮（`el-popover` 84 格、`syncDt` 合成 `yyyy-MM-dd HH:mm:ss`）。
 
 ### 左侧菜单（2026-11-09）
-- `<el-menu>` 已开 `unique-opened`（点一个分组收其它，sub-menu index 用中文分组标题），当前路由父分组仍自动展开。`MainLayout.vue` 用 `:deep()`：`.menu` 上 `--el-menu-level-padding:40px`（子项 padding-left=60px）、`.el-menu--inline` 背景 `#0b2238`（父 `#001529`）+ 4px 上下 padding + inset 细线；子项文字 `#b6bfcb` + 46px 处 5px 圆点，hover 白字+7% 白底，active `rgba(83,58,253,.28)` + inset 3px `#8b7bff` 左竖条。
+- `<el-menu>` 已开 `unique-opened`（点一个分组收其它，sub-menu index 用中文分组标题），当前路由父分组仍自动展开。`MainLayout.vue` 用 `:deep()`：`.menu` 上 `--el-menu-level-padding:40px`（子项 padding-left=60px）、`.el-menu--inline` 背景 `#0b2238`（父 `#001529`）+ 2px 上下 padding + inset 细线；子项文字 `#b6bfcb` + 46px 处 5px 圆点，hover 白字+7% 白底，active `rgba(83,58,253,.28)` + inset 3px `#8b7bff` 左竖条。
+- **紧凑行高（2026-11-11）**：`.menu` 上设官方变量 `--el-menu-item-height:40px`（一级项/分组标题，默认 56）+ `--el-menu-sub-item-height:34px`（展开子项，默认 50）；⛔别写死 `.el-menu-item{height}`，变量会同时带动 line-height、居中与折叠动画。`.logo` 与 `.header` 仍 60px 未动。
 - ⚠️改缩进用 CSS 变量而非覆盖 `padding-left`：Element Plus 用 `calc(20px + var(--el-menu-level)*var(--el-menu-level-padding))` 且优先级高，`--el-menu-level` 由组件 inline style 注入。子菜单 ul 继承根 `--el-menu-bg-color`（默认父子同色）。
 
 ### 地图 / 热力图
@@ -34,4 +35,5 @@
 - 瓦片走 `POST /api/celou/heatmap/tile-token` 签 `celou_tile`(180min) 挂 query，`GET /api/celou/tiles` 校验，缺图返 1×1 透明 PNG；权重照旧 `GetHeatmapData`（漏量/管径 95 分位归一化 + 0.001° 网格 p50~p95 五档）。前端库 `public/vendor/leaflet/`，覆盖样式用 `.celou-heat-map .xxx` 提权。合规：仅内网离线、界面留 `© 高德地图`、⛔不得对外分发；公网须官方 SDK + 自申请 key + 后端代理鉴权。
 
 ## 二、已复刻模块（细节见 `memory/MODULES.md`）
-加班 OvertimeApply、通信费/SIM 卡、车辆维修 chelwx、IP/手机、稽查 jcxt 全套、路面修复 roadrepair、材料库 materialLibrary、工单领料 WorkOrder、油量统计 oiltj、工单录入 Gongdan、维抢修加班 Jiaban、领料结算 jiesuandan、材料结算查看 jiesuan、车辆保险 Baoxian、车辆各类费用 CLfeiyong。
+加班 OvertimeApply、通信费/SIM 卡、车辆维修 chelwx、IP/手机、稽查 jcxt 全套、路面修复 roadrepair、材料库 materialLibrary、工单领料 WorkOrder、油量统计 oiltj、工单录入 Gongdan、维抢修加班 Jiaban、领料结算 jiesuandan、材料结算查看 jiesuan、车辆保险 Baoxian、车辆各类费用 CLfeiyong、车辆费用明细统计 chelfytj、**财务管理三模块（固定资产 gdzc、清理报告 baofeizc、物资采购申请 wzcgsq）**。
+- 财务管理：`models/finance.py`(7 表) + `services/finance_common.py`(部门范围/行组装/短令牌图片) + `services/finance_excel.py`(导入导出) + 3 个路由；菜单分组「财务管理」(icon Wallet)，权限码 `gdzc:view` / `baofeizc:view` / `wzcgsq:view`(分类「财务管理」)。旧库旧 `cj` 层级码由 `finance_scope_ids` 的新部门子树取代并保留集美(10)→杏林(16)特例；`wzcgsq.cj` 前缀过滤靠 `dept_cj_map()` 从 department_map.json 反查。

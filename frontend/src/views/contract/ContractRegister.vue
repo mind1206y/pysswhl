@@ -522,11 +522,12 @@ onMounted(async () => {
       </div>
     </el-card>
 
-    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="1040px" top="5vh" destroy-on-close>
+    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="1040px" top="5vh" destroy-on-close
+      class="std-dialog contract-form-dialog">
       <el-form ref="formRef" :model="form" :rules="rules" label-width="110px">
         <el-tabs v-model="dialogTab">
           <el-tab-pane label="合同登记" name="reg">
-            <el-row :gutter="16">
+            <el-row :gutter="20">
               <el-col :span="12">
                 <el-form-item label="合同年度" prop="niandu">
                   <el-input-number v-model="form.niandu" :min="1900" :max="2100" :disabled="!!editingId" style="width: 100%" />
@@ -615,7 +616,7 @@ onMounted(async () => {
           </el-tab-pane>
 
           <el-tab-pane label="招标信息" name="bid">
-            <el-row :gutter="16">
+            <el-row :gutter="20">
               <el-col :span="10">
                 <el-form-item label="招标方式">
                   <el-select v-model="form.zhaobiaofangshi" clearable placeholder="(未填写)" style="width: 100%">
@@ -746,4 +747,39 @@ onMounted(async () => {
 }
 .attach-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pdf-icon { color: #e5484d; }
+
+/* 合同登记弹窗:多 tab + 供应商表内容较长,让弹窗 body 内部滚动,底栏常驻 */
+.contract-form-dialog :deep(.el-dialog__body) {
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+}
+/* 放宽内边距与行距,避免整体过于紧凑(控件 32px 高度沿用全局规范) */
+.contract-form-dialog :deep(.el-dialog__body > .el-form) {
+  padding: 24px 30px;
+}
+.contract-form-dialog :deep(.el-form-item) {
+  margin-bottom: 24px;
+}
+.contract-form-dialog :deep(.el-form-item__error) {
+  padding-top: 2px;
+}
+.contract-form-dialog :deep(.el-tabs__header) {
+  margin-bottom: 28px;
+}
+.contract-form-dialog :deep(.el-tabs__item) {
+  font-size: 13px;
+  height: 38px;
+  line-height: 38px;
+}
+.contract-form-dialog :deep(.el-textarea__inner) {
+  min-height: 80px;
+}
+.contract-form-dialog :deep(.el-input-number) {
+  width: 100%;
+}
+/* 底栏按钮上下留出呼吸空间,避免贴边 */
+.contract-form-dialog :deep(.el-dialog__footer) {
+  min-height: 64px !important;
+  padding: 12px 16px !important;
+}
 </style>

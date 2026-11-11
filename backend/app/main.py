@@ -4,12 +4,13 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.exc import OperationalError
 
 from app.api.routes import (
-    auth, baoxian, celou, chuxian, clfeiyong, contracts, departments, gongdan, ipadress,
+    auth, baoxian, celou, chelfytj, chuxian, clfeiyong, contracts, departments, gongdan, ipadress,
     jcjl, jcxt, jiesuan, jiesuandan, jiaban, leak, lingliao, material, oilcard, oiltj, overtime,
     overtime_config,
     overtime_flow, phone, plus_oil, project_details, projects, repair, roadrepair, roles,
     simcard, simfee, users, vehicle, vehicle_daily, water_fee, weizhang, workorder, jcdan,
     spjicha, gxdxljihua, jhssdb, jhsshz, jhyyfaqi,
+    gdzc, baofeizc, wzcgsq,
 )
 from app.core.config import settings
 
@@ -63,6 +64,7 @@ app.include_router(chuxian.router, prefix="/api/chuxian", tags=["车辆管理-�
 app.include_router(weizhang.router, prefix="/api/weizhang", tags=["车辆管理-违章信息"])
 app.include_router(clfeiyong.router, prefix="/api/clfeiyong", tags=["车辆管理-各类费用"])
 app.include_router(baoxian.router, prefix="/api/baoxian", tags=["车辆管理-车辆保险"])
+app.include_router(chelfytj.router, prefix="/api/chelfytj", tags=["车辆管理-费用明细统计"])
 app.include_router(oilcard.router, prefix="/api/oilcards", tags=["车辆管理-油卡管理"])
 app.include_router(plus_oil.router, prefix="/api/plusoil", tags=["车辆管理-加油明细"])
 app.include_router(oiltj.router, prefix="/api/oiltj", tags=["车辆管理-油量统计"])
@@ -93,6 +95,9 @@ app.include_router(gxdxljihua.router, prefix="/api/plan", tags=["年度计划-�
 app.include_router(jhssdb.router, prefix="/api/jhssdb", tags=["年度计划-实施单表"])
 app.include_router(jhsshz.router, prefix="/api/jhsshz", tags=["年度计划-实施汇总"])
 app.include_router(jhyyfaqi.router, prefix="/api/jhyyfaqi", tags=["年度计划-营业所发起"])
+app.include_router(gdzc.router, prefix="/api/gdzc", tags=["财务管理-固定资产"])
+app.include_router(baofeizc.router, prefix="/api/baofeizc", tags=["财务管理-清理报告"])
+app.include_router(wzcgsq.router, prefix="/api/wzcgsq", tags=["财务管理-物资采购申请"])
 
 
 @app.get("/api/health")

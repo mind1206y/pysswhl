@@ -969,6 +969,7 @@ onMounted(() => {
       width="820px"
       top="3vh"
       destroy-on-close
+      class="std-dialog leak-form-dialog"
       @closed="onDialogClosed"
     >
       <el-form
@@ -981,7 +982,7 @@ onMounted(() => {
       >
         <el-divider content-position="left">基础信息</el-divider>
         <el-row :gutter="12">
-          <el-col :span="12">
+          <el-col :span="24">
             <el-form-item label="标题" prop="Title">
               <el-input v-model="form.Title" maxlength="200" show-word-limit placeholder="测漏点名称" />
             </el-form-item>
@@ -1218,7 +1219,7 @@ onMounted(() => {
     </el-dialog>
 
     <!-- 系数对照表 -->
-    <el-dialog v-model="coeffDlg" title="压力 - 快速系数对照表" width="420px">
+    <el-dialog v-model="coeffDlg" title="压力 - 快速系数对照表" width="420px" class="std-dialog">
       <el-table :data="coeffRows" size="small" border max-height="460">
         <el-table-column prop="pressure" label="压力 (MPa)" align="center" />
         <el-table-column prop="k" label="系数 K" align="center" />
@@ -1566,5 +1567,11 @@ onMounted(() => {
   font-size: 12px;
   text-align: center;
   word-break: break-all;
+}
+/* 测漏弹窗套 .std-dialog 后,表单内容很长(基础信息/参数/备注/附件),
+   限制 body 高度使其内部滚动,避免整体撑爆视口把底部按钮栏顶掉 */
+.leak-form-dialog :deep(.el-dialog__body) {
+  max-height: calc(100vh - 150px);
+  overflow-y: auto;
 }
 </style>

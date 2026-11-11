@@ -106,9 +106,10 @@ onMounted(async () => {
             </tr>
           </tbody>
         </table>
-        <div class="sign-row">
-          <div class="s1">审核：</div>
-          <div class="s2">申请人：</div>
+        <div class="sign-row sign-three">
+          <div>审批：</div>
+          <div>审核：</div>
+          <div>申请人：</div>
         </div>
       </div>
 
@@ -142,7 +143,7 @@ onMounted(async () => {
               <td>{{ F(m.num) }}</td>
               <td>{{ F(m.danjia) }}</td>
               <td>{{ F(m.jine) }}</td>
-              <td></td>
+              <td>完成</td>
               <td class="left">{{ m.beizhu }}</td>
             </tr>
             <tr class="sum">
@@ -205,6 +206,8 @@ table.doc tr.sum td { font-weight: bold; }
 .sign-row { margin-top: 22px; font-size: 14px; display: flex; }
 .sign-row .s1 { width: 40%; padding-left: 40px; }
 .sign-row .s2 { width: 40%; padding-left: 60px; }
+/* 申请单底部三栏签字：审批 / 审核 / 申请人（验收单仍用两栏 s1/s2） */
+.sign-row.sign-three > div { width: 33.33%; padding-left: 24px; }
 .error { text-align: center; color: #f56c6c; padding: 40px 0; }
 @media print {
   html, body { background: #fff; }

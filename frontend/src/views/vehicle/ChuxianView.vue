@@ -332,11 +332,12 @@ async function openImages(row) {
 .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .toolbar-hint { margin-left: auto; color: #909399; font-size: 12px; }
 .pager { display: flex; justify-content: flex-end; }
-.chehao-wrap { position: relative; display: inline-block; padding-right: 18px; }
+.chehao-wrap { display: inline-flex; align-items: center; gap: 6px; }
 .cx-bubble {
-  position: absolute; top: -6px; right: 0; width: 18px; height: 18px; line-height: 18px;
-  text-align: center; font-size: 12px; color: #000; background: #f5d75e;
-  border-radius: 50%; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  flex: none; min-width: 18px; height: 18px; padding: 0 5px; box-sizing: border-box;
+  font-size: 12px; line-height: 1; color: #000; background: #f5d75e;
+  border-radius: 9px; cursor: pointer;
 }
 .lock-tip { margin-bottom: 12px; }
 .jsr-row { display: flex; align-items: center; gap: 6px; width: 100%; }

@@ -5,7 +5,7 @@
  * - 13 个统计图表 Tab、Excel 导入/导出/模板、工单详情抽屉、年度节约水量公式
  * - 热力图 1:1 复刻旧版:Leaflet + 本地高德离线瓦片、4 套色谱、3 种权重、200m 点击统计
  */
-import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import * as echarts from 'echarts/core'
 import { BarChart, LineChart, PieChart } from 'echarts/charts'
@@ -19,7 +19,7 @@ import {
   batchNonYuding, deleteCelou, downloadCelouTemplate, exportCelou,
   getCelouDicts, getCelouMonths, getChartBar, getChartPie,
   getChartTb, getHeatmapPoints, getHeatmapStats, getHeatmapTileToken,
-  getWorkOrder, listCelou, uploadCelou,
+  getWorkOrder, listCelou, updateCelouCoord, uploadCelou,
 } from '@/api/celou'
 
 echarts.use([
@@ -53,8 +53,10 @@ const COLUMNS = [
   { prop: 'yue', label: '月', width: 58 },
   { prop: 'celoudw', label: '测漏单位', width: 185, tip: true },
   { prop: 'zuobiao_leibie', label: '坐标类别', width: 116 },
-  { prop: 'zuobiao_jingdu', label: '经度', width: 108, align: 'right', fixed6: true },
-  { prop: 'zuobiao_weidu', label: '纬度', width: 108, align: 'right', fixed6: true },
+  { prop: 'zuobiao_jingdu', label: '经度', width: 108, align: 'right', fixed6: true, editable: true },
+  { prop: 'zuobiao_weidu', label: '纬度', width: 108, align: 'right', fixed6: true, editable: true },
+  { prop: 'xgusername', label: '修改人', width: 80, align: 'center' },
+  { prop: 'xgdatetime', label: '修改时间', width: 152 },
 ]
 
 const TABS = [
@@ -102,6 +104,46 @@ const uploadForm = reactive({
   zuobiao_leibie: '高德火星坐标', file: null,
 })
 const uploading = ref(false)
+const fileInput = ref(null)
+
+// 表格内联编辑经纬度
+const COORD_PROPS = ['zuobiao_jingdu', 'zuobiao_weidu']
+const editCell = ref(null)            // { id, prop } 当前正在编辑的单元格
+const editVal = ref('')               // 编辑框临时值
+function isCoordCell(prop) { return COORD_PROPS.includes(prop) }
+function isEditing(row, prop) {
+  return !!editCell.value && editCell.value.id === row.ID && editCell.value.prop === prop
+}
+async function startEdit(row, prop) {
+  editCell.value = { id: row.ID, prop }
+  editVal.value = row[prop] == null ? '' : String(row[prop])
+  await nextTick()
+  const el = document.querySelector('.celou-page .coord-edit input')
+  if (el) { el.focus(); el.select() }
+}
+function cancelEdit() { editCell.value = null }
+async function commitCoord(row, prop) {
+  if (!isEditing(row, prop)) return
+  const raw = (editVal.value ?? '').toString().trim()
+  const num = Number(raw)
+  if (!raw || !isFinite(num)) { cancelEdit(); return }
+  const old = row[prop]
+  row[prop] = num
+  editCell.value = null
+  try {
+    const r = await updateCelouCoord({
+      id: row.ID,
+      jingdu: prop === 'zuobiao_jingdu' ? num : row.zuobiao_jingdu,
+      weidu: prop === 'zuobiao_weidu' ? num : row.zuobiao_weidu,
+    })
+    row.xgusername = r.xgusername
+    row.xgdatetime = r.xgdatetime
+    ElMessage.success('坐标已更新')
+  } catch (e) {
+    row[prop] = old
+    ElMessage.error('坐标更新失败')
+  }
+}
 
 const activeTab = ref('llhb')
 const chartYear = ref('')
@@ -233,6 +275,9 @@ function openUpload() {
     zuobiao_leibie: '高德火星坐标', file: null,
   })
   uploadDlg.value = true
+  // 原生 <input type="file"> 不会随 uploadForm.file=null 而清空自身显示的文件名,
+  // 必须手动把控件 value 置空,否则再次打开弹窗会残留上一次选中的文件
+  nextTick(() => { if (fileInput.value) fileInput.value.value = '' })
 }
 function onFilePick(e) { uploadForm.file = e.target.files?.[0] || null }
 async function doUpload() {
@@ -440,11 +485,14 @@ async function onMapClick(e) {
     })
     heatStats.value = d
     if (!d.count) return
+    const lng = Number(e.latlng.lng).toFixed(6)
+    const lat = Number(e.latlng.lat).toFixed(6)
     const details = (d.details || []).map((x) =>
-      `<li><b>${escapeHtml(x.didian || '无地址')}</b> 漏量 ${Number(x.louliang || 0).toFixed(1)} m³/h，管径 ${escapeHtml(x.guanjing || (x.gjsmall ? x.gjsmall + 'mm' : '未知'))}</li>`,
+      `<li><b>${escapeHtml(x.didian || '无地址')}</b> 漏量 ${Number(x.louliang || 0).toFixed(1)} m³/h，管径 ${escapeHtml(x.guanjing || (x.gjsmall ? x.gjsmall + 'mm' : '未知'))}，经度 ${Number(x.jingdu || 0).toFixed(6)} · 纬度 ${Number(x.weidu || 0).toFixed(6)}</li>`,
     ).join('')
     const html = `<div class="celou-pop">
       <div class="celou-pop-hd"><strong>测漏统计</strong><span>半径 ${d.radius} m</span></div>
+      <div class="celou-pop-coord">点击坐标：经度 <b>${lng}</b> · 纬度 <b>${lat}</b>（GCJ-02）</div>
       工单数量：<b>${d.count}</b><br>总漏量：<b>${Number(d.totalFlow).toFixed(2)}</b> m³/h<br>
       平均管径：<b>${Number(d.avgDiameter).toFixed(0)}</b> mm · 最大管径：<b>${d.maxDiameter}</b> mm
       ${details ? `<div class="celou-pop-dt"><strong>附近工单（最近 ${d.details.length} 条）</strong><ul>${details}</ul></div>` : ''}
@@ -595,7 +643,14 @@ onBeforeUnmount(() => {
           <span v-if="c.prop === 'gongdan'" class="link-like" @click="openWorkOrder(row.gongdan)">{{ row.gongdan }}</span>
           <span v-else-if="c.prop === 'yudingliang'" class="yuding-tag">{{ row.yudingliang ? '预定量' : '' }}</span>
           <span v-else-if="c.prop === 'qjll' || c.prop === 'louliang'">{{ money(row[c.prop]) }}</span>
-          <span v-else-if="c.fixed6">{{ coord(row[c.prop]) }}</span>
+          <el-input v-else-if="canManage && isCoordCell(c.prop) && isEditing(row, c.prop)"
+            v-model="editVal" size="small" class="coord-edit"
+            @keyup.enter="commitCoord(row, c.prop)" @keyup.esc="cancelEdit"
+            @blur="commitCoord(row, c.prop)" />
+          <span v-else-if="c.fixed6"
+            :class="{ 'coord-editable': canManage && isCoordCell(c.prop) }"
+            :title="canManage && isCoordCell(c.prop) ? '双击编辑经纬度' : ''"
+            @dblclick="canManage && isCoordCell(c.prop) && startEdit(row, c.prop)">{{ coord(row[c.prop]) }}</span>
           <span v-else>{{ row[c.prop] }}</span>
         </template>
       </el-table-column>
@@ -638,7 +693,7 @@ onBeforeUnmount(() => {
           </el-select>
         </el-form-item>
         <el-form-item label="Excel 文件">
-          <input type="file" accept=".xls,.xlsx" @change="onFilePick" />
+          <input ref="fileInput" type="file" accept=".xls,.xlsx" @change="onFilePick" />
           <span class="file-name">{{ uploadForm.file?.name || '' }}</span>
         </el-form-item>
       </el-form>
@@ -774,6 +829,11 @@ onBeforeUnmount(() => {
 .toolbar-hint { margin-left: auto; color: #909399; font-size: 12px; }
 .pager { display: flex; justify-content: flex-end; }
 .link-like { color: #b07d1a; text-decoration: underline; cursor: pointer; }
+.coord-editable { cursor: pointer; }
+.coord-editable:hover { text-decoration: underline dotted #409eff; }
+.coord-edit { --el-component-size-small: 24px; }
+.celou-page :deep(.coord-edit) .el-input__wrapper { padding: 0 6px; }
+.celou-page :deep(.coord-edit) { width: 100%; }
 .yuding-tag { color: #d03050; font-weight: 600; }
 .formula-head { cursor: pointer; color: #409eff; }
 .formula-icon { font-size: 12px; }
@@ -867,6 +927,10 @@ onBeforeUnmount(() => {
   border-bottom: 1px solid rgba(0, 200, 255, .45); margin-bottom: 6px; padding-bottom: 4px;
 }
 .celou-pop-hd span { color: #8bc5ff; }
+.celou-pop-coord {
+  margin: 0 0 6px; padding-bottom: 5px; font-size: 11.5px; line-height: 1.6;
+  color: #bfe6ff; border-bottom: 1px solid rgba(0, 200, 255, .18);
+}
 .celou-pop-dt { margin-top: 8px; border-top: 1px solid rgba(0, 200, 255, .2); padding-top: 6px; }
 .celou-pop-dt ul { max-height: 150px; overflow-y: auto; margin: 4px 0 0; padding-left: 16px; font-size: 11px; }
 .celou-pop-ft { margin-top: 6px; font-size: 10px; color: #7aa2f7; }

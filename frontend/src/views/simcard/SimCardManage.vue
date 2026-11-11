@@ -571,6 +571,7 @@ onMounted(init)
       :title="editing ? '编辑通信号码' : '新增通信号码'"
       width="780px"
       destroy-on-close
+      class="std-dialog"
     >
       <el-form ref="formRef" :model="form" :rules="rules" label-width="82px" class="sim-form">
         <el-row :gutter="16">
@@ -696,7 +697,7 @@ onMounted(init)
       </template>
     </el-dialog>
 
-    <el-dialog v-model="feeDialog" title="话费上传" width="460px" destroy-on-close>
+    <el-dialog v-model="feeDialog" title="话费上传" width="460px" destroy-on-close class="std-dialog">
       <el-form ref="feeFormRef" :model="feeForm" :rules="feeRules" label-width="86px">
         <el-form-item label="部门" prop="bmid">
           <el-select v-model="feeForm.bmid" filterable placeholder="请选择部门" class="w-full">
@@ -738,8 +739,9 @@ onMounted(init)
       </template>
     </el-dialog>
 
-    <el-dialog v-model="historyDialog" :title="historyTitle" width="760px">
-      <el-table v-loading="historyLoading" :data="historyRows" border max-height="520">
+    <el-dialog v-model="historyDialog" :title="historyTitle" width="760px" class="std-dialog">
+      <div class="sim-card">
+        <el-table v-loading="historyLoading" :data="historyRows" border max-height="520">
         <el-table-column prop="edit_time_text" label="时间" width="170" />
         <el-table-column prop="edit_user" label="操作人" width="100" />
         <el-table-column prop="field_name" label="字段" width="100" />
@@ -750,16 +752,19 @@ onMounted(init)
             <span class="hist-new">{{ row.new_value || '(空)' }}</span>
           </template>
         </el-table-column>
-      </el-table>
+        </el-table>
+      </div>
     </el-dialog>
 
-    <el-dialog v-model="taocanDialog" title="套餐字典" width="420px">
-      <div class="taocan-list">
+    <el-dialog v-model="taocanDialog" title="套餐字典" width="420px" class="std-dialog">
+      <div class="sim-card">
+        <div class="taocan-list">
         <div v-for="t in dicts.taocan" :key="t" class="taocan-item">
           <span>{{ t }}</span>
           <el-button link type="danger" @click="removeTaocan(t)">删除</el-button>
         </div>
         <el-empty v-if="!dicts.taocan.length" description="暂无套餐" :image-size="70" />
+        </div>
       </div>
     </el-dialog>
 
@@ -855,6 +860,13 @@ onMounted(init)
 }
 .sim-form :deep(.el-form-item) {
   margin-bottom: 14px;
+}
+.sim-card {
+  background: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 14px;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .04), 0 4px 14px rgba(16, 24, 40, .05);
 }
 .w-full {
   width: 100%;
