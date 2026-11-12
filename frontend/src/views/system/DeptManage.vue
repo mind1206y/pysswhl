@@ -23,6 +23,7 @@ onMounted(load)
 // ===== 新增 / 编辑 =====
 const dialog = ref(false)
 const editingId = ref(null)
+const saving = ref(false)
 const formRef = ref()
 const form = reactive({ name: '', parent_id: 0, remark: '', htdaihao: '' })
 const rules = {
@@ -78,15 +79,19 @@ function openEdit(row) {
 }
 
 async function submit() {
-  await formRef.value.validate()
-  if (editingId.value == null) {
-    await createDepartment(form)
-  } else {
-    await updateDepartment(editingId.value, form)
-  }
-  ElMessage.success('保存成功')
-  dialog.value = false
-  load()
+  if (saving.value) return  // 防双击重复提交
+  saving.value = true
+  try {
+    await formRef.value.validate()
+    if (editingId.value == null) {
+      await createDepartment(form)
+    } else {
+      await updateDepartment(editingId.value, form)
+    }
+    ElMessage.success('保存成功')
+    dialog.value = false
+    load()
+  } finally { saving.value = false }
 }
 
 async function remove(row) {

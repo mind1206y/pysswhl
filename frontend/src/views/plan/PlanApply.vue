@@ -113,18 +113,23 @@ async function openEdit(row) {
   formOpen.value = true
 }
 
+const saveFormSaving = ref(false)
 async function saveForm() {
+  if (saveFormSaving.value) return  // 防双击重复提交
   if (!form.zgy) return ElMessage.warning('请选择专管员')
   if (!form.faqiname) return ElMessage.warning('请输入项目名称')
   if (form.jine === null || form.jine === undefined) return ElMessage.warning('请输入计划总投资')
-  const payload = { ...form, niandu: filters.nd }
-  let r
-  if (formEditing.value) r = await updateApply(editId.value, payload)
-  else r = await createApply(payload)
-  if (!r.ok) return ElMessage.warning(r.message)
-  ElMessage.success(r.message || '保存成功')
-  formOpen.value = false
-  load()
+  saveFormSaving.value = true
+  try {
+    const payload = { ...form, niandu: filters.nd }
+    let r
+    if (formEditing.value) r = await updateApply(editId.value, payload)
+    else r = await createApply(payload)
+    if (!r.ok) return ElMessage.warning(r.message)
+    ElMessage.success(r.message || '保存成功')
+    formOpen.value = false
+    load()
+  } finally { saveFormSaving.value = false }
 }
 
 async function doDelete() {
@@ -141,10 +146,15 @@ function doSubmit() {
   if (dicts.locked) return ElMessage.warning('售水计划提交已锁定，现无法提交计划')
   smsConfirmVisible.value = true
 }
+const submitSaving = ref(false)
 async function onConfirmSubmit({ sms }) {
-  const r = await submitApply(selectedIds.value, sms)
-  if (!r.ok) return ElMessage.warning(r.message)
-  ElMessage.success(r.message); load()
+  if (submitSaving.value) return  // 防双击重复提交
+  submitSaving.value = true
+  try {
+    const r = await submitApply(selectedIds.value, sms)
+    if (!r.ok) return ElMessage.warning(r.message)
+    ElMessage.success(r.message); load()
+  } finally { submitSaving.value = false }
 }
 
 // ===== 明细抽屉 =====

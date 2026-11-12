@@ -113,18 +113,23 @@ async function openEdit(row) {
   formOpen.value = true
 }
 
+const saveSaving = ref(false)
 async function onSave(payload, action) {
-  const submit = action === 'submit'
-  let r
-  if (formEditing.value) {
-    r = await updateTodo(editId.value, { ...payload, submit })
-  } else {
-    r = await createTodo({ ...payload, submit })
-  }
-  if (!r.ok) return ElMessage.warning(r.message)
-  ElMessage.success(r.message || '保存成功')
-  formOpen.value = false
-  load()
+  if (saveSaving.value) return  // 防双击重复提交
+  saveSaving.value = true
+  try {
+    const submit = action === 'submit'
+    let r
+    if (formEditing.value) {
+      r = await updateTodo(editId.value, { ...payload, submit })
+    } else {
+      r = await createTodo({ ...payload, submit })
+    }
+    if (!r.ok) return ElMessage.warning(r.message)
+    ElMessage.success(r.message || '保存成功')
+    formOpen.value = false
+    load()
+  } finally { saveSaving.value = false }
 }
 
 // ===== 确认弹窗(短信通知/批注) =====

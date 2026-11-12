@@ -165,12 +165,16 @@ async function openImage(pic, row) {
 }
 
 // ==================== 提交/撤回/删除 ====================
+const oneSubmitBusy = ref(false)
 async function oneSubmit(row) {
+  if (oneSubmitBusy.value) return  // 防双击重复提交
+  oneSubmitBusy.value = true
   try {
     await submitJcxxOne(row.ID)
     ElMessage.success('已提交')
     load()
   } catch (e) { /* request.js 已提示 */ }
+  finally { oneSubmitBusy.value = false }
 }
 async function oneRecall(row) {
   try {
@@ -182,9 +186,12 @@ async function oneRecall(row) {
 function selection() {
   return tableRef.value?.getSelectionRows() || []
 }
+const batchSubmitBusy = ref(false)
 async function batchSubmit() {
+  if (batchSubmitBusy.value) return  // 防双击重复提交
   const ids = selection().map(r => r.ID).join(',')
   if (!ids) return ElMessage.warning('请先勾选记录')
+  batchSubmitBusy.value = true
   try {
     const res = await submitJcxxRows(ids)
     let msg = `已提交 ${res.ok_count} 条`
@@ -193,6 +200,7 @@ async function batchSubmit() {
     ElMessage.success(msg)
     load()
   } catch (e) { /* */ }
+  finally { batchSubmitBusy.value = false }
 }
 async function batchRecall() {
   const ids = selection().map(r => r.ID).join(',')
@@ -369,6 +377,7 @@ async function openEdit(row) {
 }
 
 async function save() {
+  if (saving.value) return  // 防双击重复提交
   try {
     await formRef.value.validate()
   } catch { return }

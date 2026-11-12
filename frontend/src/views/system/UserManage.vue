@@ -46,6 +46,7 @@ onMounted(async () => {
 // ===== 新增 / 编辑 =====
 const editDialog = ref(false)
 const editingId = ref(null)
+const editSaving = ref(false)
 const editFormRef = ref()
 const allDepartments = ref([])
 // 部门多选选项:显示完整层级路径,便于区分同名/多级部门
@@ -88,20 +89,24 @@ function openEdit(row) {
 }
 
 async function submitEdit() {
-  await editFormRef.value.validate()
-  if (editingId.value == null) {
-    await createUser(editForm)
-  } else {
-    await updateUser(editingId.value, {
-      real_name: editForm.real_name,
-      department_ids: editForm.department_ids,
-      phone: editForm.phone,
-      zw: editForm.zw,
-    })
-  }
-  ElMessage.success(editingId.value == null ? '已创建,初始密码 abc123456' : '保存成功')
-  editDialog.value = false
-  load()
+  if (editSaving.value) return  // 防双击重复提交
+  editSaving.value = true
+  try {
+    await editFormRef.value.validate()
+    if (editingId.value == null) {
+      await createUser(editForm)
+    } else {
+      await updateUser(editingId.value, {
+        real_name: editForm.real_name,
+        department_ids: editForm.department_ids,
+        phone: editForm.phone,
+        zw: editForm.zw,
+      })
+    }
+    ElMessage.success(editingId.value == null ? '已创建,初始密码 abc123456' : '保存成功')
+    editDialog.value = false
+    load()
+  } finally { editSaving.value = false }
 }
 
 // ===== 启用 / 停用 =====

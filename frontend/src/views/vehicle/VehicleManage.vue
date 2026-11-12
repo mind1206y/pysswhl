@@ -142,6 +142,7 @@ function requireOne() {
 // ===== 新增 / 编辑 =====
 const editDialog = ref(false)
 const editingId = ref(null)
+const editSaving = ref(false)
 const editTab = ref('basic')
 const editFormRef = ref()
 const blankForm = () => ({
@@ -191,13 +192,17 @@ function buildPayload() {
   return p
 }
 async function submitEdit() {
-  await editFormRef.value.validate()
-  const payload = buildPayload()
-  if (editingId.value) await updateVehicle(editingId.value, payload)
-  else await createVehicle(payload)
-  ElMessage.success(editingId.value ? '修改成功，资料已重新进入待审批' : '添加成功')
-  editDialog.value = false
-  load()
+  if (editSaving.value) return  // 防双击重复提交
+  editSaving.value = true
+  try {
+    await editFormRef.value.validate()
+    const payload = buildPayload()
+    if (editingId.value) await updateVehicle(editingId.value, payload)
+    else await createVehicle(payload)
+    ElMessage.success(editingId.value ? '修改成功，资料已重新进入待审批' : '添加成功')
+    editDialog.value = false
+    load()
+  } finally { editSaving.value = false }
 }
 
 // ===== 编辑弹窗内的图片 =====
@@ -281,6 +286,7 @@ async function onExpand(row, expanded) {
 }
 const cxDialog = ref(false)
 const cxEditing = ref(null)
+const cxSaving = ref(false)
 const cxCarId = ref(null)
 const cxFormRef = ref()
 const blankCx = () => ({
@@ -306,15 +312,19 @@ function openCxEdit(row, acc) {
   cxDialog.value = true
 }
 async function submitCx() {
+  if (cxSaving.value) return  // 防双击重复提交
   if (!cxForm.riqi) { ElMessage.warning('请选择出险日期'); return }
-  const data = { ...cxForm, jine: cxForm.jine === '' ? null : cxForm.jine,
-    gongli: cxForm.gongli === '' ? null : cxForm.gongli }
-  if (cxEditing.value) await updateAccident(cxEditing.value, data)
-  else await addAccident(cxCarId.value, data)
-  ElMessage.success(cxEditing.value ? '已修改' : '已添加')
-  cxDialog.value = false
-  accidents[cxCarId.value] = await listAccidents(cxCarId.value, filters.year)
-  load()
+  cxSaving.value = true
+  try {
+    const data = { ...cxForm, jine: cxForm.jine === '' ? null : cxForm.jine,
+      gongli: cxForm.gongli === '' ? null : cxForm.gongli }
+    if (cxEditing.value) await updateAccident(cxEditing.value, data)
+    else await addAccident(cxCarId.value, data)
+    ElMessage.success(cxEditing.value ? '已修改' : '已添加')
+    cxDialog.value = false
+    accidents[cxCarId.value] = await listAccidents(cxCarId.value, filters.year)
+    load()
+  } finally { cxSaving.value = false }
 }
 async function removeCx(row, acc) {
   await ElMessageBox.confirm('确定删除这条出险记录？', '提示', { type: 'warning' })

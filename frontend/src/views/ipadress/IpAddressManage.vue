@@ -73,6 +73,7 @@ onMounted(async () => {
 // ===== 添加网络 =====
 const netDialog = ref(false)
 const netFormRef = ref()
+const netSaving = ref(false)
 const netForm = reactive({ netname: '', net: '', bmid: null })
 const netRules = {
   netname: [{ required: true, message: '请输入网络名称', trigger: 'blur' }],
@@ -94,16 +95,20 @@ function openNetDialog() {
 }
 
 async function submitNet() {
-  await netFormRef.value.validate()
-  await createIpNetwork({
-    netname: netForm.netname,
-    net: netForm.net,
-    bmid: netForm.bmid,
-  })
-  ElMessage.success('初始化成功！共创建 253 个 IP')
-  netDialog.value = false
-  await loadDicts()
-  search()
+  if (netSaving.value) return  // 防双击重复提交
+  netSaving.value = true
+  try {
+    await netFormRef.value.validate()
+    await createIpNetwork({
+      netname: netForm.netname,
+      net: netForm.net,
+      bmid: netForm.bmid,
+    })
+    ElMessage.success('初始化成功！共创建 253 个 IP')
+    netDialog.value = false
+    await loadDicts()
+    search()
+  } finally { netSaving.value = false }
 }
 
 // ===== 领用 / 修改分配 =====

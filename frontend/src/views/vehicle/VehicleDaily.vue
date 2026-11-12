@@ -82,6 +82,7 @@ onMounted(async () => {
 // ===== 新增 / 编辑 =====
 const dialog = ref(false)
 const editingId = ref(null)
+const saving = ref(false)
 const tab = ref('basic')
 const formRef = ref()
 const blankForm = () => ({
@@ -194,26 +195,30 @@ function buildPayload() {
   return p
 }
 async function submit() {
-  await formRef.value.validate()
-  const payload = buildPayload()
-  const isNew = !editingId.value
-  let id = editingId.value
-  if (id) {
-    await updateDaily(id, payload)
-  } else {
-    const res = await createDaily(payload)
-    id = res.id
-    editingId.value = id
-  }
-  if (pendingImages.value.length) {
-    const fd = new FormData()
-    for (const p of pendingImages.value) fd.append('files', p.file)
-    await uploadDailyImages(id, fd)
-    clearPending()
-  }
-  ElMessage.success(isNew ? '添加成功' : '保存成功')
-  dialog.value = false
-  load()
+  if (saving.value) return  // 防双击重复提交
+  saving.value = true
+  try {
+    await formRef.value.validate()
+    const payload = buildPayload()
+    const isNew = !editingId.value
+    let id = editingId.value
+    if (id) {
+      await updateDaily(id, payload)
+    } else {
+      const res = await createDaily(payload)
+      id = res.id
+      editingId.value = id
+    }
+    if (pendingImages.value.length) {
+      const fd = new FormData()
+      for (const p of pendingImages.value) fd.append('files', p.file)
+      await uploadDailyImages(id, fd)
+      clearPending()
+    }
+    ElMessage.success(isNew ? '添加成功' : '保存成功')
+    dialog.value = false
+    load()
+  } finally { saving.value = false }
 }
 
 // ===== 删除 =====

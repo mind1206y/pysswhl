@@ -82,7 +82,9 @@ function commitCheck(row) {
   }
 }
 
+const checkSaving = ref(false)
 async function submitCheck() {
+  if (checkSaving.value) return  // 防双击重复提交
   const list = stockRows.value
     .filter((r) => r.CheckNum != null && r.CheckNum !== '' && r.CheckNum !== r.num)
     .map((r) => ({ MaterialId: r.id, CheckNum: r.CheckNum }))
@@ -90,10 +92,13 @@ async function submitCheck() {
     ElMessage.warning('没有库存变化，无需提交')
     return
   }
-  await submitStockCheck(list)
-  ElMessage.success('盘点完成')
-  loadStock()
-  if (activeTab.value === 'stock') loadInOut()
+  checkSaving.value = true
+  try {
+    await submitStockCheck(list)
+    ElMessage.success('盘点完成')
+    loadStock()
+    if (activeTab.value === 'stock') loadInOut()
+  } finally { checkSaving.value = false }
 }
 
 function doExportStockCheck() {
@@ -161,29 +166,34 @@ function onMatTabChange(name) {
   }
 }
 
+const matSaving = ref(false)
 async function saveMaterialSubmit() {
-  await matFormRef.value.validate()
-  const res = await saveMaterial({
-    id: matForm.id,
-    MaterialName: matForm.MaterialName,
-    biaoji: matForm.biaoji,
-    Alias1: matForm.Alias1,
-    Alias2: matForm.Alias2,
-    Alias3: matForm.Alias3,
-    Model: matForm.Model,
-    Spec: matForm.Spec,
-    Unit: matForm.Unit,
-    dakoujing: matForm.dakoujing ? 'on' : null,
-    yujing: matForm.yujing == null || matForm.yujing === '' ? null : Number(matForm.yujing),
-    Remark: matForm.Remark,
-  })
-  ElMessage.success('已保存！')
-  matForm.id = res.id
-  loadStock()
-  // 照旧:保存后自动切到图片管理页签
-  matTab.value = 'images'
-  await loadImages(res.id)
-  loadDicts()
+  if (matSaving.value) return  // 防双击重复提交
+  matSaving.value = true
+  try {
+    await matFormRef.value.validate()
+    const res = await saveMaterial({
+      id: matForm.id,
+      MaterialName: matForm.MaterialName,
+      biaoji: matForm.biaoji,
+      Alias1: matForm.Alias1,
+      Alias2: matForm.Alias2,
+      Alias3: matForm.Alias3,
+      Model: matForm.Model,
+      Spec: matForm.Spec,
+      Unit: matForm.Unit,
+      dakoujing: matForm.dakoujing ? 'on' : null,
+      yujing: matForm.yujing == null || matForm.yujing === '' ? null : Number(matForm.yujing),
+      Remark: matForm.Remark,
+    })
+    ElMessage.success('已保存！')
+    matForm.id = res.id
+    loadStock()
+    // 照旧:保存后自动切到图片管理页签
+    matTab.value = 'images'
+    await loadImages(res.id)
+    loadDicts()
+  } finally { matSaving.value = false }
 }
 
 async function doUploadImages() {
@@ -306,18 +316,23 @@ function openInStock() {
   inStockDialog.value = true
 }
 
+const inStockSaving = ref(false)
 async function submitInStock() {
-  await inStockFormRef.value.validate()
-  await saveInStock({
-    id: 0,
-    MaterialId: inStockForm.MaterialId,
-    Quantity: Number(inStockForm.Quantity),
-    Remark: inStockForm.Remark,
-  })
-  ElMessage.success('已保存！')
-  inStockDialog.value = false
-  loadInOut()
-  loadStock()
+  if (inStockSaving.value) return  // 防双击重复提交
+  inStockSaving.value = true
+  try {
+    await inStockFormRef.value.validate()
+    await saveInStock({
+      id: 0,
+      MaterialId: inStockForm.MaterialId,
+      Quantity: Number(inStockForm.Quantity),
+      Remark: inStockForm.Remark,
+    })
+    ElMessage.success('已保存！')
+    inStockDialog.value = false
+    loadInOut()
+    loadStock()
+  } finally { inStockSaving.value = false }
 }
 
 async function doDeleteInStock(row) {

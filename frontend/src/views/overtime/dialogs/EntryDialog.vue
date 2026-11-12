@@ -116,20 +116,21 @@
 
       <div v-if="showSubGrid" style="margin-top: 8px">
         <div style="border-top: 1px dashed #e3e8ee; padding-top: 8px; margin-bottom: 6px; font-weight: bold; font-size: 13px; color: #0d253d">已录时段</div>
-        <el-table :data="subEntries" border size="small" max-height="180">
-          <el-table-column prop="work_date" label="日期" width="110" />
-          <el-table-column label="时段" width="140">
-            <template #default="{ row }">{{ (row.start_time || '').slice(11, 16) }}-{{ (row.end_time || '').slice(11, 16) }}</template>
-          </el-table-column>
-          <el-table-column prop="total_hours" label="折算时长" width="90" />
-          <el-table-column prop="multiplier" label="倍数" width="70" />
-          <el-table-column label="操作" width="110">
-            <template #default="{ row }">
-              <span class="grid-link" @click="editSub(row)">编辑</span>
-              <span class="grid-danger" style="margin-left: 8px" @click="deleteSub(row)">删除</span>
-            </template>
-          </el-table-column>
-        </el-table>
+          <el-table :data="subEntries" border size="small" max-height="180">
+            <el-table-column prop="work_date" label="日期" width="100" />
+            <el-table-column label="时段" width="130">
+              <template #default="{ row }">{{ (row.start_time || '').slice(11, 16) }}-{{ (row.end_time || '').slice(11, 16) }}</template>
+            </el-table-column>
+            <el-table-column prop="total_hours" label="折算时长" width="80" />
+            <el-table-column prop="multiplier" label="倍数" width="60" />
+            <el-table-column prop="reason" label="工作内容" min-width="160" show-overflow-tooltip />
+            <el-table-column label="操作" width="100">
+              <template #default="{ row }">
+                <span class="grid-link" @click="editSub(row)">编辑</span>
+                <span class="grid-danger" style="margin-left: 8px" @click="deleteSub(row)">删除</span>
+              </template>
+            </el-table-column>
+          </el-table>
       </div>
     </div>
 
@@ -302,7 +303,14 @@ async function loadSub() {
   if (!id || props.options.mode !== 'personal') return
   try {
     const r = await api.listEntries(id, 'personal')
-    subEntries.value = r.rows || []
+    // 与主表 timeSlots 排序一致：按日期升序，同日再按开始时间
+    const byDate = (a, b) => {
+      const da = a.work_date || '', db_ = b.work_date || ''
+      if (da !== db_) return da < db_ ? -1 : 1
+      const sa = a.start_time || '', sb = b.start_time || ''
+      return sa < sb ? -1 : sa > sb ? 1 : 0
+    }
+    subEntries.value = (r.rows || []).slice().sort(byDate)
   } catch { subEntries.value = [] }
 }
 async function editSub(row) {

@@ -175,13 +175,18 @@ async function ensureSelected() {
 }
 
 async function submitOrder() {
+  if (submitOrderSaving.value) return  // 防双击重复提交
   if (!(await ensureSelected())) return
   if (!canSubmit.value) return ElMessage.warning('只有本人草稿和驳回单据才能提交')
-  await ElMessageBox.confirm('确定要提交这条领料单吗？', '确认', { type: 'warning' })
-  const id = currentRow.value.id
-  await submitLingliaoOrder(id)
-  ElMessage.success('提交成功')
-  await refreshCurrent(id)
+  submitOrderSaving.value = true
+  try {
+    await ElMessageBox.confirm('确定要提交这条领料单吗？', '确认', { type: 'warning' })
+    const id = currentRow.value.id
+    await submitLingliaoOrder(id)
+    ElMessage.success('提交成功')
+    await refreshCurrent(id)
+  } catch { /* 取消或拦截器已提示 */ }
+  finally { submitOrderSaving.value = false }
 }
 
 async function auditOrder() {
@@ -233,25 +238,29 @@ async function deleteOrder() {
 }
 
 async function changeRenum(row) {
+  if (renumSaving.value) return  // 防双击重复提交
   if (!canEditRenum.value) return ElMessage.warning('只有申请人本人且已审核后才能修改实发数量')
-  let value
+  renumSaving.value = true
   try {
-    const res = await ElMessageBox.prompt(
-      `申请数量 ${row.num}，已结算 ${row.jiesuannum}`,
-      '修改实发数量',
-      {
-        inputValue: String(row.renum ?? 0),
-        inputPattern: /^\d+(\.\d{1,2})?$/,
-        inputErrorMessage: '请输入不小于 0 的数字(最多 2 位小数)',
-      },
-    )
-    value = Number(res.value)
-  } catch {
-    return
-  }
-  await updateLingliaoRenum(currentRow.value.id, row.id, value)
-  ElMessage.success('实发数量已更新')
-  await refreshCurrent(currentRow.value.id)
+    let value
+    try {
+      const res = await ElMessageBox.prompt(
+        `申请数量 ${row.num}，已结算 ${row.jiesuannum}`,
+        '修改实发数量',
+        {
+          inputValue: String(row.renum ?? 0),
+          inputPattern: /^\d+(\.\d{1,2})?$/,
+          inputErrorMessage: '请输入不小于 0 的数字(最多 2 位小数)',
+        },
+      )
+      value = Number(res.value)
+    } catch {
+      return
+    }
+    await updateLingliaoRenum(currentRow.value.id, row.id, value)
+    ElMessage.success('实发数量已更新')
+    await refreshCurrent(currentRow.value.id)
+  } finally { renumSaving.value = false }
 }
 
 // ==================== 编辑弹窗 ====================
@@ -259,6 +268,8 @@ const editDlg = ref(false)
 const editMode = ref('add')
 const editFormRef = ref()
 const saving = ref(false)
+const submitOrderSaving = ref(false)
+const renumSaving = ref(false)
 const editDetails = ref([])
 const editFiles = ref([])
 const editForm = reactive({ id: 0, sqriqi: '', gongyingshang: '', shuoming: '', bmid: null })
@@ -366,6 +377,7 @@ function viewFile(url) {
 }
 
 async function saveEdit() {
+  if (saving.value) return  // 防双击重复提交
   if (!editForm.sqriqi) return ElMessage.warning('请选择申请日期')
   for (let i = 0; i < editDetails.value.length; i += 1) {
     const row = editDetails.value[i]

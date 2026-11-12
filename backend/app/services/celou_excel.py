@@ -170,11 +170,14 @@ def import_workbook(db: Session, data: bytes, filename: str, *, user: str, duiwu
     for r in db.query(CelouTb.bmid, CelouTb.bm).filter(CelouTb.bm.isnot(None)).distinct().all():
         bm_by_name.setdefault(r[0], r[1])
 
-    # 重复校验用内存集合,口径照旧:漏量+工单号+地点+上报日期+修复日期五字段全等
+    # 重复校验用内存集合,口径照旧:漏量+工单号+地点+上报日期+修复日期五字段全等。
+    # 漏量/日期用 Decimal/date 原值入 key(而非 str),"0.2"与"0.20"、文本与日期单元格
+    # 的同值行同样判重;file_rows 记录 key→Excel 行号,用于区分文件内重复与库里重复。
     exist = set()
     for r in db.query(CelouTb.louliang, CelouTb.gongdan, CelouTb.didian,
                       CelouTb.bgdate, CelouTb.xiufudate).all():
-        exist.add((str(r[0]), r[1] or "", r[2] or "", str(r[3]), str(r[4])))
+        exist.add((r[0], r[1] or "", r[2] or "", r[3], r[4]))
+    file_rows = {}
 
     new_rows = []
     sheet_counts = {}
@@ -216,9 +219,11 @@ def import_workbook(db: Session, data: bytes, filename: str, *, user: str, duiwu
             jd = _parse_decimal(_cell(row, jd_col)) if jd_col >= 0 else None
             wd = _parse_decimal(_cell(row, wd_col)) if wd_col >= 0 else None
 
-            key = (str(louliang), gongdan, didian, str(bgdate), str(xiufudate))
-            if key in exist:
-                raise ImportError_(f"第{excel_row}行数据已存在（漏量={louliang}，工单号={gongdan}）")
+            key = (louliang, gongdan, didian, bgdate, xiufudate)
+            if key in exist or key in file_rows:
+                src = f"与文件内第{file_rows[key]}行重复" if key in file_rows else "与数据库已有记录重复"
+                raise ImportError_(f"第{excel_row}行数据已存在（{src}，漏量={louliang}，工单号={gongdan}）")
+            file_rows[key] = excel_row
             exist.add(key)
 
             dept_id = dept_by_name.get(bm)

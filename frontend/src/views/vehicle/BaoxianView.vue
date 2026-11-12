@@ -74,6 +74,7 @@ const lxPills = ['商业车险', '交强险']
 // ===== 添加 / 编辑(照旧 addDiv/editDiv) =====
 const dialog = ref(false)
 const editingId = ref(null)
+const saving = ref(false)
 const formRef = ref()
 const blankForm = () => ({
   lx: '商业车险', cheid: null, tbdate: '', bxcom: '', bdnumber: '',
@@ -152,12 +153,16 @@ function buildPayload() {
   }
 }
 async function submitForm() {
-  await formRef.value.validate()
-  if (editingId.value) await updateBaoxian(editingId.value, buildPayload())
-  else await createBaoxian(buildPayload())
-  ElMessage.success(editingId.value ? '修改成功' : '添加成功')
-  dialog.value = false
-  load()
+  if (saving.value) return  // 防双击重复提交
+  saving.value = true
+  try {
+    await formRef.value.validate()
+    if (editingId.value) await updateBaoxian(editingId.value, buildPayload())
+    else await createBaoxian(buildPayload())
+    ElMessage.success(editingId.value ? '修改成功' : '添加成功')
+    dialog.value = false
+    load()
+  } finally { saving.value = false }
 }
 
 // ===== 删除(照旧 Deletegz:无本人限制) =====

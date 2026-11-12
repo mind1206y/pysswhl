@@ -242,31 +242,36 @@ async function uploadStaged(id) {
   stagedImages.value.forEach((s) => URL.revokeObjectURL(s.url))
   stagedImages.value = []
 }
+const orderSaving = ref(false)
 async function saveOrder(keepOpen = false) {
-  await orderFormRef.value.validate()
-  const payload = orderPayload()
-  if (editingOrder.value) {
-    await updateRepair(editingOrder.value.ID, payload)
-    if (stagedImages.value.length) await uploadStaged(editingOrder.value.ID)
-    ElMessage.success('修改成功')
-    orderDialog.value = false
+  if (orderSaving.value) return  // 防双击重复提交
+  orderSaving.value = true
+  try {
+    await orderFormRef.value.validate()
+    const payload = orderPayload()
+    if (editingOrder.value) {
+      await updateRepair(editingOrder.value.ID, payload)
+      if (stagedImages.value.length) await uploadStaged(editingOrder.value.ID)
+      ElMessage.success('修改成功')
+      orderDialog.value = false
+      load()
+      return
+    }
+    const row = await createRepair(payload)
+    await uploadStaged(row.ID)
+    ElMessage.success('添加成功')
+    if (keepOpen) {
+      const { wxdw, zk } = orderForm
+      resetOrderForm()
+      orderForm.wxdw = wxdw
+      orderForm.zk = zk
+      vehicleOptions.value = dicts.vehicles
+      ElMessage.success('保存成功，可继续录入')
+    } else {
+      orderDialog.value = false
+    }
     load()
-    return
-  }
-  const row = await createRepair(payload)
-  await uploadStaged(row.ID)
-  ElMessage.success('添加成功')
-  if (keepOpen) {
-    const { wxdw, zk } = orderForm
-    resetOrderForm()
-    orderForm.wxdw = wxdw
-    orderForm.zk = zk
-    vehicleOptions.value = dicts.vehicles
-    ElMessage.success('保存成功，可继续录入')
-  } else {
-    orderDialog.value = false
-  }
-  load()
+  } finally { orderSaving.value = false }
 }
 
 // ===== 图片 =====
@@ -383,23 +388,28 @@ async function openEditDetail(row, d) {
   await nextTick()
   refreshRemaining()
 }
+const mxSaving = ref(false)
 async function saveDetail() {
-  await mxFormRef.value.validate()
-  const payload = {
-    pjorgs: mxForm.pjorgs, xiangmu: mxForm.xiangmu, guige: mxForm.guige,
-    gjz: mxForm.gjz, zkqiandanjia: Number(mxForm.zkqiandanjia), shuliang: Number(mxForm.shuliang),
-  }
-  if (mxForm.id) {
-    await updateRepairDetail(mxForm.id, payload)
-    ElMessage.success('修改成功')
-  } else {
-    await addRepairDetail(detailOrder.value.ID, payload)
-    ElMessage.success('添加成功')
-    Object.assign(mxForm, { pjorgs: '', xiangmu: '', guige: '', gjz: '', zkqiandanjia: null, shuliang: 1 })
-  }
-  await loadMxList()
-  refreshRemaining()
-  load()
+  if (mxSaving.value) return  // 防双击重复提交
+  mxSaving.value = true
+  try {
+    await mxFormRef.value.validate()
+    const payload = {
+      pjorgs: mxForm.pjorgs, xiangmu: mxForm.xiangmu, guige: mxForm.guige,
+      gjz: mxForm.gjz, zkqiandanjia: Number(mxForm.zkqiandanjia), shuliang: Number(mxForm.shuliang),
+    }
+    if (mxForm.id) {
+      await updateRepairDetail(mxForm.id, payload)
+      ElMessage.success('修改成功')
+    } else {
+      await addRepairDetail(detailOrder.value.ID, payload)
+      ElMessage.success('添加成功')
+      Object.assign(mxForm, { pjorgs: '', xiangmu: '', guige: '', gjz: '', zkqiandanjia: null, shuliang: 1 })
+    }
+    await loadMxList()
+    refreshRemaining()
+    load()
+  } finally { mxSaving.value = false }
 }
 async function removeDetail(d, order) {
   if (order) detailOrder.value = order

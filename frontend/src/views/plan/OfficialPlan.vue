@@ -78,7 +78,12 @@ function resetFilters() {
 
 function onSelectionChange(val) { selection.value = val }
 
-function rowClass({ row }) { return isCompleted(row) ? 'row-completed' : '' }
+// 液位胶囊的液位百分比：完成态 100%，其余取 jdztValue（0~100]，无值视为 0
+function statusPct(row) {
+  if (isCompleted(row)) return 100
+  const v = row.jdztValue
+  return v != null && v > 0 && v <= 100 ? v : 0
+}
 
 async function onExpand(row, expandedRows) {
   const isOpen = expandedRows.some((r) => r.ID === row.ID)
@@ -143,40 +148,51 @@ function onStatusChange(id) {
 
 function onFileChange(_file, files) { progFiles.value = files }
 
+const progSaving = ref(false)
 async function submitProgress() {
-  const targets = progRows.value
-  let ok = 0
-  for (const row of targets) {
-    const form = new FormData()
-    form.append('gzid', row.ID)
-    form.append('guanzhuid', row.myGuanzhuid || 0)
-    form.append('riqi', progForm.riqi || '')
-    form.append('zhuangtaiid', progForm.zhuangtaiid || 0)
-    form.append('miaoshu', progForm.miaoshu || '')
-    form.append('fukuan', progForm.fukuan || 0)
-    form.append('beizhu', progForm.beizhu || '')
-    for (const f of progFiles.value) {
-      if (f.raw) form.append('files', f.raw)
+  if (progSaving.value) return  // 防双击重复提交
+  progSaving.value = true
+  try {
+    const targets = progRows.value
+    let ok = 0
+    for (const row of targets) {
+      const form = new FormData()
+      form.append('gzid', row.ID)
+      form.append('guanzhuid', row.myGuanzhuid || 0)
+      form.append('riqi', progForm.riqi || '')
+      form.append('zhuangtaiid', progForm.zhuangtaiid || 0)
+      form.append('miaoshu', progForm.miaoshu || '')
+      form.append('fukuan', progForm.fukuan || 0)
+      form.append('beizhu', progForm.beizhu || '')
+      for (const f of progFiles.value) {
+        if (f.raw) form.append('files', f.raw)
+      }
+      const r = await addProgress(form)
+      if (r.ok) ok += 1
     }
-    const r = await addProgress(form)
-    if (r.ok) ok += 1
-  }
-  ElMessage.success(`添加成功 ${ok} 条`)
-  progDialog.value = false
-  load()
+    ElMessage.success(`添加成功 ${ok} 条`)
+    progDialog.value = false
+    load()
+  } finally { progSaving.value = false }
 }
 
 // ===== 行内专管员 =====
+const zgySaving = ref(false)
 async function saveZgy(row) {
+  if (zgySaving.value) return  // 防双击重复提交
   if (!dicts.perms.manage) return
-  await updatePlanZgy({ id: row.ID, zgy: row.zgy })
-  ElMessage.success('专管员已更新')
+  zgySaving.value = true
+  try {
+    await updatePlanZgy({ id: row.ID, zgy: row.zgy })
+    ElMessage.success('专管员已更新')
+  } finally { zgySaving.value = false }
 }
 
 // ===== 备注 / 考核 / 质保金 =====
 const remarkDialog = ref(false)
 const remarkRow = ref(null)
 const remarkText = ref('')
+const remarkSaving = ref(false)
 
 function openRemark(row) {
   remarkRow.value = row
@@ -185,10 +201,14 @@ function openRemark(row) {
 }
 
 async function saveRemark() {
-  await updatePlanRemark({ id: remarkRow.value.ID, remark: remarkText.value })
-  ElMessage.success('备注已更新')
-  remarkDialog.value = false
-  load()
+  if (remarkSaving.value) return  // 防双击重复提交
+  remarkSaving.value = true
+  try {
+    await updatePlanRemark({ id: remarkRow.value.ID, remark: remarkText.value })
+    ElMessage.success('备注已更新')
+    remarkDialog.value = false
+    load()
+  } finally { remarkSaving.value = false }
 }
 
 async function toggleKh(row) {
@@ -200,6 +220,7 @@ async function toggleKh(row) {
 const zbjDialog = ref(false)
 const zbjRow = ref(null)
 const zbjForm = reactive({ zbj: null, zbjrq: '' })
+const zbjSaving = ref(false)
 
 function openZbj(row) {
   zbjRow.value = row
@@ -209,6 +230,8 @@ function openZbj(row) {
 }
 
 async function saveZbj() {
+  if (zbjSaving.value) return  // 防双击重复提交
+  zbjSaving.value = true
   try {
     await savePlanZbj({ id: zbjRow.value.ID, zbj: zbjForm.zbj, zbjrq: zbjForm.zbjrq })
     ElMessage.success('保存成功')
@@ -216,7 +239,7 @@ async function saveZbj() {
     load()
   } catch (e) {
     // 错误信息已由拦截器提示
-  }
+  } finally { zbjSaving.value = false }
 }
 
 function viewPhoto(pic) {
@@ -311,18 +334,18 @@ onMounted(async () => {
     </el-card>
 
     <div class="toolbar">
-      <el-button size="small" type="primary" @click="doFollow">我要关注</el-button>
-      <el-button size="small" @click="doUnfollow">取消关注</el-button>
-      <el-button size="small" @click="doCopy">复制到待办计划申报</el-button>
-      <el-button size="small" type="success" plain @click="openProgress">添加进度</el-button>
-      <el-button size="small" @click="doExport">导出计划</el-button>
-      <el-button size="small" @click="doExportProgress">导出年度全部进度</el-button>
-      <el-button size="small" @click="router.push('/plan/dashboard')">进度看板</el-button>
+      <el-button type="primary" @click="doFollow">我要关注</el-button>
+      <el-button @click="doUnfollow">取消关注</el-button>
+      <el-button @click="doCopy">复制到待办计划申报</el-button>
+      <el-button type="success" plain @click="openProgress">添加进度</el-button>
+      <el-button @click="doExport">导出计划</el-button>
+      <el-button @click="doExportProgress">导出年度全部进度</el-button>
+      <el-button @click="router.push('/plan/dashboard')">进度看板</el-button>
       <span class="hint">共 {{ total }} 条 · 展开行查看进度记录 · 双击无编辑</span>
     </div>
 
     <el-table v-loading="loading" :data="rows" border stripe size="small" row-key="ID"
-      height="calc(100vh - 355px)" :row-class-name="rowClass"
+      height="calc(100vh - 355px)"
       @selection-change="onSelectionChange" @expand-change="onExpand">
       <el-table-column type="selection" width="42" fixed />
       <el-table-column type="expand" width="40">
@@ -361,12 +384,9 @@ onMounted(async () => {
       <el-table-column prop="ssusers" label="已关注" width="130" show-overflow-tooltip />
       <el-table-column label="最新状态" width="190">
         <template #default="{ row }">
-          <div class="latest-status">
-            <el-tag size="small" :type="isCompleted(row) ? 'success' : 'info'">
-              {{ row.jdzt || row.jdztDesc || '未开始' }}
-            </el-tag>
-            <el-progress v-if="row.jdztValue != null" :percentage="row.jdztValue"
-              :stroke-width="5" class="status-bar" />
+          <div class="jd-capsule" :title="'进度 ' + statusPct(row) + '%'">
+            <span class="jd-pill">{{ row.jdzt || row.jdztDesc || '未开始' }}</span>
+            <div class="jd-liquid" :style="{ width: statusPct(row) + '%' }"></div>
           </div>
         </template>
       </el-table-column>
@@ -506,11 +526,28 @@ onMounted(async () => {
 .hint { margin-left: auto; color: #909399; font-size: 12px; }
 .pager { display: flex; justify-content: flex-end; }
 .bz-cell { display: inline-block; background: rgba(28, 30, 84, 0.06); border: 1px solid rgba(164, 180, 201, 0.35); border-radius: 6px; padding: 2px 6px; text-indent: 1em; line-height: 1.5; white-space: normal; word-break: break-word; }
-.latest-status { display: flex; flex-direction: column; gap: 2px; }
-.status-bar { width: 100%; }
+/* 最新状态：液位胶囊（与 sswhl gxdxljihua 同款）——透明底+1px 细线外圈，
+   白色文字胶囊居中，半透明蓝液体叠在其上按进度浸没 */
+.jd-capsule {
+  position: relative; display: inline-flex; align-items: center;
+  width: 164px; height: 26px; padding: 3px;
+  border-radius: 999px; background: transparent; border: 1px solid #dcdfe6;
+  overflow: hidden; vertical-align: middle;
+}
+.jd-liquid {
+  position: absolute; z-index: 2; top: 0; left: 0; bottom: 0;
+  background: linear-gradient(180deg, rgba(102, 177, 255, 0.55), rgba(64, 158, 255, 0.42));
+  border-radius: 999px; transition: width 0.3s ease;
+  pointer-events: none; box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.55);
+}
+.jd-pill {
+  position: relative; display: inline-flex; align-items: center; justify-content: center;
+  gap: 4px; width: 100%; height: 100%; max-width: 100%;
+  padding: 0 10px; border-radius: 999px; background: #fff;
+  font-size: 12px; color: #1b1d21; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 .mini-bar { margin-top: 2px; }
 .progress-box { padding: 8px 16px; background: #fafbfc; }
 .pic-tag { margin-right: 4px; cursor: pointer; }
 .mb10 { margin-bottom: 10px; }
-:deep(.row-completed) { background: #f0f9eb !important; }
 </style>

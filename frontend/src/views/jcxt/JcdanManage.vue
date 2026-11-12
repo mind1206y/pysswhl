@@ -93,6 +93,7 @@ async function openEdit(row) {
   dlg.value = true
 }
 async function save() {
+  if (saving.value) return  // 防双击重复提交
   try { await formRef.value.validate() } catch { return }
   saving.value = true
   try {

@@ -113,19 +113,21 @@ async function reloadAfterChange(id) {
   }
 }
 
+const progressSaving = ref(false)
 async function setProgress(progress) {
+  if (progressSaving.value) return  // 防双击重复提交
   if (!currentRow.value) {
     ElMessage.warning('请先在表格中选择一条记录')
     return
   }
+  progressSaving.value = true
   try {
     await ElMessageBox.confirm(`确定要将状态更新为 “${progress}” 吗？`, '确认', { type: 'info' })
-  } catch {
-    return
-  }
-  await updateProgress(currentRow.value.id, progress)
-  ElMessage.success(`状态已更新为 ${progress}`)
-  await reloadAfterChange(currentRow.value.id)
+    await updateProgress(currentRow.value.id, progress)
+    ElMessage.success(`状态已更新为 ${progress}`)
+    await reloadAfterChange(currentRow.value.id)
+  } catch { /* 取消或拦截器已提示 */ }
+  finally { progressSaving.value = false }
 }
 
 async function doDelete(row) {
@@ -351,12 +353,17 @@ function openPriceEdit(row) {
   priceEditDlg.value = true
 }
 
+const priceSaving = ref(false)
 async function submitPrice() {
-  await priceFormRef.value.validate()
-  await savePrice({ ...priceForm, company: priceForm.company || null })
-  ElMessage.success('保存成功')
-  priceEditDlg.value = false
-  loadPrices()
+  if (priceSaving.value) return  // 防双击重复提交
+  priceSaving.value = true
+  try {
+    await priceFormRef.value.validate()
+    await savePrice({ ...priceForm, company: priceForm.company || null })
+    ElMessage.success('保存成功')
+    priceEditDlg.value = false
+    loadPrices()
+  } finally { priceSaving.value = false }
 }
 
 async function doDeletePrice(row) {

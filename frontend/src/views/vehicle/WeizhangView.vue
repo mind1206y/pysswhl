@@ -115,6 +115,7 @@ async function onWzSelect(item) {
 // ===== 新增 / 编辑(照旧 dlg) =====
 const dialog = ref(false)
 const editingId = ref(null)
+const saving = ref(false)
 const formRef = ref()
 const formLocked = ref(false)
 const blankForm = () => ({
@@ -160,13 +161,17 @@ function buildPayload() {
   }
 }
 async function submitForm() {
-  await formRef.value.validate()
-  const payload = buildPayload()
-  if (editingId.value) await updateWeizhang(editingId.value, payload)
-  else await createWeizhang(payload)
-  ElMessage.success(editingId.value ? '修改成功' : '保存成功')
-  dialog.value = false
-  load()
+  if (saving.value) return  // 防双击重复提交
+  saving.value = true
+  try {
+    await formRef.value.validate()
+    const payload = buildPayload()
+    if (editingId.value) await updateWeizhang(editingId.value, payload)
+    else await createWeizhang(payload)
+    ElMessage.success(editingId.value ? '修改成功' : '保存成功')
+    dialog.value = false
+    load()
+  } finally { saving.value = false }
 }
 
 // ===== 删除(照旧只有本人可删) =====

@@ -220,6 +220,7 @@ function resetEntry(clearHeader = false) {
 
 const submitting = ref(false)
 async function submitEntry() {
+  if (submitting.value) return   // 防双击重复提交领料单
   const no = (header.workOrderNo || '').trim()
   if (!no || !header.banzu || !header.lingliaotype || !cart.value.length) {
     ElMessage.warning('请填写工单号、班组、领料类别并选择材料')

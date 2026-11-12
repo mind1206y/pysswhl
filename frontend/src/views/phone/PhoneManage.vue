@@ -303,27 +303,37 @@ async function openEdit(row) {
   editVisible.value = true
   if (row.haoma) onPhoneChange(row.haoma)
 }
+const editSaving = ref(false)
 async function submitEdit() {
-  await editFormRef.value.validate()
-  await updatePhoneInfo(editingId.value, { ...editForm })
-  ElMessage.success('手机信息已更新')
-  editVisible.value = false
-  load()
+  if (editSaving.value) return  // 防双击重复提交
+  editSaving.value = true
+  try {
+    await editFormRef.value.validate()
+    await updatePhoneInfo(editingId.value, { ...editForm })
+    ElMessage.success('手机信息已更新')
+    editVisible.value = false
+    load()
+  } finally { editSaving.value = false }
 }
 
 // ===== 备注编辑 =====
 const remarkVisible = ref(false)
 const remarkForm = reactive({ id: null, remark: '' })
+const remarkSaving = ref(false)
 function openRemark(row) {
   remarkForm.id = row.id
   remarkForm.remark = row.bz || ''
   remarkVisible.value = true
 }
 async function submitRemark() {
-  await savePhoneRemark(remarkForm.id, remarkForm.remark)
-  ElMessage.success('备注已保存')
-  remarkVisible.value = false
-  load()
+  if (remarkSaving.value) return  // 防双击重复提交
+  remarkSaving.value = true
+  try {
+    await savePhoneRemark(remarkForm.id, remarkForm.remark)
+    ElMessage.success('备注已保存')
+    remarkVisible.value = false
+    load()
+  } finally { remarkSaving.value = false }
 }
 
 // ===== 历史 =====
@@ -462,16 +472,21 @@ function openHuishou() {
   hsVisible.value = true
   loadHuishou()
 }
+const hsSaving = ref(false)
 async function submitHuishou() {
+  if (hsSaving.value) return  // 防双击重复提交
   if (!hsForm.huishoudate) { ElMessage.warning('请选择回收日期'); return }
   if (!hsForm.huishouren) { ElMessage.warning('请填写回收人'); return }
   if (!hsForm.shuliang || hsForm.shuliang <= 0) { ElMessage.warning('请填写数量'); return }
-  await createHuishou({ ...hsForm })
-  ElMessage.success('回收记录已登记')
-  Object.assign(hsForm, {
-    huishoudate: today(), bmid: null, huishouren: '', shuliang: null, shuoming: '',
-  })
-  loadHuishou()
+  hsSaving.value = true
+  try {
+    await createHuishou({ ...hsForm })
+    ElMessage.success('回收记录已登记')
+    Object.assign(hsForm, {
+      huishoudate: today(), bmid: null, huishouren: '', shuliang: null, shuoming: '',
+    })
+    loadHuishou()
+  } finally { hsSaving.value = false }
 }
 async function removeHuishou(row) {
   await ElMessageBox.confirm('确定删除该条回收记录？', '提示', { type: 'warning' })

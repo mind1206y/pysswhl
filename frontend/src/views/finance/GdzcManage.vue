@@ -108,16 +108,21 @@ async function toggleCheck(row) {
 const remarkOpen = ref(false)
 const remarkId = ref(null)
 const remarkText = ref('')
+const remarkSaving = ref(false)
 function openRemark(row) {
   remarkId.value = row.id
   remarkText.value = row.beizhu || ''
   remarkOpen.value = true
 }
 async function saveRemark() {
-  await saveGdzcRemark({ id: remarkId.value, beizhu: remarkText.value })
-  ElMessage.success('备注已保存')
-  remarkOpen.value = false
-  load()
+  if (remarkSaving.value) return  // 防双击重复提交
+  remarkSaving.value = true
+  try {
+    await saveGdzcRemark({ id: remarkId.value, beizhu: remarkText.value })
+    ElMessage.success('备注已保存')
+    remarkOpen.value = false
+    load()
+  } finally { remarkSaving.value = false }
 }
 
 // ===== 报废单详情 =====

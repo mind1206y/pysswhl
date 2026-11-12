@@ -177,16 +177,21 @@ function openEdit(row) {
   editDialog.value = true
 }
 
+const editSaving = ref(false)
 async function submitEdit() {
-  await editFormRef.value.validate()
-  if (editingId.value == null) {
-    await createProject(buildPayload())
-  } else {
-    await updateProject(editingId.value, buildPayload())
-  }
-  ElMessage.success('保存成功')
-  editDialog.value = false
-  load()
+  if (editSaving.value) return  // 防双击重复提交
+  editSaving.value = true
+  try {
+    await editFormRef.value.validate()
+    if (editingId.value == null) {
+      await createProject(buildPayload())
+    } else {
+      await updateProject(editingId.value, buildPayload())
+    }
+    ElMessage.success('保存成功')
+    editDialog.value = false
+    load()
+  } finally { editSaving.value = false }
 }
 
 // ===== 删除 =====
@@ -296,24 +301,29 @@ async function syncProjectHead() {
   if (fresh) Object.assign(detailProject.value, fresh)
 }
 
+const jinduSaving = ref(false)
 async function submitJindu() {
+  if (jinduSaving.value) return  // 防双击重复提交
   if (!jinduForm.jindu.trim()) {
     ElMessage.warning('请填写进度描述')
     return
   }
-  if (jinduEditingId.value == null) {
-    await addJindu(detailProject.value.id, {
-      jindu: jinduForm.jindu.trim(),
-      jinduzhuangtai: jinduForm.jinduzhuangtai,
-    })
-    ElMessage.success('已添加进度,工程状态已同步')
-  } else {
-    await updateJindu(detailProject.value.id, jinduEditingId.value, jinduForm.jindu.trim())
-    ElMessage.success('已保存')
-  }
-  jinduDialog.value = false
-  await loadDetail()
-  await syncProjectHead()
+  jinduSaving.value = true
+  try {
+    if (jinduEditingId.value == null) {
+      await addJindu(detailProject.value.id, {
+        jindu: jinduForm.jindu.trim(),
+        jinduzhuangtai: jinduForm.jinduzhuangtai,
+      })
+      ElMessage.success('已添加进度,工程状态已同步')
+    } else {
+      await updateJindu(detailProject.value.id, jinduEditingId.value, jinduForm.jindu.trim())
+      ElMessage.success('已保存')
+    }
+    jinduDialog.value = false
+    await loadDetail()
+    await syncProjectHead()
+  } finally { jinduSaving.value = false }
 }
 
 async function removeJindu(row) {
@@ -349,20 +359,25 @@ function openEditIssue(row) {
   issueDialog.value = true
 }
 
+const issueSaving = ref(false)
 async function submitIssue() {
+  if (issueSaving.value) return  // 防双击重复提交
   if (!issueForm.qingkuangshuoming.trim()) {
     ElMessage.warning('请填写情况说明')
     return
   }
-  if (issueEditingId.value == null) {
-    await addJianguan(detailProject.value.id, issueForm.qingkuangshuoming.trim())
-    ElMessage.success('已添加问题')
-  } else {
-    await updateJianguan(detailProject.value.id, issueEditingId.value, issueForm.qingkuangshuoming.trim())
-    ElMessage.success('已保存')
-  }
-  issueDialog.value = false
-  loadDetail()
+  issueSaving.value = true
+  try {
+    if (issueEditingId.value == null) {
+      await addJianguan(detailProject.value.id, issueForm.qingkuangshuoming.trim())
+      ElMessage.success('已添加问题')
+    } else {
+      await updateJianguan(detailProject.value.id, issueEditingId.value, issueForm.qingkuangshuoming.trim())
+      ElMessage.success('已保存')
+    }
+    issueDialog.value = false
+    loadDetail()
+  } finally { issueSaving.value = false }
 }
 
 async function toggleResolve(row) {

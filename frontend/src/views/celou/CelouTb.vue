@@ -30,9 +30,8 @@ echarts.use([
 const auth = useAuthStore()
 const canManage = computed(() => auth.hasPerm('celou:manage'))
 
-// ===== 列定义(照旧 datagrid columns 顺序与文案) =====
+// ===== 列定义(照旧 datagrid columns 顺序与文案;ID 移到最后) =====
 const COLUMNS = [
-  { prop: 'ID', label: 'ID', width: 74, fixed: 'left', align: 'center' },
   { prop: 'xsbm', label: '部门', width: 100, fixed: 'left' },
   { prop: 'louliang', label: '测定漏量（m³/h）', width: 128 },
   { prop: 'gongdan', label: '工单号', width: 106, align: 'center' },
@@ -57,6 +56,7 @@ const COLUMNS = [
   { prop: 'zuobiao_weidu', label: '纬度', width: 108, align: 'right', fixed6: true, editable: true },
   { prop: 'xgusername', label: '修改人', width: 80, align: 'center' },
   { prop: 'xgdatetime', label: '修改时间', width: 152 },
+  { prop: 'ID', label: 'ID', width: 74, align: 'center' },
 ]
 
 const TABS = [
@@ -89,6 +89,7 @@ const rows = ref([])
 const total = ref(0)
 const footer = ref({ louliang: 0, qjll: 0 })
 const selected = ref([])
+const tableRef = ref(null)
 const dicts = ref({ departments: [], years: [], diameters: [], teams: [], usernames: [], coordinate_types: [], months_of_year: {} })
 const months = ref([{ value: -1, label: '==请选择月份==' }])
 
@@ -188,9 +189,6 @@ function money(v) {
 function coord(v) {
   return v === null || v === undefined || v === '' ? '' : Number(v).toFixed(6)
 }
-function rowClass({ row }) {
-  return row.yudingliang ? 'row-yuding' : ''
-}
 function summaryMethod({ columns }) {
   return columns.map((col) => {
     // 选择列只有 44px,标签放这里会竖排;改放部门列
@@ -243,6 +241,12 @@ function resetFilters() {
   loadMonths(); loadList()
 }
 function onSelectionChange(v) { selected.value = v }
+// 点击行任意位置即切换勾选(双击编辑经纬度会触发两次 click,相互抵消不影响)
+function onRowClick(row) {
+  if (editCell.value && editCell.value.id === row.ID) return  // 经纬度编辑中,点输入框不切勾选
+  tableRef.value?.toggleRowSelection(row)
+}
+function clearSelection() { tableRef.value?.clearSelection() }
 function requireSelected() {
   if (!selected.value.length) { ElMessage.warning('请先勾选记录'); return null }
   return selected.value.map((r) => r.ID)
@@ -610,27 +614,35 @@ onBeforeUnmount(() => {
         <el-select v-model="filters.celoudw" clearable placeholder="测漏单位" style="width: 210px" @change="search">
           <el-option v-for="t in dicts.teams" :key="t" :label="t" :value="t" />
         </el-select>
-        <el-button class="heat-btn" size="small" @click="openHeat">热力图</el-button>
+        <el-button class="heat-btn" @click="openHeat">热力图</el-button>
       </div>
     </el-card>
 
     <div class="toolbar">
       <template v-if="canManage">
-        <el-button type="danger" size="small" plain @click="doDelete">批量删除</el-button>
-        <el-button type="primary" size="small" @click="openUpload">上传测漏成果表</el-button>
-        <el-button size="small" @click="downloadCelouTemplate">下载测漏成果表模板</el-button>
+        <el-button type="danger" plain @click="doDelete">批量删除</el-button>
+        <el-button type="primary" @click="openUpload">上传测漏成果表</el-button>
+        <el-button @click="downloadCelouTemplate">下载测漏成果表模板</el-button>
       </template>
-      <el-button size="small" @click="openCharts">统计图表</el-button>
-      <el-button size="small" @click="doExport">导出记录</el-button>
-      <el-button v-if="canManage" size="small" @click="doBatchNonYuding">批量设为非预定</el-button>
-      <el-button size="small" text type="primary" @click="formulaDlg = true">年度节约水量公式</el-button>
+      <el-button @click="openCharts">统计图表</el-button>
+      <el-button @click="doExport">导出记录</el-button>
+      <el-button v-if="canManage" @click="doBatchNonYuding">批量设为非预定</el-button>
+      <el-button :disabled="!selected.length" @click="clearSelection">取消所有选择</el-button>
+      <el-button text type="primary" @click="formulaDlg = true">年度节约水量公式</el-button>
       <span class="toolbar-hint">共 {{ total }} 条 · 点工单号查看详情 · 合计为筛选后全量</span>
     </div>
 
-    <el-table v-loading="loading" :data="rows" border stripe size="small"
-      height="calc(100vh - 292px)" :row-class-name="rowClass"
-      show-summary :summary-method="summaryMethod" @selection-change="onSelectionChange">
+    <el-table ref="tableRef" v-loading="loading" :data="rows" border stripe size="small"
+      height="calc(100vh - 292px)"
+      show-summary :summary-method="summaryMethod" @selection-change="onSelectionChange"
+      @row-click="onRowClick">
       <el-table-column type="selection" width="44" fixed="left" />
+      <el-table-column label="预定" width="62" align="center" fixed="left">
+        <template #default="{ row }">
+          <span v-if="row.yudingliang" class="yuding-tag">预定</span>
+          <span v-else class="non-yuding-tag">非预定</span>
+        </template>
+      </el-table-column>
       <el-table-column v-for="c in COLUMNS" :key="c.prop" :prop="c.prop" :width="c.width"
         :align="c.align || 'left'" :fixed="c.fixed" :show-overflow-tooltip="c.tip">
         <template #header>
@@ -640,8 +652,8 @@ onBeforeUnmount(() => {
           <span v-else>{{ c.label }}</span>
         </template>
         <template #default="{ row }">
-          <span v-if="c.prop === 'gongdan'" class="link-like" @click="openWorkOrder(row.gongdan)">{{ row.gongdan }}</span>
-          <span v-else-if="c.prop === 'yudingliang'" class="yuding-tag">{{ row.yudingliang ? '预定量' : '' }}</span>
+          <span v-if="c.prop === 'gongdan'" class="link-like" @click.stop="openWorkOrder(row.gongdan)">{{ row.gongdan }}</span>
+          <span v-else-if="c.prop === 'yudingliang'" class="non-yuding-tag">{{ row.yudingliang ? '预定量' : '' }}</span>
           <span v-else-if="c.prop === 'qjll' || c.prop === 'louliang'">{{ money(row[c.prop]) }}</span>
           <el-input v-else-if="canManage && isCoordCell(c.prop) && isEditing(row, c.prop)"
             v-model="editVal" size="small" class="coord-edit"
@@ -835,9 +847,9 @@ onBeforeUnmount(() => {
 .celou-page :deep(.coord-edit) .el-input__wrapper { padding: 0 6px; }
 .celou-page :deep(.coord-edit) { width: 100%; }
 .yuding-tag { color: #d03050; font-weight: 600; }
+.non-yuding-tag { color: #909399; font-size: 12px; }
 .formula-head { cursor: pointer; color: #409eff; }
 .formula-icon { font-size: 12px; }
-:deep(.row-yuding) { background-color: rgba(214, 178, 94, .35) !important; color: #7a4a12; font-weight: 600; }
 .tip { color: #909399; font-size: 12px; line-height: 1.7; margin-bottom: 12px; }
 .file-name { margin-left: 8px; color: #606266; font-size: 12px; }
 .chart-layout { display: flex; gap: 12px; height: 620px; }

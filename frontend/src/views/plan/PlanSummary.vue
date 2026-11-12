@@ -110,21 +110,28 @@ async function openEdit(row) {
   formEditing.value = true
   formOpen.value = true
 }
+const saveSaving = ref(false)
 async function onSave(payload, action) {
-  let r
-  if (formEditing.value) {
-    r = await updateSummary(editId.value, { ...payload, approve: action === 'approve' })
-    if (r.ok && r.approve) await changeSummaryStatus({ ids: [editId.value], zt: '售水通过', iftel: false })
-  } else {
-    r = await createSummary(payload)
-  }
-  if (!r.ok) return ElMessage.warning(r.message)
-  ElMessage.success(r.message || '保存成功')
-  formOpen.value = false
-  load()
+  if (saveSaving.value) return  // 防双击重复提交
+  saveSaving.value = true
+  try {
+    let r
+    if (formEditing.value) {
+      r = await updateSummary(editId.value, { ...payload, approve: action === 'approve' })
+      if (r.ok && r.approve) await changeSummaryStatus({ ids: [editId.value], zt: '售水通过', iftel: false })
+    } else {
+      r = await createSummary(payload)
+    }
+    if (!r.ok) return ElMessage.warning(r.message)
+    ElMessage.success(r.message || '保存成功')
+    formOpen.value = false
+    load()
+  } finally { saveSaving.value = false }
 }
 
+const returnSaving = ref(false)
 async function onReturnFromForm(payload) {
+  if (returnSaving.value) return  // 防双击重复提交
   let pizhu = ''
   try {
     const { value } = await ElMessageBox.prompt('可填写回退批注（选填）', '回退营业所', {
@@ -132,14 +139,17 @@ async function onReturnFromForm(payload) {
     })
     pizhu = value || ''
   } catch { return }
-  // 照旧:先保存弹窗修改,再回退营业所
-  const saved = await updateSummary(editId.value, { ...payload, approve: false })
-  if (!saved.ok) return ElMessage.warning(saved.message)
-  const r = await changeSummaryStatus({ ids: [editId.value], zt: '已回退', iftel: false, pizhu })
-  if (!r.ok) return ElMessage.warning(r.message)
-  ElMessage.success(r.message)
-  formOpen.value = false
-  load()
+  returnSaving.value = true
+  try {
+    // 照旧:先保存弹窗修改,再回退营业所
+    const saved = await updateSummary(editId.value, { ...payload, approve: false })
+    if (!saved.ok) return ElMessage.warning(saved.message)
+    const r = await changeSummaryStatus({ ids: [editId.value], zt: '已回退', iftel: false, pizhu })
+    if (!r.ok) return ElMessage.warning(r.message)
+    ElMessage.success(r.message)
+    formOpen.value = false
+    load()
+  } finally { returnSaving.value = false }
 }
 
 // ===== 确认弹窗(短信通知/批注) =====

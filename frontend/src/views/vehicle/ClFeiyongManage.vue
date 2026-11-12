@@ -88,6 +88,7 @@ async function fetchUnits(q, cb) {
 // ===== 添加 / 编辑(照旧 #addDiv / #editDiv) =====
 const dialog = ref(false)
 const editingId = ref(null)
+const saving = ref(false)
 const formRef = ref()
 const blankForm = () => ({
   cheid: null, lx: '洗车', dw: '', fangshi: '', jingshou: '',
@@ -129,13 +130,17 @@ function buildPayload() {
   }
 }
 async function submitForm() {
-  await formRef.value.validate()
-  const payload = buildPayload()
-  if (editingId.value) await updateClFeiyong(editingId.value, payload)
-  else await createClFeiyong(payload)
-  ElMessage.success(editingId.value ? '修改成功' : '添加成功')
-  dialog.value = false
-  load()
+  if (saving.value) return  // 防双击重复提交
+  saving.value = true
+  try {
+    await formRef.value.validate()
+    const payload = buildPayload()
+    if (editingId.value) await updateClFeiyong(editingId.value, payload)
+    else await createClFeiyong(payload)
+    ElMessage.success(editingId.value ? '修改成功' : '添加成功')
+    dialog.value = false
+    load()
+  } finally { saving.value = false }
 }
 
 // ===== 删除 / 下载记录(照旧 Deletegz / loadexcel) =====

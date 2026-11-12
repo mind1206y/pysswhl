@@ -133,6 +133,7 @@ function rowClass({ row }) {
 }
 
 const memoVisible = ref(false)
+const memoSaving = ref(false)
 const memoForm = reactive({ id: null, bz: '', name: '' })
 
 function openMemo(row) {
@@ -143,10 +144,16 @@ function openMemo(row) {
 }
 
 async function saveMemo() {
-  await updateMemo(memoForm.id, memoForm.bz)
-  memoVisible.value = false
-  ElMessage.success('已修改记录')
-  load()
+  if (memoSaving.value) return  // 防双击重复提交
+  memoSaving.value = true
+  try {
+    await updateMemo(memoForm.id, memoForm.bz)
+    memoVisible.value = false
+    ElMessage.success('已修改记录')
+    load()
+  } finally {
+    memoSaving.value = false
+  }
 }
 
 async function doExport() {

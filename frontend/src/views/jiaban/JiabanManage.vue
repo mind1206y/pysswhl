@@ -390,6 +390,7 @@ function validateForm() {
 }
 
 async function submit() {
+  if (saving.value) return   // 防双击重复提交(会添加多条记录)
   const err = validateForm()
   if (err) { ElMessage.warning(err); return }
   saving.value = true
@@ -535,6 +536,7 @@ function renSearch() { renPage.value = 1; loadRenyuan() }
 function renPageChange(v) { renPage.value = v; loadRenyuan() }
 function renSizeChange(v) { renPageSize.value = v; renPage.value = 1; loadRenyuan() }
 async function renSave() {
+  if (renSaving.value) return  // 防双击重复提交
   if (!renForm.name.trim() || !renForm.bmlb.trim()) {
     ElMessage.warning('姓名和部门类别不能为空')
     return

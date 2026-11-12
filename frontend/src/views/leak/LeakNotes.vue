@@ -693,15 +693,19 @@ function buildFlowRemark() {
   return `原漏量值：${raw.toFixed(2)} m³/h，因配合排查，最终值为：${adjusted.toFixed(2)} m³/h`
 }
 
+const saving = ref(false)
 async function saveRecord() {
+  if (saving.value) return   // 防双击重复提交(会添加两条记录)
   if (!formRef.value) return
+  saving.value = true
   const ok = await formRef.value.validate().catch(() => false)
-  if (!ok) return
+  if (!ok) { saving.value = false; return }
   if (uploadingCount.value > 0) {
     ElMessage.warning('附件仍在上传，请稍候')
+    saving.value = false
     return
   }
-  if (!validateMethod()) return
+  if (!validateMethod()) { saving.value = false; return }
 
   refreshCalculation()
   const flowRemark = buildFlowRemark()
@@ -758,6 +762,8 @@ async function saveRecord() {
     loadList()
   } catch (err) {
     ElMessage.error(err?.response?.data?.detail || '保存失败')
+  } finally {
+    saving.value = false
   }
 }
 
@@ -1214,7 +1220,7 @@ onMounted(() => {
 
       <template #footer>
         <el-button @click="formDlg = false">取消</el-button>
-        <el-button type="primary" :loading="false" @click="saveRecord">提交保存</el-button>
+        <el-button type="primary" :loading="saving" @click="saveRecord">提交保存</el-button>
       </template>
     </el-dialog>
 

@@ -109,6 +109,7 @@ async function toggleLock(row, checked) {
 // ===== 新增 / 编辑 =====
 const dialogVisible = ref(false)
 const dialogTitle = ref('')
+const submitSaving = ref(false)
 const dialogTab = ref('reg')
 const editingId = ref(null)
 const formRef = ref()
@@ -312,42 +313,48 @@ async function removeExistingAttachment(tp) {
 }
 
 async function submit() {
+  if (submitSaving.value) return  // 防双击重复提交
   try {
     await formRef.value.validate()
   } catch {
     return
   }
-  const payload = {
-    ...form,
-    niandu: Number(form.niandu),
-    bumenid: form.bumenid || null,
-    jine: toNumber(form.jine),
-    kongzhijia: toNumber(form.kongzhijia),
-    qddate: form.qddate || null,
-    ssdate: form.ssdate || null,
-    zzdate: form.zzdate || null,
-    suppliers: supplierPayload(),
+  submitSaving.value = true
+  try {
+    const payload = {
+      ...form,
+      niandu: Number(form.niandu),
+      bumenid: form.bumenid || null,
+      jine: toNumber(form.jine),
+      kongzhijia: toNumber(form.kongzhijia),
+      qddate: form.qddate || null,
+      ssdate: form.ssdate || null,
+      zzdate: form.zzdate || null,
+      suppliers: supplierPayload(),
+    }
+    let id = editingId.value
+    let created = null
+    if (id) {
+      await updateContract(id, payload)
+    } else {
+      created = await createContract(payload)
+      id = created.id
+      editingId.value = id
+    }
+    if (localFiles.value.length) {
+      await uploadContractAttachments(id, localFiles.value.map((f) => f.raw))
+    }
+    dialogVisible.value = false
+    if (created) {
+      ElMessage.success(`添加成功!本次合同编号为:${created.allbh}`)
+    } else {
+      ElMessage.success('已修改记录')
+    }
+    load()
+    refreshYears()
+  } finally {
+    submitSaving.value = false
   }
-  let id = editingId.value
-  let created = null
-  if (id) {
-    await updateContract(id, payload)
-  } else {
-    created = await createContract(payload)
-    id = created.id
-    editingId.value = id
-  }
-  if (localFiles.value.length) {
-    await uploadContractAttachments(id, localFiles.value.map((f) => f.raw))
-  }
-  dialogVisible.value = false
-  if (created) {
-    ElMessage.success(`添加成功!本次合同编号为:${created.allbh}`)
-  } else {
-    ElMessage.success('已修改记录')
-  }
-  load()
-  refreshYears()
 }
 
 async function removeContract() {

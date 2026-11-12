@@ -75,6 +75,7 @@ onMounted(async () => {
 // ===== 新增 / 编辑 =====
 const editVisible = ref(false)
 const editingId = ref(null)
+const editSaving = ref(false)
 const formRef = ref()
 const blankForm = () => ({
   kanum: '', yanzhengma: '', carid: null, youpin: '', zt: '正常', bz: '', handadd: 0,
@@ -101,14 +102,18 @@ async function openEdit(row) {
   editVisible.value = true
 }
 async function submitEdit() {
-  await formRef.value.validate()
-  const payload = { ...form }
-  if (!payload.carid) payload.carid = null
-  if (editingId.value) await updateOilCard(editingId.value, payload)
-  else await createOilCard(payload)
-  ElMessage.success(editingId.value ? '修改成功' : '添加成功')
-  editVisible.value = false
-  load()
+  if (editSaving.value) return  // 防双击重复提交
+  editSaving.value = true
+  try {
+    await formRef.value.validate()
+    const payload = { ...form }
+    if (!payload.carid) payload.carid = null
+    if (editingId.value) await updateOilCard(editingId.value, payload)
+    else await createOilCard(payload)
+    ElMessage.success(editingId.value ? '修改成功' : '添加成功')
+    editVisible.value = false
+    load()
+  } finally { editSaving.value = false }
 }
 async function doDelete() {
   if (!selected.value) { ElMessage.warning('请先选择要删除的油卡'); return }

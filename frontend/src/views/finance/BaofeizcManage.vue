@@ -125,15 +125,16 @@ async function openEdit(row) {
   nextTick(() => formRef.value?.clearValidate())
 }
 async function submitForm() {
-  activeTab.value = 'info'
-  await nextTick()
-  try { await formRef.value.validate() } catch { return }
-  const payload = {
-    riqi: form.riqi || null, bmid: form.bmid,
-    zaiyao: form.zaiyao || '', images: images.value.map((x) => x.dizhi),
-  }
+  if (saving.value) return  // 防双击重复提交
   saving.value = true
   try {
+    activeTab.value = 'info'
+    await nextTick()
+    try { await formRef.value.validate() } catch { return }
+    const payload = {
+      riqi: form.riqi || null, bmid: form.bmid,
+      zaiyao: form.zaiyao || '', images: images.value.map((x) => x.dizhi),
+    }
     if (editingId.value) await updateBaofeizc(editingId.value, payload)
     else await createBaofeizc(payload)
     ElMessage.success(editingId.value ? '修改成功' : '添加成功')
@@ -196,6 +197,8 @@ const candTotal = ref(0)
 const candPage = ref(1)
 const candSize = ref(10)
 const candLoading = ref(false)
+const candAddSaving = ref(false)
+const candCancelSaving = ref(false)
 
 function openCandidates(row) {
   candBfid.value = row.id
@@ -217,14 +220,22 @@ async function loadCandidates() {
 }
 function searchCandidates() { candPage.value = 1; loadCandidates() }
 async function addCandidate(sub) {
-  await addBaofeizcMx({ id: sub.id, bfid: candBfid.value })
-  ElMessage.success('已加入报废')
-  await Promise.all([loadCandidates(), load()])
+  if (candAddSaving.value) return  // 防双击重复提交
+  candAddSaving.value = true
+  try {
+    await addBaofeizcMx({ id: sub.id, bfid: candBfid.value })
+    ElMessage.success('已加入报废')
+    await Promise.all([loadCandidates(), load()])
+  } finally { candAddSaving.value = false }
 }
 async function cancelCandidate(sub) {
-  await deleteBaofeizcMx({ id: sub.id })
-  ElMessage.success('已取消报废')
-  await Promise.all([loadCandidates(), load()])
+  if (candCancelSaving.value) return  // 防双击重复提交
+  candCancelSaving.value = true
+  try {
+    await deleteBaofeizcMx({ id: sub.id })
+    ElMessage.success('已取消报废')
+    await Promise.all([loadCandidates(), load()])
+  } finally { candCancelSaving.value = false }
 }
 </script>
 

@@ -227,6 +227,7 @@ async function openLogs(id, source = 'shuifeixitong') {
 // ===== 新增 / 编辑(照旧系统五页签编辑弹窗) =====
 const editDialog = ref(false)
 const editingId = ref(null)
+const editSaving = ref(false)
 const editFormRef = ref()
 const editTab = ref('input')
 const blankForm = () => ({
@@ -313,16 +314,20 @@ function openEdit(row) {
 }
 
 async function submitEdit() {
-  await editFormRef.value.validate()
-  if (editingId.value == null) {
-    await createWaterFee(buildPayload())
-    ElMessage.success('已新增')
-  } else {
-    const r = await updateWaterFee(editingId.value, buildPayload())
-    ElMessage.success(`已保存,变更 ${r.log_added} 处`)
-  }
-  editDialog.value = false
-  load()
+  if (editSaving.value) return  // 防双击重复提交
+  editSaving.value = true
+  try {
+    await editFormRef.value.validate()
+    if (editingId.value == null) {
+      await createWaterFee(buildPayload())
+      ElMessage.success('已新增')
+    } else {
+      const r = await updateWaterFee(editingId.value, buildPayload())
+      ElMessage.success(`已保存,变更 ${r.log_added} 处`)
+    }
+    editDialog.value = false
+    load()
+  } finally { editSaving.value = false }
 }
 
 // 提取当前信息到历史记录(照旧:快照的是编辑弹窗表单当前值,不是库里的旧值)
@@ -571,6 +576,7 @@ const bdMohu = ref('')
 const bdDeptSel = ref(null)
 const bdEditDialog = ref(false)
 const bdEditingId = ref(null)
+const bdSaving = ref(false)
 const blankBdForm = () => ({
   yonghuhao: '', qitayongshui: '', beizhu: '', yueshu: null, juzhudizhi: '',
   daoruqingkuang: '', guitaishouli: '', fanhuiminzhengju: '否',
@@ -623,15 +629,19 @@ function openBdEdit(row) {
 }
 
 async function submitBdEdit() {
-  const payload = {}
-  for (const k of Object.keys(bdForm)) {
-    const v = bdForm[k]
-    payload[k] = v === '' ? null : v
-  }
-  const r = await updateBiandong(bdEditingId.value, payload)
-  ElMessage.success(`已保存,变更 ${r.log_added} 处`)
-  bdEditDialog.value = false
-  loadBiandong()
+  if (bdSaving.value) return  // 防双击重复提交
+  bdSaving.value = true
+  try {
+    const payload = {}
+    for (const k of Object.keys(bdForm)) {
+      const v = bdForm[k]
+      payload[k] = v === '' ? null : v
+    }
+    const r = await updateBiandong(bdEditingId.value, payload)
+    ElMessage.success(`已保存,变更 ${r.log_added} 处`)
+    bdEditDialog.value = false
+    loadBiandong()
+  } finally { bdSaving.value = false }
 }
 
 async function removeBdBatch() {

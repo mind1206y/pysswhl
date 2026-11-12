@@ -240,18 +240,23 @@ function openEdit(row) {
   dialogVisible.value = true
 }
 
+const submitSaving = ref(false)
 async function submitForm() {
-  await formRef.value.validate()
-  const payload = { ...form }
-  if (editing.value) {
-    await updateSimCard(editing.value.id, payload)
-    ElMessage.success('修改成功')
-  } else {
-    await createSimCard(payload)
-    ElMessage.success('成功添加卡号')
-  }
-  dialogVisible.value = false
-  await load()
+  if (submitSaving.value) return  // 防双击重复提交
+  submitSaving.value = true
+  try {
+    await formRef.value.validate()
+    const payload = { ...form }
+    if (editing.value) {
+      await updateSimCard(editing.value.id, payload)
+      ElMessage.success('修改成功')
+    } else {
+      await createSimCard(payload)
+      ElMessage.success('成功添加卡号')
+    }
+    dialogVisible.value = false
+    await load()
+  } finally { submitSaving.value = false }
 }
 
 async function doDelete() {

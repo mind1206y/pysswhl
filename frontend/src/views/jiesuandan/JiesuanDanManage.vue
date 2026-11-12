@@ -181,6 +181,7 @@ async function openEdit(row) {
 }
 
 async function submitSave() {
+  if (saving.value) return  // 防双击重复提交
   if (!saveForm.jiesuanriqi) return ElMessage.warning('请选择结算日期')
   saving.value = true
   try {
@@ -218,6 +219,7 @@ async function removeOrder() {
 // ==================== 结算明细 ====================
 const editingId = ref(0)
 const editDetail = reactive({ num: 0, danjia: 0 })
+const detailSaving = ref(false)
 
 function startEditDetail(row) {
   editingId.value = row.id
@@ -230,13 +232,17 @@ function cancelEditDetail() {
 }
 
 async function saveDetail(row) {
+  if (detailSaving.value) return  // 防双击重复提交
   if (!editDetail.num || editDetail.num <= 0) return ElMessage.warning('数量不能为0或空')
   if (!editDetail.danjia || editDetail.danjia <= 0) return ElMessage.warning('单价不能为0或空')
-  await updateJiesuanDetail(row.id, { num: editDetail.num, danjia: editDetail.danjia })
-  ElMessage.success('明细已保存')
-  editingId.value = 0
-  await load()
-  await loadDetails(currentRow.value.id)
+  detailSaving.value = true
+  try {
+    await updateJiesuanDetail(row.id, { num: editDetail.num, danjia: editDetail.danjia })
+    ElMessage.success('明细已保存')
+    editingId.value = 0
+    await load()
+    await loadDetails(currentRow.value.id)
+  } finally { detailSaving.value = false }
 }
 
 async function removeDetail(row) {
@@ -256,6 +262,7 @@ const cand = reactive({
   selected: {}, edits: {},
 })
 const candTable = ref(null)
+const candAddSaving = ref(false)
 let restoring = false
 
 function candidateQuery() {
@@ -341,6 +348,7 @@ const candTotal = computed(() => {
 })
 
 async function addSelectedCandidates() {
+  if (candAddSaving.value) return  // 防双击重复提交
   const ids = Object.keys(cand.selected)
   if (!ids.length) return ElMessage.warning('请选择明细')
   const list = []
@@ -357,12 +365,15 @@ async function addSelectedCandidates() {
     }
     list.push({ LingliaoDetailId: Number(id), Num: num, Danjia: price })
   }
-  await addJiesuanDetails(cand.orderId, list)
-  ElMessage.success('结算明细保存成功')
-  cand.dlg = false
-  cand.selected = {}
-  cand.edits = {}
-  await refreshCurrent(cand.orderId)
+  candAddSaving.value = true
+  try {
+    await addJiesuanDetails(cand.orderId, list)
+    ElMessage.success('结算明细保存成功')
+    cand.dlg = false
+    cand.selected = {}
+    cand.edits = {}
+    await refreshCurrent(cand.orderId)
+  } finally { candAddSaving.value = false }
 }
 
 // ==================== 采购单据 ====================

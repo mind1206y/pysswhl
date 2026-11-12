@@ -162,6 +162,7 @@ async function dlYs() {
 // ===== 添加 / 编辑弹窗 =====
 const formDialog = ref(false)
 const editingId = ref(null)
+const submitSaving = ref(false)
 const importInput = ref(null)
 const mxWrap = ref(null)
 const form = reactive({ bumen: '', sgyy: '', mx: [] })
@@ -250,20 +251,24 @@ async function onImportChange(e) {
   } catch { ElMessage.error('导入失败，请使用明细模板') }
 }
 async function submitForm() {
-  const mx = form.mx
-    .filter((r) => (r.wpmc || '').trim())
-    .map((r) => ({
-      wpmc: (r.wpmc || '').trim(), ggxh: r.ggxh || '', danwei: r.danwei || '',
-      shuliang: Number(r.shuliang || 0), danjia: Number(r.danjia || 0),
-      ysqk: r.ysqk || '完成', beizhu: r.beizhu || '',
-    }))
-  if (!mx.length) { ElMessage.warning('请至少填写一条物品明细'); return }
-  const payload = { bumen: (form.bumen || '').trim(), sgyy: (form.sgyy || '').trim(), mx }
-  if (editingId.value) await updateWzcgsq(editingId.value, payload)
-  else await createWzcgsq(payload)
-  ElMessage.success(editingId.value ? '修改成功' : '添加成功')
-  formDialog.value = false
-  load()
+  if (submitSaving.value) return  // 防双击重复提交
+  submitSaving.value = true
+  try {
+    const mx = form.mx
+      .filter((r) => (r.wpmc || '').trim())
+      .map((r) => ({
+        wpmc: (r.wpmc || '').trim(), ggxh: r.ggxh || '', danwei: r.danwei || '',
+        shuliang: Number(r.shuliang || 0), danjia: Number(r.danjia || 0),
+        ysqk: r.ysqk || '完成', beizhu: r.beizhu || '',
+      }))
+    if (!mx.length) { ElMessage.warning('请至少填写一条物品明细'); return }
+    const payload = { bumen: (form.bumen || '').trim(), sgyy: (form.sgyy || '').trim(), mx }
+    if (editingId.value) await updateWzcgsq(editingId.value, payload)
+    else await createWzcgsq(payload)
+    ElMessage.success(editingId.value ? '修改成功' : '添加成功')
+    formDialog.value = false
+    load()
+  } finally { submitSaving.value = false }
 }
 async function doDelete(row) {
   try {

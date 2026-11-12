@@ -3,7 +3,7 @@
  * 工单信息录入 —— 照旧 Gongdan/Index.cshtml 1:1 复刻
  * 顶部: 标题(含记录数) + 查询带(模糊/按登记日期/重复/非重复/日期/管径/部门)
  * 中部: 5 个工具栏按钮 + 17 列主表(大管径行浅红、工单号可点开详情抽屉、关键字高亮)
- * 弹窗: 新增/编辑(两列表单、工单号失焦带出、字典可删选项、主材点击看领料明细)
+ * 弹窗: 新增/编辑(两列表单、添加时工单号失焦清空后带出、字典可删选项、主材点击看领料明细)
  *      抢修班组名单(增删改)、领料明细、右侧工单详情抽屉(含现场图片)
  */
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
@@ -303,7 +303,17 @@ watch(() => [form.ksriqi, form.jsriqi], () => {
   calcMinute()
 })
 
-// 工单号失焦:内网工单带出开始/结束/地址/主材 + 查重提示
+// 工单号失焦:查到内网工单后清空查询相关字段并回填开始/结束/地址/主材,
+// 查不到(内网无此单/接口失败)只清查询相关字段;工作内容/管径/抢修班组等手填值始终保留;
+// 编辑弹窗不清空,避免毁掉正在编辑的记录
+function clearQueryFields() {
+  // 注意:neirong / guanjing / qiangxiurenyuan 是用户手填、需要记住的值,刻意不清
+  Object.assign(form, {
+    ksriqi: '', jsriqi: '', shijian: null, tingshui: '',
+    dizhi: '', caizhi: '', shuiliang: null, cailiao: '', beizhu: '',
+  })
+  Object.assign(dt, { ksDate: '', ksTime: '', jsDate: '', jsTime: '' })
+}
 async function onNoBlur() {
   const no = form.gongdanhao.trim()
   if (!no) return
@@ -313,6 +323,10 @@ async function onNoBlur() {
       ElMessageBox.alert('该工单号已存在记录（但可继续使用）', '提示', { type: 'info' })
     }
     const d = res.data || {}
+    if (dialogMode.value === 'add') {
+      // 查到内网工单:先清空查询相关字段再回填,避免上一次查询残留(手填三字段保留)
+      clearQueryFields()
+    }
     form.ksriqi = normalizeDt(d.ksriqi)
     form.jsriqi = normalizeDt(d.jsriqi)
     setDt('ks', form.ksriqi)
@@ -320,9 +334,8 @@ async function onNoBlur() {
     form.dizhi = d.dizhi || ''
     form.cailiao = d.cailiao || ''
   } catch {
-    form.ksriqi = ''; form.jsriqi = ''; form.dizhi = ''
-    setDt('ks', ''); setDt('js', '')
-    form.shijian = null
+    // 接口失败:同样只清查询相关字段(含主材,防旧料带入新单),手填三字段保留
+    clearQueryFields()
   }
 }
 
@@ -334,6 +347,7 @@ function validateForm() {
   return ''
 }
 async function submit(continueAdding = false) {
+  if (saving.value) return   // 正在提交中,忽略重复点击(双击会导致重复添加)
   const err = validateForm()
   if (err) { ElMessage.error(err); return }
   saving.value = true
@@ -412,6 +426,7 @@ const qxKeyword = ref('')
 const qxName = ref('')
 const qxSelected = ref(null)
 const qxLoading = ref(false)
+const qxAddSaving = ref(false)
 async function loadQx() {
   qxLoading.value = true
   try { qxRows.value = await listQiangxiu(qxKeyword.value.trim()) }
@@ -424,7 +439,9 @@ async function openQx() {
   await loadDicts()
 }
 async function qxAdd() {
+  if (qxAddSaving.value) return  // 防双击重复提交
   if (!qxName.value.trim()) { ElMessage.warning('请输入姓名'); return }
+  qxAddSaving.value = true
   try {
     await addQiangxiu(qxName.value.trim())
     qxName.value = ''
@@ -433,6 +450,7 @@ async function qxAdd() {
     await loadDicts()
     ElMessage.success('已新增')
   } catch { /* 拦截器已提示 */ }
+  finally { qxAddSaving.value = false }
 }
 async function qxEdit() {
   if (!qxSelected.value) { ElMessage.warning('请选择记录'); return }
