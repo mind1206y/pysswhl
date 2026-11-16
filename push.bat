@@ -31,12 +31,14 @@ echo OK
 
 echo.
 echo [2/5] Commit changes...
+set "NEWCOMMIT=0"
 git add -A
 git commit -q -m "chore: auto backup %TS%"
 if %errorlevel% equ 0 (
+    set "NEWCOMMIT=1"
     echo OK
 ) else (
-    echo Nothing to commit
+    echo Nothing to commit ^(no file changes^)
 )
 
 echo.
@@ -76,9 +78,13 @@ echo OK
 
 echo.
 echo ========================================
-echo   All done!  HEAD:
+echo   All done!  %TS%
 echo ========================================
-git log --oneline -1
+if "%NEWCOMMIT%"=="1" (
+    git log -1 --format="  new commit  %%h  %%s"
+) else (
+    git log -1 --format="  no new commit, HEAD stays at %%h"
+)
 
 popd
 echo.
