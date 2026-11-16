@@ -16,33 +16,23 @@ if %errorlevel% neq 0 (
 for /f %%i in ('powershell -NoProfile -Command "Get-Date -Format yyyy-MM-dd_HH:mm:ss"') do set "TS=%%i"
 
 echo ========================================
-echo   pysswhl - Git Backup ^& Dual Push
-echo   %TS%
+echo Git Push - Dual Remote
 echo ========================================
-echo.
 
-echo [1/5] Ensure local bare backup repo...
-if not exist "%BARE%" (
-    git init --bare "%BARE%"
-    echo   created %BARE%
-)
+rem keep origin remote usable: create the bare backup repo on first run (silent)
+if not exist "%BARE%" git init --bare "%BARE%" >nul 2>nul
 git --git-dir="%BARE%" symbolic-ref HEAD refs/heads/main >nul 2>nul
-echo OK
 
-echo.
-echo [2/5] Commit changes...
-set "NEWCOMMIT=0"
+echo [1/4] Commit changes...
 git add -A
-git commit -q -m "chore: auto backup %TS%"
+git commit -m "chore: auto backup %TS%"
 if %errorlevel% equ 0 (
-    set "NEWCOMMIT=1"
     echo OK
 ) else (
-    echo Nothing to commit ^(no file changes^)
+    echo Nothing to commit / commit failed
 )
 
-echo.
-echo [3/5] Local backup ^(origin: %BARE%^)...
+echo [2/4] Local backup ^(git^)...
 git push origin main
 if %errorlevel% neq 0 (
     echo Local backup FAILED!
@@ -52,8 +42,7 @@ if %errorlevel% neq 0 (
 )
 echo OK
 
-echo.
-echo [4/5] GitHub...
+echo [3/4] GitHub...
 git push github main:github-clean
 if %errorlevel% neq 0 (
     echo GitHub push FAILED!
@@ -63,8 +52,7 @@ if %errorlevel% neq 0 (
 )
 echo OK
 
-echo.
-echo [5/5] File backup ^(config / secret / db artifacts^)...
+echo [4/4] File backup...
 if not exist "%BACKUP%" mkdir "%BACKUP%"
 copy /y backend\.env "%BACKUP%\.env" >nul 2>nul
 copy /y backend\.env.example "%BACKUP%\.env.example" >nul 2>nul
@@ -76,16 +64,9 @@ copy /y *.tar.gz "%BACKUP%\artifacts\" >nul 2>nul
 copy /y *.sql.gz "%BACKUP%\artifacts\" >nul 2>nul
 echo OK
 
-echo.
 echo ========================================
-echo   All done!  %TS%
+echo All done!
 echo ========================================
-if "%NEWCOMMIT%"=="1" (
-    git log -1 --format="  new commit  %%h  %%s"
-) else (
-    git log -1 --format="  no new commit, HEAD stays at %%h"
-)
 
 popd
-echo.
 pause

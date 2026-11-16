@@ -16,7 +16,7 @@
 - 权限码 `scripts/init_db.py`；菜单/路由 `router/index.js` + `MainLayout.vue`；文档 `docs/权限控制机制.md`、`docs/数据迁移约定.md`。图片：旧 `/Upload/...` 多缺失→占位/404；列表图走短令牌 URL（`create_short_token`），⛔登录令牌别进 URL；黑名单照 UploadGuard、10MB。
 
 ### Git 备份 / 双远程推送（2026-11-09）
-- 入口 `E:\pysswhl\push.bat`（纯 ASCII + CRLF），桌面 `push-pysswhl.bat` 只 `call` 它。流程：缺则建裸库 `E:/pysswhl-backup.git` 并把 HEAD 指 `refs/heads/main`（原 HEAD=master→clone 出空分支）→ `git add -A` + 时间戳提交 → push `origin main` → push `github main:github-clean`（`mind1206y/pysswhl.git`）→ 备份 `backend/.env`、`.env.example`、`rsa_key.pem` 到 `E:\pysswhl-backup\`，并 `robocopy deploy\import` + 根目录 `*.tar.gz`/`*.sql.gz` 到 `E:\pysswhl-backup\artifacts`（2026-11-16 起）。
+- 入口 `E:\pysswhl\push.bat`（纯 ASCII + CRLF），桌面 `push-pysswhl.bat` 只 `call` 它。流程：缺则建裸库 `E:/pysswhl-backup.git` 并把 HEAD 指 `refs/heads/main`（原 HEAD=master→clone 出空分支；2026-11-16 起改为**静默前置**，不占步骤号）→ `git add -A` + 时间戳提交 → push `origin main` → push `github main:github-clean`（`mind1206y/pysswhl.git`）→ 备份 `backend/.env`、`.env.example`、`rsa_key.pem` 到 `E:\pysswhl-backup\`，并 `robocopy deploy\import` + 根目录 `*.tar.gz`/`*.sql.gz` 到 `E:\pysswhl-backup\artifacts`（2026-11-16 起）。
 - ⛔ **数据库 dump / 发版包一律不进 Git**（`.gitignore` 已加 `*.sql`、`*.sql.gz`、`*.tar.gz`、`deploy/import/`）：`deploy/import/sswhl_new.sql` 122MB 撞 GitHub 100MB 硬限，第一次只在 push 的最后一步炸（接收端 pre-receive 校验，本地无提示）。再遇到同类报错：只改 tip 提交（`reset --soft HEAD~1` → `git rm -r --cached` → 重新 commit → 裸库打标签留档再 `-f` 推 origin），别急着重写全历史。
 - ⛔本环境 Bash/PowerShell 均禁 `cmd /c`，.bat 无法代跑，只能人工双击验证。`.vscode/`、`.zcode/`、`*.bak`、`*.log` 已忽略；`.workbuddy/` 入库（项目记忆随备份走）。
 
