@@ -62,11 +62,16 @@ if %errorlevel% neq 0 (
 echo OK
 
 echo.
-echo [5/5] File backup ^(config / secret^)...
+echo [5/5] File backup ^(config / secret / db artifacts^)...
 if not exist "%BACKUP%" mkdir "%BACKUP%"
 copy /y backend\.env "%BACKUP%\.env" >nul 2>nul
 copy /y backend\.env.example "%BACKUP%\.env.example" >nul 2>nul
 copy /y backend\rsa_key.pem "%BACKUP%\rsa_key.pem" >nul 2>nul
+rem .gitignore excludes db dumps / release tarballs (github 100MB limit), back them up as files
+if not exist "%BACKUP%\artifacts" mkdir "%BACKUP%\artifacts"
+if exist deploy\import robocopy deploy\import "%BACKUP%\artifacts" /E /NFL /NDL /NJH /NJS /NP >nul 2>nul
+copy /y *.tar.gz "%BACKUP%\artifacts\" >nul 2>nul
+copy /y *.sql.gz "%BACKUP%\artifacts\" >nul 2>nul
 echo OK
 
 echo.
