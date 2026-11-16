@@ -23,6 +23,14 @@ NOPERM = "smoke_fin_noperm"
 DEPT_USER = "smoke_fin_dept"
 WZ_USER = "smoke_fin_wz"
 
+# 迁移数据基线:旧系统仍在录数,每次从旧库同步增量后按新库实际值更新这里即可。
+# 2026-11-16 全库补数后复核:报废单 176->181、采购申请 1->2(明细 1->13)。
+BASE = {
+    "zc_lb": 29, "zc_nd": 4, "zc_cw": 41383,
+    "zc_baofeidan": 181, "zc_baofeitp": 208,
+    "wzcgsq": 2, "wzcgsq_mx": 13, "wzcgsq_sum": 1115.0,
+}
+
 
 def check(name, cond, extra=""):
     global PASS, FAIL
@@ -159,12 +167,14 @@ def main():
     }
     db.close()
     print("\n[1] 迁移基线")
-    check("固定资产类别 29", baseline["zc_lb"] == 29, baseline)
-    check("固定资产台账 41383", baseline["zc_cw"] == 41383, baseline)
-    check("报废单 176 / 图片 208", baseline["zc_baofeidan"] == 176
-          and baseline["zc_baofeitp"] == 208, baseline)
-    check("采购申请 1 / 明细 1", baseline["wzcgsq"] == 1
-          and baseline["wzcgsq_mx"] == 1, baseline)
+    check(f"固定资产类别 {BASE['zc_lb']}", baseline["zc_lb"] == BASE["zc_lb"], baseline)
+    check(f"固定资产台账 {BASE['zc_cw']}", baseline["zc_cw"] == BASE["zc_cw"], baseline)
+    check(f"报废单 {BASE['zc_baofeidan']} / 图片 {BASE['zc_baofeitp']}",
+          baseline["zc_baofeidan"] == BASE["zc_baofeidan"]
+          and baseline["zc_baofeitp"] == BASE["zc_baofeitp"], baseline)
+    check(f"采购申请 {BASE['wzcgsq']} / 明细 {BASE['wzcgsq_mx']}",
+          baseline["wzcgsq"] == BASE["wzcgsq"]
+          and baseline["wzcgsq_mx"] == BASE["wzcgsq_mx"], baseline)
 
     print("\n[2] 权限码")
     for path in ("/api/gdzc/dicts", "/api/baofeizc/dicts", "/api/wzcgsq/dicts"):
@@ -256,7 +266,8 @@ def main():
     check("字典含默认日期与部门", bd["default_start"].endswith("-01-01")
           and bd["departments"])
     bl = client.get("/api/baofeizc", params={"page": 1, "size": 20}, headers=H).json()
-    check("报废单列表", bl["total"] == 176 and len(bl["items"]) == 20, bl["total"])
+    check("报废单列表", bl["total"] == BASE["zc_baofeidan"] and len(bl["items"]) == 20,
+          bl["total"])
     check("行含报废条数/部门/图片", all("ts" in x and "bm" in x and "tps" in x
                                      for x in bl["items"]))
     bm = client.get("/api/baofeizc", params={"keyword": "泵"}, headers=H).json()
@@ -311,8 +322,10 @@ def main():
     wd = client.get("/api/wzcgsq/dicts", headers=H).json()
     check("字典含范围部门/年度", wd["departments"] and len(wd["years"]) == 6)
     wl = client.get("/api/wzcgsq", params={"scope": "all"}, headers=H).json()
-    check("列表(含迁入的 1 条历史单)", wl["total"] == 1 and wl["sum_hj"] == 446.0, wl)
-    check("历史单明细数", wl["items"][0]["mxcount"] == 1, wl["items"])
+    check(f"列表(含迁入的 {BASE['wzcgsq']} 条历史单)",
+          wl["total"] == BASE["wzcgsq"] and wl["sum_hj"] == BASE["wzcgsq_sum"], wl)
+    check("历史单明细数",
+          sum(x["mxcount"] for x in wl["items"]) == BASE["wzcgsq_mx"], wl["items"])
     tpl = client.get("/api/wzcgsq/template", headers=H)
     check("下载明细模板", tpl.status_code == 200 and tpl.content[:2] == b"PK")
     mx_xlsx = _xlsx([

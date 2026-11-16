@@ -1,0 +1,55 @@
+# =============================================================================
+# 售水业务管理系统(sswhl) API 镜像 —— 容器化备选方案
+#
+# 构建上下文必须是项目根目录(/opt/sswhl),因为要 COPY backend 与 frontend/dist:
+#   sudo docker build -f deploy/Dockerfile.api -t sswhl-api:1.0 .
+#
+# 前提:本机已有可用的 Python 基础镜像。三种情况:
+#   1) 内网/阿里云镜像库能拉到 python:3.10-slim  → 直接 build(推荐)
+#   2) 从别的机器 docker save 后 load 进来       → 同上,build 全离线
+#   3) 只有第三方镜像(如 localhost/xinkong:1.0) → --build-arg BASE_IMAGE=localhost/xinkong:1.0,
+#      但它可能没有 venv/ensurepip,构建会失败,届时改用宿主机 venv 方案
+#
+# 构建过程中 pip 全部走 --no-index 本地 wheels,不需要访问 pypi。
+# =============================================================================
+ARG BASE_IMAGE=python:3.10-slim
+FROM ${BASE_IMAGE}
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    TZ=Asia/Shanghai
+
+# ---------------------------------------------------------------- 1 离线依赖
+# 先装依赖再复制代码,代码改动时这一层可直接复用缓存
+COPY deploy/wheels /tmp/wheels
+COPY backend/requirements-linux.txt /tmp/requirements-linux.txt
+RUN python3 -m venv /opt/venv \
+ && /opt/venv/bin/pip install --no-index --find-links=/tmp/wheels \
+        -r /tmp/requirements-linux.txt -q \
+ && rm -rf /tmp/wheels /tmp/requirements-linux.txt
+
+# ---------------------------------------------------------------- 2 代码与前端
+COPY backend /app/backend
+COPY frontend/dist /app/frontend/dist
+
+ENV SERVE_FRONTEND=true \
+    ENABLE_DOCS=false \
+    UPLOAD_DIR=/app/backend/uploads \
+    FRONTEND_DIST=/app/frontend/dist \
+    DB_HOST=mysql \
+    DB_PORT=3306
+
+# ---------------------------------------------------------------- 3 运行用户
+RUN mkdir -p /app/backend/uploads \
+ && (id -u sswhl >/dev/null 2>&1 || useradd -r -u 10001 -d /home/sswhl -m sswhl) \
+ && chown -R sswhl:sswhl /app
+USER sswhl
+
+WORKDIR /app/backend
+EXPOSE 18080
+
+# 配置文件(/app/backend/.env)与环境变量由 docker compose 注入,运行时挂载,不打进镜像
+CMD ["/opt/venv/bin/python", "-m", "uvicorn", "app.main:app", \
+     "--host", "0.0.0.0", "--port", "18080", \
+     "--proxy-headers", "--forwarded-allow-ips", "127.0.0.1"]

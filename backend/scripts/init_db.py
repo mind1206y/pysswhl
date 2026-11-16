@@ -10,6 +10,7 @@ from sqlalchemy import inspect, text
 from app.core.config import settings
 from app.core.security import hash_password, verify_password
 from app.db.session import Base, SessionLocal, engine
+from app.models.cd import CDDaxiu, CDGz, CDWhl, CDXz  # noqa: F401  传导完好率(4 张表)
 from app.models.celou import CelouTb, CLdui  # noqa: F401  测漏成果
 from app.models.contract import HtAdd, HtTp, HtZbSupplier  # noqa: F401  合同登记/归集
 from app.models.finance import (  # noqa: F401  财务管理(固定资产/清理报告/物资采购申请 7 表)
@@ -173,6 +174,13 @@ DEFAULT_PERMISSIONS = [
     ("gdzc:view", "固定资产查看", "财务管理"),
     ("baofeizc:view", "清理报告查看", "财务管理"),
     ("wzcgsq:view", "物资采购申请查看", "财务管理"),
+    # 传导完好率:旧系统四个菜单同级分组,每页一个 view 码覆盖查询/增删改/导入导出;
+    # cdwhl:manage 对应旧 otherqx 含「传导管理」/admin,单独守锁定报表开关。
+    ("cdwhl:view", "传导完好率查看", "传导完好率"),
+    ("cdwhl:manage", "传导报表管理(锁定/生成)", "传导完好率"),
+    ("cdgz:view", "传导故障查看", "传导完好率"),
+    ("cddaxiu:view", "传导大修查看", "传导完好率"),
+    ("cdbd:view", "传导变动表查看", "传导完好率"),
 ]
 
 

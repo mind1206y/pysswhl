@@ -12,7 +12,8 @@
           <label>部门：</label>
           <el-tree-select v-model="f.dept" :data="ot.deptTreeData.value" node-key="value"
                           :props="{ label: 'label', children: 'children' }" check-strictly clearable
-                          size="small" style="width: 280px" @change="onChange" />
+                          fit-input-width popper-class="ot-dept-pop"
+                          size="small" :style="deptSelStyle" @change="onChange" />
         </div>
         <div class="filter-group">
           <el-input v-model="f.keyword" placeholder="姓名/工号/事由" size="small" clearable
@@ -54,7 +55,7 @@
       </div>
     </el-card>
 
-    <div class="table-card">
+    <div class="table-card table-fill">
       <el-table :data="rows" border size="small" v-loading="loading" height="500"
                 @row-click="openDetail">
         <el-table-column prop="deptName" label="部门" width="170" show-overflow-tooltip />
@@ -137,6 +138,20 @@ const monthOptions = computed(() => {
   return opts
 })
 const f = reactive({ month: '', dept: null, keyword: '', workType: 'all', status: 'all', maxDepth: '' })
+// 部门下拉宽度随选中名称自适应，避免长部门名被截断
+const deptSelStyle = computed(() => {
+  let label = ''
+  const find = (nodes) => {
+    for (const n of nodes || []) {
+      if (n.value === f.dept) { label = n.label || ''; return true }
+      if (n.children && find(n.children)) return true
+    }
+    return false
+  }
+  if (f.dept != null) find(ot.deptTreeData.value || [])
+  const w = Math.min(560, Math.max(200, 70 + label.length * 15))
+  return { width: `${w}px` }
+})
 const rows = ref([]), total = ref(0), page = ref(1), size = ref(50)
 const footer = ref({}), loading = ref(false), sortByRaw = ref(false), suppress = ref(false)
 watch(() => ot.currentMonth.value, (m) => { if (m && !f.month) f.month = m }, { immediate: true })

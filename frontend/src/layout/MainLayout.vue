@@ -120,6 +120,17 @@ const menuItems = computed(() => {
   } else if (finance.length > 1) {
     items.push({ title: '财务管理', icon: 'Wallet', children: finance })
   }
+  // 传导完好率:完好率 → 故障 → 大修 → 变动表(旧系统同一菜单分组,仅在有权限时加入)
+  const cd = []
+  if (auth.hasPerm('cdwhl:view')) cd.push({ path: '/cdwhl', title: '传导完好率' })
+  if (auth.hasPerm('cdgz:view')) cd.push({ path: '/cdgz', title: '传导故障' })
+  if (auth.hasPerm('cddaxiu:view')) cd.push({ path: '/cddaxiu', title: '传导大修' })
+  if (auth.hasPerm('cdbd:view')) cd.push({ path: '/cdbd', title: '传导变动表' })
+  if (cd.length === 1) {
+    items.push({ ...cd[0], icon: 'TrendCharts' })
+  } else if (cd.length > 1) {
+    items.push({ title: '传导完好率', icon: 'TrendCharts', children: cd })
+  }
   if (system.length) {
     items.push({ title: '系统管理', icon: 'Setting', children: system })
   }

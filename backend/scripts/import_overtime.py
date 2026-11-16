@@ -19,7 +19,9 @@
    整棵树连同 id 原样导入即可自洽,**不要**套 bmid_map。
 
 3. 旧 bb_user.id -> 新 users.id
-   按 username 精确匹配生成 user_map.json 后重映射。
+   ⚠ 2026-11-15 16:17 起 `users.id` 已用 `rebuild_user_ids.py` 重编号为**旧 id 的 1:1 恒等**
+   (199 个账号,3~382 跳号),`user_map.json` 也随之改为恒等映射。本脚本仍优先复用它、
+   绝不重算覆盖;仅当文件不存在/不完整时才回退到按 username/tel/real_name 匹配。
    涉及列见 USER_COLUMNS。匹配不到的置 NULL 并告警。
 
 另:加班部门是否"基层营业所"(旧 bb_bumen._parentId==1)决定审批路由 field/hq,
@@ -109,11 +111,11 @@ USER_COLUMNS = {
     "overtime_approver": ["bb_user_id"],
     "overtime_apply_approval": ["approver_id"],
     "overtime_comp_leave": ["create_user_id"],
-    "overtime_record": ["userid"],
+    # ⚠ overtime_record.userid 指向 overtime_user.id(1~19 的人名表),不是 bb_user.id。
+    #   overtime_user 按原 id 导入,所以该列原样保留;⛔绝不能套 user_map(那是另一套 id 空间)。
 }
-# 目标列为 NOT NULL 的列:匹配不到时必须给安全值,不能写 NULL 触发 1048 错误。
-# overtime_record 是旧系统遗留表,userid 无对应账号时置 0(真实姓名仍在 username 文本列)。
-NON_NULL_FALLBACK = {("overtime_record", "userid"): 0}
+# 目标列为 NOT NULL 的列:匹配不到时给安全值,不能写 NULL 触发 1048 错误。
+NON_NULL_FALLBACK = {}
 
 
 def old_conn():
@@ -153,13 +155,25 @@ def _key(v):
 def build_user_map(ocur, ncur):
     """旧 bb_user.id -> 新 users.id。
 
-    按 docs/数据迁移约定.md「用户与密码」,新库 users 不从旧库导入、管理员重建账号,
-    所以这里只做**多通道尽力匹配**(不做任何账号创建):
-      ① 旧 username  == 新 username   (英文名/手机号登录名)
-      ② 旧 tel       == 新 username   (旧库实名+手机号登录,新库用手机号做账号)
-      ③ 旧 username/unames == 新 real_name
-    匹配不到的详细名单写进 user_map.json,供管理员建号后回填。
+    优先复用 scripts/import_users.py 产出的 user_map.json(全量迁移的权威映射)。
+    早期版本在这里按 username/tel 现算并**覆盖写回**该文件,会破坏全量迁移产出的
+    权威映射(现已是旧 id 的 1:1 恒等),故只作为无缓存时的兜底,
+    且结果另存 user_map_fallback.json,绝不覆盖 user_map.json。
     """
+    if USER_MAP_FILE.exists():
+        try:
+            cached = json.loads(USER_MAP_FILE.read_text(encoding="utf-8"))
+            m = {int(k): int(v) for k, v in cached.get("user_map", {}).items()
+                 if v is not None}
+            if m and not cached.get("missing"):
+                print(f"用户映射: 复用 {USER_MAP_FILE.name}({len(m)} 项,全量迁移产出,未重算)")
+                return m
+            print(f"  ⚠ {USER_MAP_FILE.name} 不完整(missing={len(cached.get('missing', []))}),回退按名匹配")
+        except (ValueError, OSError, TypeError) as e:
+            print(f"  ⚠ 读取 {USER_MAP_FILE.name} 失败({e}),回退按名匹配")
+
+    # 兜底:旧库账号尚未全量迁移时,多通道尽力匹配(不创建任何账号)
+    #   ① username==username ② tel==username ③ unames/username==real_name
     try:
         ocur.execute("SELECT [id], [username], [unames], [tel] FROM [bb_user]")
         old = [(int(r[0]), _key(r[1]), _key(r[2]), _key(r[3])) for r in ocur.fetchall()]
@@ -185,15 +199,17 @@ def build_user_map(ocur, ncur):
         labels = [m["username"] or m["unames"] or str(m["id"]) for m in missing]
         print(f"  ⚠ 旧系统 {len(missing)} 个用户在新库无对应账号: "
               f"{', '.join(labels[:10])}{' ...' if len(labels) > 10 else ''}")
-    USER_MAP_FILE.parent.mkdir(parents=True, exist_ok=True)
-    USER_MAP_FILE.write_text(
+    # 兜底结果绝不写回权威文件,单独存一份供人工核对
+    fallback = USER_MAP_FILE.with_name("user_map_fallback.json")
+    fallback.parent.mkdir(parents=True, exist_ok=True)
+    fallback.write_text(
         json.dumps({"source": "db_plan.dbo.bb_user", "target": f"{settings.DB_NAME}.users",
                     "match_rules": ["username==username", "tel==username",
                                     "unames/username==real_name"],
                     "user_map": {str(k): v for k, v in out.items()},
                     "missing": missing}, ensure_ascii=False, indent=2),
         encoding="utf-8")
-    print(f"用户映射: 成功 {len(out)} 项 → {USER_MAP_FILE.name}")
+    print(f"用户映射(兜底): 成功 {len(out)} 项 → {fallback.name}(未改动 {USER_MAP_FILE.name})")
     return out
 
 
@@ -279,7 +295,7 @@ def remap(rows, cols, table, bmid_map, user_map, field_flags):
     if warnings["dept"]:
         print(f"  ⚠ {table}: 旧部门 id {sorted(warnings['dept'])} 无映射,已置 NULL")
     if warnings["user"]:
-        print(f"  ⚠ {table}: 旧用户 id {sorted(warnings['user'])} 无映射,已置 NULL")
+        print(f"  ⚠ {table}: 旧用户 id {sorted(warnings['user'])} 无映射,已置 NULL 或安全默认值")
     return out, warnings
 
 

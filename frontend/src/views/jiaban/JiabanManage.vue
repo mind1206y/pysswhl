@@ -673,6 +673,7 @@ async function openImageViewer(row) {
       id: r.id,
       name: r.file_name,
       url: `${r.downloadUrl}&inline=1`,
+      downloadUrl: r.downloadUrl, // 不带 inline → 后端返回 attachment，供下载按钮用
     }))
     // 从点击的附件开始浏览
     const idx = viewerImages.value.findIndex((it) => it.id === row.id)
@@ -687,6 +688,11 @@ function viewerStep(delta) {
   if (next < 0 || next >= viewerImages.value.length) return
   viewerIndex.value = next
   viewerErr.value = false
+}
+// 图片浏览窗：下载当前正在查看的这一张（走 attachment，不是 inline 预览）
+function viewerDownload() {
+  const img = curImage.value
+  if (img?.downloadUrl) window.open(img.downloadUrl, '_blank')
 }
 function onViewerWheel(e) {
   viewerStep(e.deltaY > 0 ? 1 : -1)
@@ -1078,7 +1084,7 @@ onBeforeUnmount(() => {
           <el-date-picker v-model="attMonth" type="month" value-format="YYYY-MM"
                           :clearable="false" style="width: 140px" @change="attMonthChange" />
           <el-button size="small" :icon="'Picture'" @click="openImageViewer({ id: 0 })">图片浏览</el-button>
-          <span class="jb-att-tip">支持 PDF、图片，单文件 ≤ 50MB；点击图片名可翻看当月图片</span>
+          <span class="jb-att-tip">支持 PDF、图片，单文件 ≤ 50MB；点击图片名可翻看当月图片，操作列可下载</span>
         </div>
         <div class="jb-att-upload">
           <el-button size="small" type="primary" :loading="attUploading"
@@ -1111,11 +1117,12 @@ onBeforeUnmount(() => {
           <el-table-column prop="uploadTime" label="上传日期" width="160" align="center" />
           <el-table-column prop="operator_name" label="上传人" width="100" align="center" />
           <el-table-column prop="fileSizeStr" label="文件大小" width="100" align="center" />
-          <el-table-column label="操作" width="80" align="center">
+          <el-table-column label="操作" width="112" align="center">
             <template #default="{ row }">
+              <el-button link type="primary" size="small"
+                         @click="attDownload(row)">下载</el-button>
               <el-button v-if="row.canDelete" link type="danger" size="small"
                          @click="attDelete(row)">删除</el-button>
-              <span v-else class="jb-muted">-</span>
             </template>
           </el-table-column>
         </el-table>
@@ -1137,6 +1144,8 @@ onBeforeUnmount(() => {
           </span>
           <span class="jb-iv-name" :title="curImage?.name">{{ curImage?.name || '' }}</span>
           <span class="jb-iv-hint">滚轮 / ← → 翻页，Esc 关闭</span>
+          <button v-if="curImage" class="jb-iv-dl" title="下载当前图片"
+                  @click="viewerDownload">↓ 下载当前图片</button>
           <span class="jb-iv-close" title="关闭" @click="viewerVisible = false">✕</span>
         </div>
         <div class="jb-iv-body">
@@ -1298,6 +1307,13 @@ onBeforeUnmount(() => {
   color: #fff; font-size: 16px; cursor: pointer; user-select: none;
 }
 .jb-iv-close:hover { background: rgba(255, 255, 255, .15); }
+.jb-iv-dl {
+  flex: 0 0 auto; padding: 4px 12px;
+  border: 1px solid rgba(255, 255, 255, .28); border-radius: 6px;
+  background: rgba(255, 255, 255, .10); color: #e8e8ea;
+  font-size: 12px; line-height: 18px; white-space: nowrap; cursor: pointer;
+}
+.jb-iv-dl:hover { background: rgba(255, 255, 255, .22); color: #fff; }
 .jb-iv-body {
   flex: 1; min-height: 0; padding: 0 64px 16px;
   display: flex; align-items: center; justify-content: center;

@@ -42,6 +42,7 @@
               <label>部门：</label>
               <el-tree-select v-model="drawerDept" :data="deptTreeData" node-key="id"
                               :props="{ label: 'text', children: 'children' }" check-strictly
+                              popper-class="ot-dept-pop"
                               style="width: 300px" size="small" @change="saveDrawerDept" />
             </div>
           </div>

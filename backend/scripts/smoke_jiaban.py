@@ -112,6 +112,14 @@ def _cleanup():
 def main():
     global HEADERS, VIEW_HEADERS
     _cleanup()
+    # 共享表基线:数据会随旧系统增量同步而变,不能写死绝对行数,只校验本次测试前后一致
+    from app.db.session import SessionLocal as _SL
+    from app.models.workorder import GongdanCailiao as _GDC
+    _s = _SL()
+    try:
+        GDC_BASELINE = _s.query(_GDC).count()
+    finally:
+        _s.close()
     _mk_user(SMOKE_USER, True)
     _mk_user(SMOKE_VIEW_USER, False, with_perm=True)
     _mk_user(SMOKE_NONE_USER, False)
@@ -352,7 +360,8 @@ def main():
     try:
         check("清理后测试记录为 0",
               db.query(_JB).filter(_JB.riqi == datetime(2020, 1, 1)).count() == 0)
-        check("gongdancailiao 未被改动", db.query(GongdanCailiao).count() == 19689)
+        check("gongdancailiao 未被改动",
+              db.query(GongdanCailiao).count() == GDC_BASELINE)
     finally:
         db.close()
 

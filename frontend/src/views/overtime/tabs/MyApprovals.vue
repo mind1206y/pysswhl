@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="table-card">
+    <div class="table-card table-fill">
       <el-table :data="rows" border size="small" v-loading="loading" height="600">
         <el-table-column label="申请单编号" width="170">
           <template #default="{ row }"><span class="grid-link" @click="ot.openApplyDrawer({ id: row.apply_id })">{{ row.apply_no }}</span></template>

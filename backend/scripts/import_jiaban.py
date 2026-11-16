@@ -93,7 +93,8 @@ def main():
         old_sums["jiaban"] = (float(row[0]), float(row[1]))
         ocur.execute("SELECT ISNULL(SUM(danjia),0) FROM [jiabanrenyuan]")
         old_sums["danjia"] = float(ocur.fetchone()[0])
-        ocur.execute("SELECT ISNULL(SUM(fileSize),0) FROM [jiaban_attachment]")
+        # fileSize 是 int 列,SUM 也返回 int;附件总量超 2^31-1 会算术溢出,必须 CAST 成 BIGINT
+        ocur.execute("SELECT ISNULL(SUM(CAST(fileSize AS BIGINT)),0) FROM [jiaban_attachment]")
         old_sums["fileSize"] = int(ocur.fetchone()[0])
     finally:
         oc.close()

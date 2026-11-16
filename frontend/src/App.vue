@@ -138,4 +138,26 @@ body,
 }
 .std-dialog .el-form-item__content { min-height: 32px; line-height: 32px; }
 .std-dialog .preview-nav .el-button { height: 32px; border-radius: 8px; }
+
+/* 传导模块多字段弹窗(故障 10 项 / 大修 14 项):整体限高 + 表单区可滚,
+   避免 14 字段弹窗的确定按钮被视口底部裁掉;字段间距收紧到 8px 让常见屏高免滚动 */
+.cd-long-dialog { max-height: 88vh; display: flex; flex-direction: column; }
+.cd-long-dialog .el-dialog__header,
+.cd-long-dialog .el-dialog__footer { flex: 0 0 auto; }
+.cd-long-dialog .el-dialog__body { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+.cd-long-dialog .el-form-item { margin-bottom: 8px; }
+
+/* ===== 表格正文字号(全局统一) =====
+   Element Plus 的 size="small" 表格取 --el-font-size-extra-small,即 12px;
+   项目 106 个表格里有 95 个是 small,12px 在高分屏/1080p 上偏小。
+   这里把 small 表格的正文与表头提到 13px,default 尺寸的表格(14px)保持不动,
+   只放大不缩小。不改 --el-font-size-extra-small 变量本身,否则会连带放大
+   输入框、按钮等其它 small 控件,行高/内边距跟着乱。
+   ⚠️ 各模块 scoped 里的 :deep(.el-table .cell) 编译后带 data-v 属性,特异性更高,
+      它们自己设的 line-height(20/26px)与 padding 仍然生效,本规则只管字号。 */
+.el-table--small,
+.el-table--small .cell { font-size: 13px; }
+/* 操作列的 link 按钮跟随表体字号,避免「正文 13px + 按钮 12px」参差 */
+.el-table--small .el-button { font-size: 13px; }
+.el-table .el-table__empty-text { font-size: 13px; }
 </style>

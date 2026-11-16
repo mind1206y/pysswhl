@@ -16,6 +16,7 @@
           <label>部门：</label>
           <el-tree-select v-model="deptFilter" :data="ot.deptTreeData.value" node-key="value"
                           :props="{ label: 'label', children: 'children' }" check-strictly clearable
+                          popper-class="ot-dept-pop"
                           style="width: 230px" size="small" />
         </div>
         <div class="filter-group">

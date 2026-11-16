@@ -1,0 +1,36 @@
+{
+  "generated_at": "2026-11-15T16:17:49",
+  "backup": "E:\\pysswhl\\backend\\scripts\\migration_reports\\user_ids_backup_20261115_161749.json",
+  "id_map": {
+    "1": 207,
+    "7": 3,
+    "383": 7
+  },
+  "deleted_ids": [
+    21
+  ],
+  "before_dangling": {
+    "sms_contact.id": 2,
+    "gx_user_gxgz.userid": 548,
+    "jh_ssdb.zhuanguan": 457,
+    "jh_ssdbpz.zhuanguan": 10952,
+    "jh_yyfq.zgy": 334,
+    "jh_yyfq.opid": 1,
+    "ht_add.djuser": 0,
+    "jc_printcolum.userid": 0,
+    "wzcgsq.userid": 0
+  },
+  "after_dangling": {
+    "sms_contact.id": 0,
+    "gx_user_gxgz.userid": 0,
+    "jh_ssdb.zhuanguan": 0,
+    "jh_ssdbpz.zhuanguan": 0,
+    "jh_yyfq.zgy": 0,
+    "jh_yyfq.opid": 1,
+    "ht_add.djuser": 0,
+    "jc_printcolum.userid": 0,
+    "wzcgsq.userid": 0
+  },
+  "users_rows": 199,
+  "passed": true
+}

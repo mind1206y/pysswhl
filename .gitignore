@@ -15,3 +15,19 @@ rsa_key.pem
 # 临时与备份文件
 *.bak
 *.log
+
+# 构建中间产物（离线镜像组装、瓦片打包等，体积大不入库）
+build/
+*.tar
+*.tar.gz
+
+# 数据库 dump / 部署制品：单文件常超 GitHub 100MB 硬限制，只走本地裸库+文件备份
+*.sql
+*.sql.gz
+deploy/import/
+sswhl-deploy.tar.gz
+sswhl-update.tar.gz
+
+# 用户迁移备份含密码哈希,只留本地用于回滚,不入库
+backend/scripts/migration_reports/users_backup_*.json
+backend/scripts/migration_reports/user_map_before_users_import_*.json

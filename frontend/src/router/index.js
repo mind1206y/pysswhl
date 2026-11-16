@@ -53,6 +53,34 @@ import PlanDashboard from '@/views/plan/PlanDashboard.vue'
 import PlanTodo from '@/views/plan/PlanTodo.vue'
 import PlanSummary from '@/views/plan/PlanSummary.vue'
 import PlanApply from '@/views/plan/PlanApply.vue'
+import CdWhlManage from '@/views/cd/CdWhlManage.vue'
+import CdGuzhangManage from '@/views/cd/CdGuzhangManage.vue'
+import CdDaxiuManage from '@/views/cd/CdDaxiuManage.vue'
+import CdBiandongManage from '@/views/cd/CdBiandongManage.vue'
+
+/* 记住最后使用的菜单模块：只记主框架内的菜单页(挂在 '/' 下的子路由)，
+   登录页 / 改密页 / 单独窗口打开的打印页都不记。localStorage 跨浏览器关闭仍保留。 */
+const LAST_ROUTE_KEY = 'sswhl:last-route'
+
+function readLastRoute() {
+  try {
+    const path = localStorage.getItem(LAST_ROUTE_KEY)
+    // 必须是本站绝对路径（排除 '//evil' 之类的协议相对写法）
+    return path && path.startsWith('/') && !path.startsWith('//') ? path : ''
+  } catch {
+    return ''
+  }
+}
+
+function rememberLastRoute(to) {
+  // 只记一级模块页：matched[0] 是 MainLayout 的 '/'；打印页是顶层独立路由，天然被排除
+  if (to.matched[0]?.path !== '/' || to.path === '/') return
+  try {
+    localStorage.setItem(LAST_ROUTE_KEY, to.path)
+  } catch {
+    /* 隐私模式下 localStorage 可能不可写，忽略即可 */
+  }
+}
 
 const router = createRouter({
   history: createWebHistory(),
@@ -62,7 +90,9 @@ const router = createRouter({
     {
       path: '/',
       component: MainLayout,
-      redirect: '/dashboard',
+      // 重新打开系统时直接回到上次使用的菜单模块；若该模块已无权访问/已下线，
+      // 由下方全局守卫(perm 校验)与兜底路由自动弹回首页。
+      redirect: () => (readLastRoute() || '/dashboard'),
       children: [
         { path: 'dashboard', component: Dashboard, meta: { title: '首页' } },
         {
@@ -278,6 +308,27 @@ const router = createRouter({
           component: WzcgsqManage,
           meta: { title: '物资采购申请', perm: 'wzcgsq:view' },
         },
+        // 传导完好率:完好率 → 故障 → 大修 → 变动表(旧系统同一菜单分组)
+        {
+          path: 'cdwhl',
+          component: CdWhlManage,
+          meta: { title: '传导完好率', perm: 'cdwhl:view' },
+        },
+        {
+          path: 'cdgz',
+          component: CdGuzhangManage,
+          meta: { title: '传导故障', perm: 'cdgz:view' },
+        },
+        {
+          path: 'cddaxiu',
+          component: CdDaxiuManage,
+          meta: { title: '传导大修', perm: 'cddaxiu:view' },
+        },
+        {
+          path: 'cdbd',
+          component: CdBiandongManage,
+          meta: { title: '传导变动表', perm: 'cdbd:view' },
+        },
         {
           path: 'system/users',
           component: UserManage,
@@ -307,7 +358,18 @@ const router = createRouter({
 router.beforeEach(async (to) => {
   const auth = useAuthStore()
   if (to.path === '/login') {
-    return true
+    // 已登录(浏览器里 token 还有效)时直接进系统,不要停在登录框。
+    // 典型场景:收藏夹存的是 /login,以前每次打开都得重新输账号;现在会回到上次模块。
+    if (!auth.token) return true
+    try {
+      await auth.loadUser()
+    } catch {
+      // token 已过期/被撤销:清掉残留,token 留在登录页正常登录
+      auth.logout()
+      return true
+    }
+    const last = readLastRoute()
+    return last && last !== '/login' ? last : '/dashboard'
   }
   if (!auth.token) {
     return { path: '/login', query: { redirect: to.fullPath } }
@@ -333,6 +395,8 @@ router.beforeEach(async (to) => {
 
 router.afterEach((to) => {
   document.title = to.meta.title ? `${to.meta.title} - 售水业务管理系统` : '售水业务管理系统'
+  // 登录成功进入主框架后记下当前菜单模块，下次打开系统直接回到这里
+  if (localStorage.getItem('token')) rememberLastRoute(to)
 })
 
 export default router

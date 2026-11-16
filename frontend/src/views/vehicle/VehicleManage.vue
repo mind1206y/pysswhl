@@ -827,7 +827,7 @@ const docDialog = ref(false)
 .form-grid .full { grid-column: 1 / -1; }
 .form-grid :deep(.el-form-item) { margin-bottom: 12px; }
 .inspect-cell { display: flex; align-items: center; gap: 4px; }
-.remind-cell { display: flex; align-items: center; gap: 6px; font-size: 12px; white-space: nowrap; }
+.remind-cell { display: flex; align-items: center; gap: 6px; font-size: 13px; white-space: nowrap; }
 .remind-cell :deep(.el-progress) { flex: 1; min-width: 60px; }
 .link-like { color: #409eff; cursor: default; border-bottom: 1px dashed #409eff; }
 .pop-title { font-weight: 600; margin-bottom: 6px; }

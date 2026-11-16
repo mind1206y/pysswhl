@@ -1,10 +1,14 @@
-from fastapi import FastAPI, Request
+from pathlib import Path
+
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy.exc import OperationalError
 
 from app.api.routes import (
-    auth, baoxian, celou, chelfytj, chuxian, clfeiyong, contracts, departments, gongdan, ipadress,
+    auth, baoxian, cd_bd, cd_daxiu, cd_dicts, cd_gz, cd_whl, celou, chelfytj,
+    chuxian, clfeiyong, contracts, departments, gongdan, ipadress,
     jcjl, jcxt, jiesuan, jiesuandan, jiaban, leak, lingliao, material, oilcard, oiltj, overtime,
     overtime_config,
     overtime_flow, phone, plus_oil, project_details, projects, repair, roadrepair, roles,
@@ -12,7 +16,7 @@ from app.api.routes import (
     spjicha, gxdxljihua, jhssdb, jhsshz, jhyyfaqi,
     gdzc, baofeizc, wzcgsq,
 )
-from app.core.config import settings
+from app.core.config import BASE_DIR, settings
 
 app = FastAPI(
     title="售水业务管理系统",
@@ -98,8 +102,63 @@ app.include_router(jhyyfaqi.router, prefix="/api/jhyyfaqi", tags=["年度计划-
 app.include_router(gdzc.router, prefix="/api/gdzc", tags=["财务管理-固定资产"])
 app.include_router(baofeizc.router, prefix="/api/baofeizc", tags=["财务管理-清理报告"])
 app.include_router(wzcgsq.router, prefix="/api/wzcgsq", tags=["财务管理-物资采购申请"])
+app.include_router(cd_dicts.router, prefix="/api/cd", tags=["传导完好率-公共字典"])
+app.include_router(cd_whl.router, prefix="/api/cdwhl", tags=["传导完好率-完好率汇总"])
+app.include_router(cd_gz.router, prefix="/api/cdgz", tags=["传导完好率-传导故障"])
+app.include_router(cd_daxiu.router, prefix="/api/cddaxiu", tags=["传导完好率-传导大修"])
+app.include_router(cd_bd.router, prefix="/api/cdbd", tags=["传导完好率-传导变动表"])
 
 
 @app.get("/api/health")
 def health():
     return {"status": "ok"}
+
+
+# ===== 生产部署:由后端直接托管前端 dist(SERVE_FRONTEND=true) =====
+# 这样对外只需一个端口,不必额外部署 nginx;开发环境保持 false,前端仍走 Vite 5173。
+# 注意:本段必须放在所有 include_router 之后,通配路由才能只兜底未匹配的路径。
+_DIST_DIR = (
+    Path(settings.FRONTEND_DIST)
+    if settings.FRONTEND_DIST
+    else BASE_DIR.parent / "frontend" / "dist"  # BASE_DIR = backend/,其父目录是项目根
+)
+
+if settings.SERVE_FRONTEND:
+    if not _DIST_DIR.is_dir():
+        raise RuntimeError(
+            f"SERVE_FRONTEND=true 但前端构建产物不存在:{_DIST_DIR};"
+            "请先在前端目录执行 npm run build,或用 FRONTEND_DIST 指向 dist 目录"
+        )
+    _assets_dir = _DIST_DIR / "assets"
+    if _assets_dir.is_dir():
+        app.mount("/assets", StaticFiles(directory=str(_assets_dir)), name="assets")
+    _dist_root = _DIST_DIR.resolve()
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    def spa_fallback(full_path: str):
+        """静态文件命中就返回文件,其余路径一律回 index.html(前端 history 路由)。"""
+        if full_path.startswith("api/") or full_path in ("docs", "openapi.json", "redoc"):
+            raise HTTPException(status_code=404, detail="Not Found")
+        if full_path:
+            target = (_dist_root / full_path).resolve()
+            # startswith 校验防止 ../ 路径穿越读出 dist 之外的文件
+            if target.is_file() and str(target).startswith(str(_dist_root)):
+                return FileResponse(target)
+        return FileResponse(_dist_root / "index.html")
+
+    # ===== 缓存策略(必须在托管前端时才有意义) =====
+    # index.html 引用的是带内容 hash 的产物文件名:一旦发版,入口必须回源,
+    # 否则浏览器拿着旧 index.html 去请求已被删除的 index-<旧hash>.js,直接白屏
+    # —— 这是"更新了但页面打不开/还是旧的"最常见的成因,靠喊用户 Ctrl+F5 不可靠。
+    # 反过来 /assets/* 文件名随内容变,可以永久缓存。
+    @app.middleware("http")
+    async def _static_cache_headers(request: Request, call_next):
+        response = await call_next(request)
+        path = request.url.path
+        if path.startswith("/assets/"):
+            response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+        elif not path.startswith("/api") and str(
+            response.headers.get("content-type", "")
+        ).startswith("text/html"):
+            response.headers["Cache-Control"] = "no-store, must-revalidate"
+        return response

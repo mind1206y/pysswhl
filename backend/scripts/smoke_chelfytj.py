@@ -326,4 +326,11 @@ def main():
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    # 开头 _cleanup() 只能清掉上一次的残留;结束时必须再清一次,
+    # 否则本次建的 3 个临时账号会留在库里,被后续 smoke_users 的
+    # 「非超管账号都有部门」断言抓到,甚至被误打进生产 dump。
+    try:
+        _rc = main()
+    finally:
+        _cleanup()
+    raise SystemExit(_rc)

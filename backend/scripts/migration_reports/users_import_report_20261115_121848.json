@@ -1,0 +1,3950 @@
+{
+  "generated_at": "2026-11-15 12:18:48",
+  "source": "db_plan.dbo.bb_user / bb_qxfenpei / bb_quanx",
+  "target": "sswhl_new.users",
+  "summary": {
+    "old_total": 199,
+    "inserted": 0,
+    "updated": 199,
+    "inactive": 4,
+    "initial_password": 44,
+    "legacy_pbkdf2": 59,
+    "legacy_md5": 96,
+    "roles_touched": 68,
+    "dept_missing": 0,
+    "password_kept_v1": 2
+  },
+  "initial_password_accounts": [
+    {
+      "username": "何晓敏",
+      "real_name": "何晓敏",
+      "phone": "",
+      "dept": "停用部门"
+    },
+    {
+      "username": "同安",
+      "real_name": "同安",
+      "phone": "",
+      "dept": "停用部门"
+    },
+    {
+      "username": "集美",
+      "real_name": "集美",
+      "phone": "",
+      "dept": "停用部门"
+    },
+    {
+      "username": "林茜",
+      "real_name": "林茜",
+      "phone": "",
+      "dept": "停用部门"
+    },
+    {
+      "username": "涂宝贵（退休）",
+      "real_name": "涂宝贵（退休）",
+      "phone": "",
+      "dept": "停用部门"
+    },
+    {
+      "username": "张荣海（停用）",
+      "real_name": "张荣海（停用）",
+      "phone": "",
+      "dept": "停用部门"
+    },
+    {
+      "username": "庄继璋",
+      "real_name": "庄继璋",
+      "phone": "",
+      "dept": "停用部门"
+    },
+    {
+      "username": "王振栋（退休）",
+      "real_name": "王振栋（退休）",
+      "phone": "",
+      "dept": "停用部门"
+    },
+    {
+      "username": "杨旭(退休)",
+      "real_name": "杨旭(退休)",
+      "phone": "",
+      "dept": "停用部门"
+    },
+    {
+      "username": "陈向茹",
+      "real_name": "陈向茹",
+      "phone": "",
+      "dept": "停用部门"
+    },
+    {
+      "username": "郭彩虹",
+      "real_name": "郭彩虹",
+      "phone": "",
+      "dept": "停用部门"
+    },
+    {
+      "username": "曹小涛",
+      "real_name": "曹小涛",
+      "phone": "",
+      "dept": "二供部"
+    },
+    {
+      "username": "余文德",
+      "real_name": "余文德",
+      "phone": "",
+      "dept": "水表检定站"
+    },
+    {
+      "username": "蔡海水",
+      "real_name": "蔡海水",
+      "phone": "",
+      "dept": "翔安营业所"
+    },
+    {
+      "username": "张水吉",
+      "real_name": "张水吉",
+      "phone": "",
+      "dept": "厦门营业所"
+    },
+    {
+      "username": "李阳昆",
+      "real_name": "李阳昆",
+      "phone": "",
+      "dept": "厦门营业所"
+    },
+    {
+      "username": "吴毅",
+      "real_name": "吴毅",
+      "phone": "",
+      "dept": "厦门营业所"
+    },
+    {
+      "username": "林维嘉",
+      "real_name": "林维嘉",
+      "phone": "",
+      "dept": "厦门营业所"
+    },
+    {
+      "username": "李军",
+      "real_name": "李军",
+      "phone": "",
+      "dept": "厦门营业所"
+    },
+    {
+      "username": "喻靖",
+      "real_name": "喻靖",
+      "phone": "",
+      "dept": "厦门营业所"
+    },
+    {
+      "username": "刘肇君",
+      "real_name": "刘肇君",
+      "phone": "",
+      "dept": "厦门营业所"
+    },
+    {
+      "username": "蔡武平",
+      "real_name": "蔡武平",
+      "phone": "",
+      "dept": "厦门营业所"
+    },
+    {
+      "username": "廖小晖",
+      "real_name": "廖小晖",
+      "phone": "",
+      "dept": "厦门营业所"
+    },
+    {
+      "username": "王飞扬",
+      "real_name": "王飞扬",
+      "phone": "",
+      "dept": "厦门营业所"
+    },
+    {
+      "username": "周佳鹏",
+      "real_name": "周佳鹏",
+      "phone": "",
+      "dept": "海沧营业所"
+    },
+    {
+      "username": "张舒婕",
+      "real_name": "张舒婕",
+      "phone": "",
+      "dept": "售水事业部"
+    },
+    {
+      "username": "郑东贵",
+      "real_name": "郑东贵",
+      "phone": "",
+      "dept": "售水事业部"
+    },
+    {
+      "username": "黄荣敏",
+      "real_name": "黄荣敏",
+      "phone": "",
+      "dept": "海沧营业所"
+    },
+    {
+      "username": "许小龙",
+      "real_name": "许小龙",
+      "phone": "",
+      "dept": "集美营业所"
+    },
+    {
+      "username": "朱建平",
+      "real_name": "朱建平",
+      "phone": "",
+      "dept": "集美营业所"
+    },
+    {
+      "username": "郑炳德",
+      "real_name": "郑炳德",
+      "phone": "",
+      "dept": "集美营业所"
+    },
+    {
+      "username": "游联春",
+      "real_name": "游联春",
+      "phone": "",
+      "dept": "集美营业所"
+    },
+    {
+      "username": "陈志武",
+      "real_name": "陈志武",
+      "phone": "",
+      "dept": "同安营业所"
+    },
+    {
+      "username": "纪瑞铨",
+      "real_name": "纪瑞铨",
+      "phone": "",
+      "dept": "同安营业所"
+    },
+    {
+      "username": "林耀楠",
+      "real_name": "林耀楠",
+      "phone": "",
+      "dept": "同安营业所"
+    },
+    {
+      "username": "林常委",
+      "real_name": "林常委",
+      "phone": "",
+      "dept": "同安营业所"
+    },
+    {
+      "username": "吴加庆",
+      "real_name": "吴加庆",
+      "phone": "",
+      "dept": "同安营业所"
+    },
+    {
+      "username": "施俊斌",
+      "real_name": "施俊斌",
+      "phone": "",
+      "dept": "同安营业所"
+    },
+    {
+      "username": "李厚灿",
+      "real_name": "李厚灿",
+      "phone": "",
+      "dept": "同安营业所"
+    },
+    {
+      "username": "庄金华",
+      "real_name": "庄金华",
+      "phone": "",
+      "dept": "翔安营业所"
+    },
+    {
+      "username": "邱毅荣",
+      "real_name": "邱毅荣",
+      "phone": "",
+      "dept": "翔安营业所"
+    },
+    {
+      "username": "吴月芬",
+      "real_name": "吴月芬",
+      "phone": "",
+      "dept": "海沧营业所"
+    },
+    {
+      "username": "陈小航",
+      "real_name": "陈小航",
+      "phone": "",
+      "dept": "集团"
+    },
+    {
+      "username": "汪红",
+      "real_name": "汪红",
+      "phone": "",
+      "dept": "计划财务部"
+    }
+  ],
+  "inactive_accounts": [
+    {
+      "username": "何晓敏",
+      "real_name": "何晓敏"
+    },
+    {
+      "username": "李秀兰",
+      "real_name": "李秀兰"
+    },
+    {
+      "username": "甘小溪(停用)",
+      "real_name": "甘小溪(停用)"
+    },
+    {
+      "username": "蔡宇雯（退休）",
+      "real_name": "蔡宇雯（退休）"
+    }
+  ],
+  "rows": [
+    {
+      "old_id": 3,
+      "new_id": 7,
+      "username": "林春",
+      "real_name": "林春",
+      "phone": "13959257536",
+      "zw": "专管员",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "售水事业部",
+      "perms": [
+        "baofeizc:view",
+        "baoxian:view",
+        "celou:manage",
+        "celou:view",
+        "chelfytj:view",
+        "contract:collect",
+        "contract:manage",
+        "contract:view",
+        "gdzc:view",
+        "gongdan:manage",
+        "gongdan:view",
+        "ipadress:manage",
+        "ipadress:view",
+        "jcjl:view",
+        "jcxt:view",
+        "jhssdb:manage",
+        "jhssdb:view",
+        "jhsshz:admin",
+        "jhsshz:manage",
+        "jhsshz:view",
+        "jhyyfaqi:manage",
+        "jhyyfaqi:summary",
+        "jhyyfaqi:view",
+        "jiaban:view",
+        "jiesuan:view",
+        "jiesuandan:manage",
+        "jiesuandan:view",
+        "leak:manage",
+        "leak:view",
+        "lingliao:audit",
+        "lingliao:view",
+        "material:manage",
+        "material:view",
+        "oilcard:manage",
+        "oilcard:view",
+        "oiltj:view",
+        "overtime:apply",
+        "overtime:hr",
+        "overtime:manage",
+        "overtime:verify",
+        "overtime:view",
+        "phone:huishou",
+        "phone:manage",
+        "phone:view",
+        "plan:manage",
+        "plan:view",
+        "plusoil:view",
+        "project:manage",
+        "project:view",
+        "repair:audit",
+        "repair:manage",
+        "repair:view",
+        "roadrepair:view",
+        "simcard:manage",
+        "simcard:view",
+        "simfee:view",
+        "spjicha:view",
+        "system:dept:manage",
+        "system:role:manage",
+        "system:user:manage",
+        "vehicle:manage",
+        "vehicle:view",
+        "waterfee:manage",
+        "workorder:manage",
+        "workorder:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 4,
+      "new_id": 4,
+      "username": "何晓敏",
+      "real_name": "何晓敏",
+      "phone": "",
+      "zw": "",
+      "is_active": false,
+      "password_version": 1,
+      "dept": "停用部门",
+      "perms": [
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 5,
+      "new_id": 5,
+      "username": "蔡博钧",
+      "real_name": "蔡博钧",
+      "phone": "",
+      "zw": "设备",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "停用部门",
+      "perms": [
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 6,
+      "new_id": 6,
+      "username": "陈泽彬",
+      "real_name": "陈泽彬",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "停用部门",
+      "perms": [
+        "gdzc:view",
+        "jhyyfaqi:view",
+        "plan:view",
+        "simcard:view",
+        "vehicle:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 7,
+      "new_id": 383,
+      "username": "陈毅清",
+      "real_name": "陈毅清",
+      "phone": "13616060604",
+      "zw": "设备",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "集美营业所",
+      "perms": [
+        "baofeizc:view",
+        "baoxian:view",
+        "gdzc:view",
+        "jhyyfaqi:view",
+        "oiltj:view",
+        "overtime:hr",
+        "overtime:verify",
+        "overtime:view",
+        "phone:view",
+        "plan:view",
+        "repair:view",
+        "simcard:view",
+        "simfee:view",
+        "vehicle:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 8,
+      "new_id": 8,
+      "username": "张建平",
+      "real_name": "张建平",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "海沧营业所",
+      "perms": [
+        "baofeizc:view",
+        "baoxian:view",
+        "gdzc:view",
+        "jhyyfaqi:view",
+        "oiltj:view",
+        "plan:view",
+        "repair:view",
+        "simcard:view",
+        "vehicle:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 9,
+      "new_id": 9,
+      "username": "李鹏程",
+      "real_name": "李鹏程",
+      "phone": "15080337791",
+      "zw": "专管员",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "售水事业部",
+      "perms": [
+        "baofeizc:view",
+        "contract:view",
+        "gdzc:view",
+        "jcjl:view",
+        "jcxt:view",
+        "jhssdb:view",
+        "jhsshz:view",
+        "jhyyfaqi:view",
+        "plan:view",
+        "project:view",
+        "spjicha:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 10,
+      "new_id": 10,
+      "username": "戴杰",
+      "real_name": "戴杰",
+      "phone": "13459248228",
+      "zw": "设备",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "翔安营业所",
+      "perms": [
+        "baofeizc:view",
+        "baoxian:view",
+        "gdzc:view",
+        "jhyyfaqi:view",
+        "oiltj:view",
+        "phone:view",
+        "plan:view",
+        "repair:view",
+        "simcard:view",
+        "simfee:view",
+        "vehicle:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 13,
+      "new_id": 13,
+      "username": "郭立超",
+      "real_name": "郭立超",
+      "phone": "13799849194",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "售水事业部",
+      "perms": [
+        "contract:view",
+        "jcdan:view",
+        "phone:view",
+        "plan:view",
+        "simcard:view",
+        "simfee:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 14,
+      "new_id": 14,
+      "username": "蔡瑜婕",
+      "real_name": "蔡瑜婕",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "二供部",
+      "perms": [
+        "overtime:hr",
+        "overtime:verify",
+        "overtime:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 15,
+      "new_id": 15,
+      "username": "李护森",
+      "real_name": "李护森",
+      "phone": "",
+      "zw": "车管",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "集团",
+      "perms": [
+        "plusoil:view",
+        "repair:view",
+        "vehicle:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 16,
+      "new_id": 16,
+      "username": "叶谢萌",
+      "real_name": "叶谢萌",
+      "phone": "18250825739",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "停用部门",
+      "perms": [
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 18,
+      "new_id": 18,
+      "username": "同安",
+      "real_name": "同安",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "停用部门",
+      "perms": [
+        "jcxt:view",
+        "plan:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 23,
+      "new_id": 23,
+      "username": "集美",
+      "real_name": "集美",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "停用部门",
+      "perms": [
+        "plan:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 27,
+      "new_id": 27,
+      "username": "陈珊珊",
+      "real_name": "陈珊珊",
+      "phone": "13799843816",
+      "zw": "设备",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "二供部",
+      "perms": [
+        "baofeizc:view",
+        "gdzc:view",
+        "ipadress:view",
+        "jhyyfaqi:view",
+        "oiltj:view",
+        "phone:view",
+        "plan:view",
+        "repair:view",
+        "simcard:view",
+        "simfee:view",
+        "vehicle:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 28,
+      "new_id": 28,
+      "username": "林茜",
+      "real_name": "林茜",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "停用部门",
+      "perms": [
+        "gdzc:view",
+        "jhyyfaqi:view",
+        "plan:view",
+        "vehicle:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 31,
+      "new_id": 31,
+      "username": "骆和福",
+      "real_name": "骆和福",
+      "phone": "",
+      "zw": "稽查",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "停用部门",
+      "perms": [
+        "contract:view",
+        "jcxt:view",
+        "vehicle:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 32,
+      "new_id": 32,
+      "username": "李秀兰",
+      "real_name": "李秀兰",
+      "phone": "",
+      "zw": "",
+      "is_active": false,
+      "password_version": 3,
+      "dept": "停用部门",
+      "perms": [
+        "contract:view",
+        "gdzc:view",
+        "jhssdb:view",
+        "plan:view",
+        "simcard:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 33,
+      "new_id": 33,
+      "username": "沈艺宏",
+      "real_name": "沈艺宏",
+      "phone": "13500953294",
+      "zw": "专管员",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "售水事业部",
+      "perms": [
+        "celou:manage",
+        "celou:view",
+        "contract:view",
+        "jcdan:view",
+        "jhssdb:view",
+        "overtime:hr",
+        "overtime:verify",
+        "overtime:view",
+        "plan:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 34,
+      "new_id": 34,
+      "username": "吴薇薇",
+      "real_name": "吴薇薇",
+      "phone": "13506059816",
+      "zw": "专管员",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "售水事业部",
+      "perms": [
+        "contract:view",
+        "jcdan:view",
+        "jhssdb:view",
+        "jhsshz:view",
+        "overtime:verify",
+        "overtime:view",
+        "plan:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 35,
+      "new_id": 35,
+      "username": "李明",
+      "real_name": "李明",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "生产部",
+      "perms": [
+        "celou:view",
+        "jhsshz:view",
+        "plan:view",
+        "vehicle:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 36,
+      "new_id": 36,
+      "username": "陈小豪",
+      "real_name": "陈小豪",
+      "phone": "13950082599",
+      "zw": "",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "售水事业部",
+      "perms": [
+        "celou:manage",
+        "celou:view",
+        "contract:collect",
+        "contract:view",
+        "jhssdb:view",
+        "jhsshz:view",
+        "jhyyfaqi:summary",
+        "jhyyfaqi:view",
+        "plan:view",
+        "simcard:view",
+        "vehicle:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 37,
+      "new_id": 37,
+      "username": "施晓鸿",
+      "real_name": "施晓鸿",
+      "phone": "13515971359",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "翔安营业所",
+      "perms": [
+        "gdzc:view",
+        "jcxt:view",
+        "jhyyfaqi:view",
+        "phone:view",
+        "plan:view",
+        "simcard:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 39,
+      "new_id": 39,
+      "username": "肖苏洁",
+      "real_name": "肖苏洁",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "集美营业所",
+      "perms": [
+        "overtime:hr",
+        "overtime:verify",
+        "overtime:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 40,
+      "new_id": 40,
+      "username": "涂宝贵（退休）",
+      "real_name": "涂宝贵（退休）",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "停用部门",
+      "perms": [
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 41,
+      "new_id": 41,
+      "username": "吴邦哲",
+      "real_name": "吴邦哲",
+      "phone": "15260110016",
+      "zw": "设备",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "海沧营业所",
+      "perms": [
+        "baofeizc:view",
+        "baoxian:view",
+        "gdzc:view",
+        "jhyyfaqi:view",
+        "oiltj:view",
+        "overtime:hr",
+        "overtime:verify",
+        "overtime:view",
+        "phone:view",
+        "plan:view",
+        "repair:view",
+        "simcard:view",
+        "vehicle:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 42,
+      "new_id": 42,
+      "username": "郭琳",
+      "real_name": "郭琳",
+      "phone": "15960809099",
+      "zw": "设备",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "水表检定站",
+      "perms": [
+        "baofeizc:view",
+        "gdzc:view",
+        "jhyyfaqi:view",
+        "plan:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 43,
+      "new_id": 43,
+      "username": "陈淑霞",
+      "real_name": "陈淑霞",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "集美营业所",
+      "perms": [
+        "plan:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 44,
+      "new_id": 44,
+      "username": "陈燕云",
+      "real_name": "陈燕云",
+      "phone": "",
+      "zw": "财务",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "同安营业所",
+      "perms": [
+        "jhyyfaqi:view",
+        "plan:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 45,
+      "new_id": 45,
+      "username": "孙翠英",
+      "real_name": "孙翠英",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "厦门营业所",
+      "perms": [
+        "plan:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 47,
+      "new_id": 47,
+      "username": "林超",
+      "real_name": "林超",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "同安营业所",
+      "perms": [
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 48,
+      "new_id": 48,
+      "username": "吴淑菊",
+      "real_name": "吴淑菊",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "同安营业所",
+      "perms": [
+        "overtime:verify",
+        "overtime:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 49,
+      "new_id": 49,
+      "username": "施万江",
+      "real_name": "施万江",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "集美营业所",
+      "perms": [
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 50,
+      "new_id": 50,
+      "username": "洪淑雅",
+      "real_name": "洪淑雅",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "翔安营业所",
+      "perms": [
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 51,
+      "new_id": 51,
+      "username": "林清洋",
+      "real_name": "林清洋",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "翔安营业所",
+      "perms": [
+        "contract:collect",
+        "contract:view",
+        "vehicle:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 52,
+      "new_id": 52,
+      "username": "张荣海（停用）",
+      "real_name": "张荣海（停用）",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "停用部门",
+      "perms": [
+        "gdzc:view",
+        "jcxt:view",
+        "jhyyfaqi:view",
+        "plan:view",
+        "vehicle:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 54,
+      "new_id": 54,
+      "username": "庄继璋",
+      "real_name": "庄继璋",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "停用部门",
+      "perms": [
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 55,
+      "new_id": 55,
+      "username": "肖文毅",
+      "real_name": "肖文毅",
+      "phone": "",
+      "zw": "所长",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "翔安营业所",
+      "perms": [
+        "jhyyfaqi:view",
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 56,
+      "new_id": 56,
+      "username": "李志阳",
+      "real_name": "李志阳",
+      "phone": "",
+      "zw": "所长",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "集美营业所",
+      "perms": [
+        "jhyyfaqi:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 57,
+      "new_id": 57,
+      "username": "韩飚",
+      "real_name": "韩飚",
+      "phone": "",
+      "zw": "所长",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "停用部门",
+      "perms": [
+        "jhyyfaqi:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 58,
+      "new_id": 58,
+      "username": "徐南阳",
+      "real_name": "徐南阳",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "售水事业部",
+      "perms": [
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 59,
+      "new_id": 59,
+      "username": "涂江坤",
+      "real_name": "涂江坤",
+      "phone": "15280237961",
+      "zw": "设备",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "厦门营业所",
+      "perms": [
+        "baofeizc:view",
+        "gdzc:view",
+        "ipadress:view",
+        "jhyyfaqi:view",
+        "oiltj:view",
+        "phone:view",
+        "plan:view",
+        "repair:view",
+        "simcard:view",
+        "vehicle:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 62,
+      "new_id": 62,
+      "username": "黄瑾",
+      "real_name": "黄瑾",
+      "phone": "",
+      "zw": "稽查",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "厦门营业所",
+      "perms": [
+        "jcdan:view",
+        "jcxt:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 63,
+      "new_id": 63,
+      "username": "叶丽葵",
+      "real_name": "叶丽葵",
+      "phone": "",
+      "zw": "稽查",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "同安营业所",
+      "perms": [
+        "jcdan:view",
+        "jcjl:view",
+        "jcxt:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 65,
+      "new_id": 65,
+      "username": "陈英杰",
+      "real_name": "陈英杰",
+      "phone": "",
+      "zw": "稽查",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "集美营业所",
+      "perms": [
+        "jcdan:view",
+        "jcjl:view",
+        "jcxt:view",
+        "vehicle:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 68,
+      "new_id": 68,
+      "username": "陈聪敏",
+      "real_name": "陈聪敏",
+      "phone": "",
+      "zw": "稽查",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "翔安营业所",
+      "perms": [
+        "jcjl:view",
+        "jcxt:view",
+        "vehicle:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 70,
+      "new_id": 70,
+      "username": "甘小溪(停用)",
+      "real_name": "甘小溪(停用)",
+      "phone": "",
+      "zw": "",
+      "is_active": false,
+      "password_version": 3,
+      "dept": "停用部门",
+      "perms": [
+        "jcxt:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 71,
+      "new_id": 71,
+      "username": "戴震海",
+      "real_name": "戴震海",
+      "phone": "",
+      "zw": "测漏",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "海沧营业所",
+      "perms": [
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 72,
+      "new_id": 72,
+      "username": "周智奋",
+      "real_name": "周智奋",
+      "phone": "",
+      "zw": "测漏",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "海沧营业所",
+      "perms": [
+        "leak:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 73,
+      "new_id": 73,
+      "username": "林俊达",
+      "real_name": "林俊达",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "集美营业所",
+      "perms": [
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 75,
+      "new_id": 75,
+      "username": "苏登汉",
+      "real_name": "苏登汉",
+      "phone": "",
+      "zw": "稽查",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "集美营业所",
+      "perms": [
+        "jcjl:view",
+        "jcxt:view",
+        "vehicle:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 76,
+      "new_id": 76,
+      "username": "方志猛",
+      "real_name": "方志猛",
+      "phone": "",
+      "zw": "测漏",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "同安营业所",
+      "perms": [
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 77,
+      "new_id": 77,
+      "username": "陈英栋",
+      "real_name": "陈英栋",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "停用部门",
+      "perms": [
+        "vehicle:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 80,
+      "new_id": 80,
+      "username": "刘夏阳",
+      "real_name": "刘夏阳",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "集美营业所",
+      "perms": [
+        "vehicle:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 81,
+      "new_id": 81,
+      "username": "翁振坤",
+      "real_name": "翁振坤",
+      "phone": "",
+      "zw": "所长",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "厦门营业所",
+      "perms": [
+        "gongdan:view",
+        "jhyyfaqi:view",
+        "jiesuan:view",
+        "jiesuandan:view",
+        "lingliao:view",
+        "material:view",
+        "roadrepair:view",
+        "workorder:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 82,
+      "new_id": 82,
+      "username": "张劲松",
+      "real_name": "张劲松",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "停用部门",
+      "perms": [
+        "jhyyfaqi:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 84,
+      "new_id": 84,
+      "username": "刘家荣",
+      "real_name": "刘家荣",
+      "phone": "13959298188",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "售水事业部",
+      "perms": [
+        "contract:view",
+        "jcdan:view",
+        "jhssdb:view",
+        "overtime:hr",
+        "overtime:verify",
+        "overtime:view",
+        "plan:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 85,
+      "new_id": 85,
+      "username": "谢红梅",
+      "real_name": "谢红梅",
+      "phone": "13799787566",
+      "zw": "",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "售水事业部",
+      "perms": [
+        "contract:view",
+        "jcdan:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 87,
+      "new_id": 87,
+      "username": "王振栋（退休）",
+      "real_name": "王振栋（退休）",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "停用部门",
+      "perms": [
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 88,
+      "new_id": 88,
+      "username": "甘小溪",
+      "real_name": "甘小溪",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "售水事业部",
+      "perms": [
+        "overtime:hr",
+        "overtime:verify",
+        "overtime:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 89,
+      "new_id": 89,
+      "username": "张静",
+      "real_name": "张静",
+      "phone": "13600976456",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "同安营业所",
+      "perms": [
+        "gdzc:view",
+        "jhyyfaqi:view",
+        "overtime:hr",
+        "overtime:verify",
+        "overtime:view",
+        "plan:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 93,
+      "new_id": 93,
+      "username": "杨旭(退休)",
+      "real_name": "杨旭(退休)",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "停用部门",
+      "perms": [
+        "contract:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 94,
+      "new_id": 94,
+      "username": "谢其",
+      "real_name": "谢其",
+      "phone": "",
+      "zw": "稽查",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "停用部门",
+      "perms": [
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 95,
+      "new_id": 95,
+      "username": "陈虹",
+      "real_name": "陈虹",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "售水事业部",
+      "perms": [
+        "contract:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 96,
+      "new_id": 96,
+      "username": "王斌彬",
+      "real_name": "王斌彬",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "售水事业部",
+      "perms": [
+        "contract:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 99,
+      "new_id": 99,
+      "username": "陈向茹",
+      "real_name": "陈向茹",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "停用部门",
+      "perms": [
+        "jhyyfaqi:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 100,
+      "new_id": 100,
+      "username": "丁铭",
+      "real_name": "丁铭",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "海沧营业所",
+      "perms": [
+        "baofeizc:view",
+        "gdzc:view",
+        "phone:view",
+        "project:view",
+        "simcard:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 103,
+      "new_id": 103,
+      "username": "陈璜",
+      "real_name": "陈璜",
+      "phone": "15960811509",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "售水事业部",
+      "perms": [
+        "contract:view",
+        "jcxt:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 105,
+      "new_id": 105,
+      "username": "连旋旋",
+      "real_name": "连旋旋",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "售水事业部",
+      "perms": [
+        "contract:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 107,
+      "new_id": 107,
+      "username": "陈佳锐",
+      "real_name": "陈佳锐",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "售水事业部",
+      "perms": [
+        "contract:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 109,
+      "new_id": 109,
+      "username": "尤耀顺",
+      "real_name": "尤耀顺",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "厦门营业所",
+      "perms": [
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 111,
+      "new_id": 111,
+      "username": "陈毅清2",
+      "real_name": "陈毅清2",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "杏林营业所",
+      "perms": [
+        "gdzc:view",
+        "jhyyfaqi:view",
+        "plan:view",
+        "simcard:view",
+        "vehicle:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 113,
+      "new_id": 113,
+      "username": "林俊晖",
+      "real_name": "林俊晖",
+      "phone": "15960230517",
+      "zw": "专管员",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "售水事业部",
+      "perms": [
+        "contract:collect",
+        "contract:view",
+        "jcdan:view",
+        "jhssdb:view",
+        "plan:view",
+        "vehicle:view",
+        "waterfee:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 115,
+      "new_id": 115,
+      "username": "詹仕辉",
+      "real_name": "詹仕辉",
+      "phone": "",
+      "zw": "所长",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "同安营业所",
+      "perms": [
+        "jhyyfaqi:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 126,
+      "new_id": 126,
+      "username": "陈佳",
+      "real_name": "陈佳",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "停用部门",
+      "perms": [
+        "vehicle:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 127,
+      "new_id": 127,
+      "username": "郭群明",
+      "real_name": "郭群明",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "厦门营业所",
+      "perms": [
+        "vehicle:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 129,
+      "new_id": 129,
+      "username": "黄亚来",
+      "real_name": "黄亚来",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "厦门营业所",
+      "perms": [
+        "vehicle:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 138,
+      "new_id": 138,
+      "username": "郭彩虹",
+      "real_name": "郭彩虹",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "停用部门",
+      "perms": [
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 141,
+      "new_id": 141,
+      "username": "邱建麟",
+      "real_name": "邱建麟",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "厦门营业所",
+      "perms": [
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 145,
+      "new_id": 145,
+      "username": "胡婷",
+      "real_name": "胡婷",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "二供部",
+      "perms": [
+        "vehicle:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 174,
+      "new_id": 174,
+      "username": "蔡宇雯（退休）",
+      "real_name": "蔡宇雯（退休）",
+      "phone": "",
+      "zw": "",
+      "is_active": false,
+      "password_version": 3,
+      "dept": "停用部门",
+      "perms": [
+        "jcxt:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 183,
+      "new_id": 183,
+      "username": "石达华",
+      "real_name": "石达华",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "海沧营业所",
+      "perms": [
+        "waterfee:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 193,
+      "new_id": 193,
+      "username": "刘赐生",
+      "real_name": "刘赐生",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "厦门营业所",
+      "perms": [
+        "vehicle:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 194,
+      "new_id": 194,
+      "username": "熊弯",
+      "real_name": "熊弯",
+      "phone": "",
+      "zw": "经理",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "售水事业部",
+      "perms": [
+        "celou:manage",
+        "celou:view",
+        "jhssdb:view",
+        "jhsshz:view",
+        "leak:view",
+        "plan:view",
+        "project:view",
+        "vehicle:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 196,
+      "new_id": 196,
+      "username": "张银嘉",
+      "real_name": "张银嘉",
+      "phone": "",
+      "zw": "所长",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "二供部",
+      "perms": [
+        "jhyyfaqi:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 200,
+      "new_id": 200,
+      "username": "林朝阳",
+      "real_name": "林朝阳",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "售水事业部",
+      "perms": [
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 201,
+      "new_id": 201,
+      "username": "阮兰茜",
+      "real_name": "阮兰茜",
+      "phone": "13599929752",
+      "zw": "",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "售水事业部",
+      "perms": [
+        "contract:collect",
+        "contract:view",
+        "ipadress:manage",
+        "ipadress:view",
+        "jcdan:view",
+        "waterfee:manage",
+        "waterfee:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 202,
+      "new_id": 202,
+      "username": "黄松文",
+      "real_name": "黄松文",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "海沧营业所",
+      "perms": [
+        "vehicle:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 204,
+      "new_id": 204,
+      "username": "颜艺云",
+      "real_name": "颜艺云",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "集美营业所",
+      "perms": [
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 207,
+      "new_id": 1,
+      "username": "admin",
+      "real_name": "admin",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "超级",
+      "perms": [
+        "baofeizc:view",
+        "celou:manage",
+        "contract:collect",
+        "contract:manage",
+        "contract:view",
+        "gdzc:view",
+        "gongdan:manage",
+        "ipadress:manage",
+        "jcxt:view",
+        "jhssdb:manage",
+        "jhssdb:view",
+        "jhsshz:admin",
+        "jhsshz:manage",
+        "jhsshz:view",
+        "jhyyfaqi:manage",
+        "jhyyfaqi:summary",
+        "jhyyfaqi:view",
+        "jiesuandan:manage",
+        "leak:manage",
+        "lingliao:audit",
+        "material:manage",
+        "oilcard:manage",
+        "oiltj:view",
+        "overtime:apply",
+        "overtime:hr",
+        "overtime:manage",
+        "overtime:verify",
+        "phone:huishou",
+        "phone:manage",
+        "plan:manage",
+        "plan:view",
+        "project:manage",
+        "repair:audit",
+        "repair:manage",
+        "repair:view",
+        "simcard:manage",
+        "simcard:view",
+        "simfee:view",
+        "system:dept:manage",
+        "system:role:manage",
+        "system:user:manage",
+        "vehicle:manage",
+        "vehicle:view",
+        "waterfee:manage",
+        "workorder:manage",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 208,
+      "new_id": 208,
+      "username": "黄纳薇",
+      "real_name": "黄纳薇",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "厦门营业所",
+      "perms": [
+        "contract:collect",
+        "contract:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 209,
+      "new_id": 209,
+      "username": "邹贤菊",
+      "real_name": "邹贤菊",
+      "phone": "18983133744",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "售水事业部",
+      "perms": [
+        "contract:view",
+        "jhssdb:view",
+        "plan:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 210,
+      "new_id": 210,
+      "username": "甘淑贞",
+      "real_name": "甘淑贞",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "厦门营业所",
+      "perms": [
+        "simcard:view",
+        "simfee:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 211,
+      "new_id": 211,
+      "username": "杨文祺",
+      "real_name": "杨文祺",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "厦门营业所",
+      "perms": [
+        "gongdan:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 212,
+      "new_id": 212,
+      "username": "肖珑洁",
+      "real_name": "肖珑洁",
+      "phone": "",
+      "zw": "集团",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "集团",
+      "perms": [
+        "simcard:manage",
+        "simcard:view",
+        "simfee:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 213,
+      "new_id": 213,
+      "username": "jsb",
+      "real_name": "jsb",
+      "phone": "",
+      "zw": "所长",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "厦门营业所",
+      "perms": [
+        "baofeizc:view",
+        "baoxian:view",
+        "celou:manage",
+        "celou:view",
+        "chelfytj:view",
+        "contract:collect",
+        "contract:manage",
+        "contract:view",
+        "gdzc:view",
+        "gongdan:manage",
+        "gongdan:view",
+        "ipadress:manage",
+        "ipadress:view",
+        "jcjl:view",
+        "jcxt:view",
+        "jhssdb:manage",
+        "jhssdb:view",
+        "jhsshz:admin",
+        "jhsshz:manage",
+        "jhsshz:view",
+        "jhyyfaqi:manage",
+        "jhyyfaqi:summary",
+        "jhyyfaqi:view",
+        "jiaban:view",
+        "jiesuan:view",
+        "jiesuandan:manage",
+        "jiesuandan:view",
+        "leak:manage",
+        "leak:view",
+        "lingliao:audit",
+        "lingliao:view",
+        "material:manage",
+        "material:view",
+        "oilcard:manage",
+        "oilcard:view",
+        "oiltj:view",
+        "overtime:apply",
+        "overtime:hr",
+        "overtime:manage",
+        "overtime:verify",
+        "overtime:view",
+        "phone:huishou",
+        "phone:manage",
+        "phone:view",
+        "plan:manage",
+        "plan:view",
+        "plusoil:view",
+        "project:manage",
+        "project:view",
+        "repair:audit",
+        "repair:manage",
+        "repair:view",
+        "roadrepair:view",
+        "simcard:manage",
+        "simcard:view",
+        "simfee:view",
+        "spjicha:view",
+        "system:dept:manage",
+        "system:role:manage",
+        "system:user:manage",
+        "vehicle:manage",
+        "vehicle:view",
+        "waterfee:manage",
+        "workorder:manage",
+        "workorder:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 214,
+      "new_id": 214,
+      "username": "胡敬军",
+      "real_name": "胡敬军",
+      "phone": "",
+      "zw": "系统管理",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "集团",
+      "perms": [
+        "baofeizc:view",
+        "celou:manage",
+        "contract:manage",
+        "gdzc:view",
+        "gongdan:manage",
+        "ipadress:manage",
+        "jhssdb:manage",
+        "jhsshz:admin",
+        "jhsshz:manage",
+        "jhyyfaqi:manage",
+        "jhyyfaqi:summary",
+        "jiesuandan:manage",
+        "leak:manage",
+        "lingliao:audit",
+        "material:manage",
+        "oilcard:manage",
+        "overtime:apply",
+        "overtime:hr",
+        "overtime:manage",
+        "overtime:verify",
+        "phone:huishou",
+        "phone:manage",
+        "plan:manage",
+        "project:manage",
+        "repair:audit",
+        "repair:manage",
+        "simcard:manage",
+        "simcard:view",
+        "simfee:view",
+        "system:dept:manage",
+        "system:user:manage",
+        "vehicle:manage",
+        "waterfee:manage",
+        "workorder:manage",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 215,
+      "new_id": 215,
+      "username": "黄文麟",
+      "real_name": "黄文麟",
+      "phone": "",
+      "zw": "稽查",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "海沧营业所",
+      "perms": [
+        "jcdan:view",
+        "jcxt:view",
+        "vehicle:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 217,
+      "new_id": 217,
+      "username": "蔡博铨",
+      "real_name": "蔡博铨",
+      "phone": "18698335522",
+      "zw": "专管员",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "售水事业部",
+      "perms": [
+        "celou:manage",
+        "celou:view",
+        "contract:collect",
+        "contract:view",
+        "jhssdb:view",
+        "overtime:hr",
+        "overtime:verify",
+        "overtime:view",
+        "plan:view",
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 218,
+      "new_id": 218,
+      "username": "郑明强",
+      "real_name": "郑明强",
+      "phone": "",
+      "zw": "稽查",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "翔安营业所",
+      "perms": [
+        "jcdan:view",
+        "jcjl:view",
+        "jcxt:view",
+        "project:view",
+        "vehicle:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 219,
+      "new_id": 219,
+      "username": "詹文生",
+      "real_name": "詹文生",
+      "phone": "",
+      "zw": "稽查",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "海沧营业所",
+      "perms": [
+        "jcdan:view",
+        "jcxt:view",
+        "overtime:verify",
+        "overtime:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 220,
+      "new_id": 220,
+      "username": "陈小丽",
+      "real_name": "陈小丽",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "厦门营业所",
+      "perms": [
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 221,
+      "new_id": 221,
+      "username": "马玉梅",
+      "real_name": "马玉梅",
+      "phone": "",
+      "zw": "传导",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "厦门营业所",
+      "perms": [
+        "baofeizc:view",
+        "gdzc:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 222,
+      "new_id": 222,
+      "username": "小陈",
+      "real_name": "小陈",
+      "phone": "",
+      "zw": "车辆维修",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "售水事业部",
+      "perms": [
+        "repair:view",
+        "vehicle:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 223,
+      "new_id": 223,
+      "username": "陈进福",
+      "real_name": "陈进福",
+      "phone": "",
+      "zw": "设备",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "制水事业部",
+      "perms": [
+        "baofeizc:view",
+        "celou:manage",
+        "contract:manage",
+        "gdzc:view",
+        "gongdan:manage",
+        "ipadress:manage",
+        "jhssdb:manage",
+        "jhsshz:admin",
+        "jhsshz:manage",
+        "jhyyfaqi:manage",
+        "jhyyfaqi:summary",
+        "jiesuandan:manage",
+        "leak:manage",
+        "lingliao:audit",
+        "material:manage",
+        "oilcard:manage",
+        "oilcard:view",
+        "oiltj:view",
+        "overtime:apply",
+        "overtime:hr",
+        "overtime:manage",
+        "overtime:verify",
+        "phone:huishou",
+        "phone:manage",
+        "plan:manage",
+        "plusoil:view",
+        "project:manage",
+        "repair:audit",
+        "repair:manage",
+        "repair:view",
+        "simcard:manage",
+        "vehicle:manage",
+        "vehicle:view",
+        "waterfee:manage",
+        "workorder:manage",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 225,
+      "new_id": 225,
+      "username": "陈琛",
+      "real_name": "陈琛",
+      "phone": "",
+      "zw": "传导",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "集美营业所",
+      "perms": [
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 226,
+      "new_id": 226,
+      "username": "陈亮",
+      "real_name": "陈亮",
+      "phone": "",
+      "zw": "传导",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "海沧营业所",
+      "perms": [
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 227,
+      "new_id": 227,
+      "username": "杨达",
+      "real_name": "杨达",
+      "phone": "18006000566",
+      "zw": "设备",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "水表检定站",
+      "perms": [
+        "baofeizc:view",
+        "gdzc:view",
+        "jhyyfaqi:view",
+        "plan:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 228,
+      "new_id": 228,
+      "username": "连宇峰",
+      "real_name": "连宇峰",
+      "phone": "",
+      "zw": "稽查",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "海沧营业所",
+      "perms": [
+        "jcdan:view",
+        "jcjl:view",
+        "jcxt:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 230,
+      "new_id": 230,
+      "username": "李由",
+      "real_name": "李由",
+      "phone": "13859420266",
+      "zw": "专管员",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "售水事业部",
+      "perms": [
+        "contract:view",
+        "jcdan:view",
+        "jcjl:view",
+        "jcxt:view",
+        "jhssdb:view",
+        "spjicha:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 231,
+      "new_id": 231,
+      "username": "林俊",
+      "real_name": "林俊",
+      "phone": "13599515369",
+      "zw": "专管员",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "售水事业部",
+      "perms": [
+        "contract:view",
+        "jhssdb:view",
+        "plan:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 233,
+      "new_id": 233,
+      "username": "施婕婕",
+      "real_name": "施婕婕",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "售水事业部",
+      "perms": [
+        "contract:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 234,
+      "new_id": 234,
+      "username": "郑怡婷",
+      "real_name": "郑怡婷",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "售水事业部",
+      "perms": [
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 235,
+      "new_id": 235,
+      "username": "陈姝娴",
+      "real_name": "陈姝娴",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "售水事业部",
+      "perms": [
+        "overtime:hr",
+        "overtime:verify",
+        "overtime:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 293,
+      "new_id": 293,
+      "username": "戴少毅",
+      "real_name": "戴少毅",
+      "phone": "18960222609",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "停用部门",
+      "perms": [
+        "contract:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 295,
+      "new_id": 295,
+      "username": "郑冬梅",
+      "real_name": "郑冬梅",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "同安营业所",
+      "perms": [
+        "overtime:hr",
+        "overtime:verify",
+        "overtime:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 296,
+      "new_id": 296,
+      "username": "陈素真",
+      "real_name": "陈素真",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "翔安营业所",
+      "perms": [
+        "overtime:hr",
+        "overtime:verify",
+        "overtime:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 297,
+      "new_id": 297,
+      "username": "高小燕",
+      "real_name": "高小燕",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "厦门营业所",
+      "perms": [
+        "baofeizc:view",
+        "celou:manage",
+        "contract:manage",
+        "gdzc:view",
+        "gongdan:manage",
+        "gongdan:view",
+        "ipadress:manage",
+        "jhssdb:manage",
+        "jhsshz:admin",
+        "jhsshz:manage",
+        "jhyyfaqi:manage",
+        "jhyyfaqi:summary",
+        "jiaban:view",
+        "jiesuan:view",
+        "jiesuandan:manage",
+        "jiesuandan:view",
+        "leak:manage",
+        "lingliao:audit",
+        "lingliao:view",
+        "material:manage",
+        "material:view",
+        "oilcard:manage",
+        "overtime:apply",
+        "overtime:hr",
+        "overtime:manage",
+        "overtime:verify",
+        "overtime:view",
+        "phone:huishou",
+        "phone:manage",
+        "plan:manage",
+        "project:manage",
+        "repair:audit",
+        "repair:manage",
+        "roadrepair:view",
+        "simcard:manage",
+        "system:user:manage",
+        "vehicle:manage",
+        "waterfee:manage",
+        "workorder:manage",
+        "workorder:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 298,
+      "new_id": 298,
+      "username": "肖钦月",
+      "real_name": "肖钦月",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "计划财务部",
+      "perms": [
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 299,
+      "new_id": 299,
+      "username": "张琼飞",
+      "real_name": "张琼飞",
+      "phone": "",
+      "zw": "所长",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "同安营业所",
+      "perms": [
+        "jhyyfaqi:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 300,
+      "new_id": 300,
+      "username": "曹小涛",
+      "real_name": "曹小涛",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "二供部",
+      "perms": [
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 302,
+      "new_id": 302,
+      "username": "肖谆",
+      "real_name": "肖谆",
+      "phone": "",
+      "zw": "所长",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "海沧营业所",
+      "perms": [
+        "jhyyfaqi:view",
+        "plan:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 303,
+      "new_id": 303,
+      "username": "余文德",
+      "real_name": "余文德",
+      "phone": "",
+      "zw": "所长",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "水表检定站",
+      "perms": [
+        "jhyyfaqi:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 304,
+      "new_id": 304,
+      "username": "林华杰",
+      "real_name": "林华杰",
+      "phone": "",
+      "zw": "所长",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "水表检定站",
+      "perms": [
+        "jhyyfaqi:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 305,
+      "new_id": 305,
+      "username": "张茂洋",
+      "real_name": "张茂洋",
+      "phone": "18659889186",
+      "zw": "专管员",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "售水事业部",
+      "perms": [
+        "celou:view",
+        "contract:view",
+        "gdzc:view",
+        "jhssdb:view",
+        "overtime:hr",
+        "overtime:verify",
+        "overtime:view",
+        "plan:view",
+        "simcard:view",
+        "simfee:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 307,
+      "new_id": 307,
+      "username": "王荣跃",
+      "real_name": "王荣跃",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "集美营业所",
+      "perms": [
+        "waterfee:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 309,
+      "new_id": 309,
+      "username": "邱凤晴",
+      "real_name": "邱凤晴",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "同安营业所",
+      "perms": [
+        "waterfee:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 310,
+      "new_id": 310,
+      "username": "陈轶鹏",
+      "real_name": "陈轶鹏",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "翔安营业所",
+      "perms": [
+        "waterfee:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 312,
+      "new_id": 312,
+      "username": "经铭",
+      "real_name": "经铭",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "厦门营业所",
+      "perms": [
+        "lingliao:view",
+        "material:view",
+        "workorder:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 313,
+      "new_id": 313,
+      "username": "谢圣珏",
+      "real_name": "谢圣珏",
+      "phone": "13507523089",
+      "zw": "设备",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "同安营业所",
+      "perms": [
+        "baofeizc:view",
+        "baoxian:view",
+        "gdzc:view",
+        "jhyyfaqi:view",
+        "oiltj:view",
+        "phone:view",
+        "plan:view",
+        "repair:view",
+        "simcard:view",
+        "simfee:view",
+        "vehicle:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 314,
+      "new_id": 314,
+      "username": "电话卡维护",
+      "real_name": "电话卡维护",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "售水事业部",
+      "perms": [
+        "simcard:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 315,
+      "new_id": 315,
+      "username": "陈敏芳",
+      "real_name": "陈敏芳",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "厦门营业所",
+      "perms": [
+        "waterfee:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 316,
+      "new_id": 316,
+      "username": "夏艺源",
+      "real_name": "夏艺源",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "售水本部",
+      "perms": [
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 317,
+      "new_id": 317,
+      "username": "陈鹭婷",
+      "real_name": "陈鹭婷",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "厦门营业所",
+      "perms": [
+        "waterfee:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 318,
+      "new_id": 318,
+      "username": "张敏",
+      "real_name": "张敏",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "厦门营业所",
+      "perms": [
+        "gongdan:view",
+        "jiesuan:view",
+        "jiesuandan:view",
+        "lingliao:view",
+        "roadrepair:view",
+        "workorder:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 319,
+      "new_id": 319,
+      "username": "连一心",
+      "real_name": "连一心",
+      "phone": "",
+      "zw": "安全部经理",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "售水事业部",
+      "perms": [
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 320,
+      "new_id": 320,
+      "username": "周妍",
+      "real_name": "周妍",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "厦门营业所",
+      "perms": [
+        "waterfee:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 321,
+      "new_id": 321,
+      "username": "陈志钦",
+      "real_name": "陈志钦",
+      "phone": "",
+      "zw": "安全管理",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "售水事业部",
+      "perms": [
+        "contract:view",
+        "overtime:verify",
+        "overtime:view",
+        "plan:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 322,
+      "new_id": 322,
+      "username": "刘玲",
+      "real_name": "刘玲",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "二供部",
+      "perms": [
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 323,
+      "new_id": 323,
+      "username": "郑鹭川",
+      "real_name": "郑鹭川",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "总经办",
+      "perms": [
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 324,
+      "new_id": 324,
+      "username": "吴铤南",
+      "real_name": "吴铤南",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "翔安营业所",
+      "perms": [
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 325,
+      "new_id": 325,
+      "username": "陈俊严",
+      "real_name": "陈俊严",
+      "phone": "",
+      "zw": "工程管理",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "翔安营业所",
+      "perms": [
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 326,
+      "new_id": 326,
+      "username": "蔡海水",
+      "real_name": "蔡海水",
+      "phone": "",
+      "zw": "工程管理",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "翔安营业所",
+      "perms": [
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 327,
+      "new_id": 327,
+      "username": "郑航利",
+      "real_name": "郑航利",
+      "phone": "",
+      "zw": "工程管理",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "翔安营业所",
+      "perms": [
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 328,
+      "new_id": 328,
+      "username": "陈欣",
+      "real_name": "陈欣",
+      "phone": "",
+      "zw": "工程管理",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "厦门营业所",
+      "perms": [
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 329,
+      "new_id": 329,
+      "username": "张水吉",
+      "real_name": "张水吉",
+      "phone": "",
+      "zw": "工程管理",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "厦门营业所",
+      "perms": [
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 330,
+      "new_id": 330,
+      "username": "李阳昆",
+      "real_name": "李阳昆",
+      "phone": "",
+      "zw": "工程管理",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "厦门营业所",
+      "perms": [
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 331,
+      "new_id": 331,
+      "username": "张美艺",
+      "real_name": "张美艺",
+      "phone": "",
+      "zw": "工程管理",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "厦门营业所",
+      "perms": [
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 332,
+      "new_id": 332,
+      "username": "吴毅",
+      "real_name": "吴毅",
+      "phone": "",
+      "zw": "工程管理",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "厦门营业所",
+      "perms": [
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 333,
+      "new_id": 333,
+      "username": "林维嘉",
+      "real_name": "林维嘉",
+      "phone": "",
+      "zw": "特水工程管理",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "厦门营业所",
+      "perms": [
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 334,
+      "new_id": 334,
+      "username": "李军",
+      "real_name": "李军",
+      "phone": "",
+      "zw": "特水工程管理",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "厦门营业所",
+      "perms": [
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 335,
+      "new_id": 335,
+      "username": "喻靖",
+      "real_name": "喻靖",
+      "phone": "",
+      "zw": "建管工程管理",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "厦门营业所",
+      "perms": [
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 336,
+      "new_id": 336,
+      "username": "刘肇君",
+      "real_name": "刘肇君",
+      "phone": "",
+      "zw": "建管工程管理",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "厦门营业所",
+      "perms": [
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 337,
+      "new_id": 337,
+      "username": "蔡武平",
+      "real_name": "蔡武平",
+      "phone": "",
+      "zw": "设计工程管理",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "厦门营业所",
+      "perms": [
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 338,
+      "new_id": 338,
+      "username": "廖小晖",
+      "real_name": "廖小晖",
+      "phone": "",
+      "zw": "设计工程管理",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "厦门营业所",
+      "perms": [
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 339,
+      "new_id": 339,
+      "username": "王飞扬",
+      "real_name": "王飞扬",
+      "phone": "",
+      "zw": "工程管理",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "厦门营业所",
+      "perms": [
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 340,
+      "new_id": 340,
+      "username": "杜德凯",
+      "real_name": "杜德凯",
+      "phone": "",
+      "zw": "工程管理",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "海沧营业所",
+      "perms": [
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 341,
+      "new_id": 341,
+      "username": "周佳鹏",
+      "real_name": "周佳鹏",
+      "phone": "",
+      "zw": "工程管理",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "海沧营业所",
+      "perms": [
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 342,
+      "new_id": 342,
+      "username": "张舒婕",
+      "real_name": "张舒婕",
+      "phone": "",
+      "zw": "设计工程管理",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "售水事业部",
+      "perms": [
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 343,
+      "new_id": 343,
+      "username": "郑东贵",
+      "real_name": "郑东贵",
+      "phone": "",
+      "zw": "特水工程管理",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "售水事业部",
+      "perms": [
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 344,
+      "new_id": 344,
+      "username": "黄荣敏",
+      "real_name": "黄荣敏",
+      "phone": "",
+      "zw": "建管工程管理",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "海沧营业所",
+      "perms": [
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 345,
+      "new_id": 345,
+      "username": "刘远佳",
+      "real_name": "刘远佳",
+      "phone": "",
+      "zw": "工程管理",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "集美营业所",
+      "perms": [
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 346,
+      "new_id": 346,
+      "username": "陈智勇",
+      "real_name": "陈智勇",
+      "phone": "",
+      "zw": "工程管理",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "集美营业所",
+      "perms": [
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 347,
+      "new_id": 347,
+      "username": "许小龙",
+      "real_name": "许小龙",
+      "phone": "",
+      "zw": "设计工程管理",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "集美营业所",
+      "perms": [
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 348,
+      "new_id": 348,
+      "username": "朱建平",
+      "real_name": "朱建平",
+      "phone": "",
+      "zw": "特水工程管理",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "集美营业所",
+      "perms": [
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 349,
+      "new_id": 349,
+      "username": "郑炳德",
+      "real_name": "郑炳德",
+      "phone": "",
+      "zw": "建管工程管理",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "集美营业所",
+      "perms": [
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 350,
+      "new_id": 350,
+      "username": "游联春",
+      "real_name": "游联春",
+      "phone": "",
+      "zw": "建管工程管理",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "集美营业所",
+      "perms": [
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 351,
+      "new_id": 351,
+      "username": "陈志武",
+      "real_name": "陈志武",
+      "phone": "",
+      "zw": "工程管理",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "同安营业所",
+      "perms": [
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 352,
+      "new_id": 352,
+      "username": "纪瑞铨",
+      "real_name": "纪瑞铨",
+      "phone": "",
+      "zw": "工程管理",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "同安营业所",
+      "perms": [
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 353,
+      "new_id": 353,
+      "username": "林耀楠",
+      "real_name": "林耀楠",
+      "phone": "",
+      "zw": "设计工程管理",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "同安营业所",
+      "perms": [
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 354,
+      "new_id": 354,
+      "username": "林常委",
+      "real_name": "林常委",
+      "phone": "",
+      "zw": "特水工程管理",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "同安营业所",
+      "perms": [
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 355,
+      "new_id": 355,
+      "username": "吴加庆",
+      "real_name": "吴加庆",
+      "phone": "",
+      "zw": "特水工程管理",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "同安营业所",
+      "perms": [
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 356,
+      "new_id": 356,
+      "username": "施俊斌",
+      "real_name": "施俊斌",
+      "phone": "",
+      "zw": "建管工程管理",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "同安营业所",
+      "perms": [
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 357,
+      "new_id": 357,
+      "username": "李厚灿",
+      "real_name": "李厚灿",
+      "phone": "",
+      "zw": "建管工程管理",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "同安营业所",
+      "perms": [
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 358,
+      "new_id": 358,
+      "username": "高泉祀",
+      "real_name": "高泉祀",
+      "phone": "",
+      "zw": "设计工程管理",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "翔安营业所",
+      "perms": [
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 359,
+      "new_id": 359,
+      "username": "庄金华",
+      "real_name": "庄金华",
+      "phone": "",
+      "zw": "建管工程管理",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "翔安营业所",
+      "perms": [
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 360,
+      "new_id": 360,
+      "username": "邱毅荣",
+      "real_name": "邱毅荣",
+      "phone": "",
+      "zw": "特水工程管理",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "翔安营业所",
+      "perms": [
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 361,
+      "new_id": 361,
+      "username": "吴月芬",
+      "real_name": "吴月芬",
+      "phone": "",
+      "zw": "设计工程管理",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "海沧营业所",
+      "perms": [
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 362,
+      "new_id": 362,
+      "username": "王曙晖",
+      "real_name": "王曙晖",
+      "phone": "",
+      "zw": "专管员",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "售水事业部",
+      "perms": [
+        "contract:view",
+        "jhssdb:view",
+        "plan:view",
+        "project:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 363,
+      "new_id": 363,
+      "username": "陈奇俊",
+      "real_name": "陈奇俊",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "售水事业部",
+      "perms": [
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 364,
+      "new_id": 364,
+      "username": "陈小航",
+      "real_name": "陈小航",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "集团",
+      "perms": [
+        "leak:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 365,
+      "new_id": 365,
+      "username": "汪红",
+      "real_name": "汪红",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 1,
+      "dept": "计划财务部",
+      "perms": [
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 366,
+      "new_id": 366,
+      "username": "张淑芬",
+      "real_name": "张淑芬",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "厦门营业所",
+      "perms": [
+        "overtime:hr",
+        "overtime:verify",
+        "overtime:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 367,
+      "new_id": 367,
+      "username": "陈春英",
+      "real_name": "陈春英",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "厦门营业所",
+      "perms": [
+        "overtime:verify",
+        "overtime:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 368,
+      "new_id": 368,
+      "username": "陈钰",
+      "real_name": "陈钰",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "售水事业部",
+      "perms": [
+        "celou:manage",
+        "celou:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 369,
+      "new_id": 369,
+      "username": "邱冬晴",
+      "real_name": "邱冬晴",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "海沧营业所",
+      "perms": [
+        "overtime:hr",
+        "overtime:verify",
+        "overtime:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 370,
+      "new_id": 370,
+      "username": "林延伟",
+      "real_name": "林延伟",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "集美营业所",
+      "perms": [
+        "overtime:verify",
+        "overtime:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 371,
+      "new_id": 371,
+      "username": "杨阳",
+      "real_name": "杨阳",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "集美营业所",
+      "perms": [
+        "overtime:verify",
+        "overtime:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 372,
+      "new_id": 372,
+      "username": "李雅虹",
+      "real_name": "李雅虹",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "同安营业所",
+      "perms": [
+        "overtime:hr",
+        "overtime:verify",
+        "overtime:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 373,
+      "new_id": 373,
+      "username": "曾少敏",
+      "real_name": "曾少敏",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "翔安营业所",
+      "perms": [
+        "overtime:verify",
+        "overtime:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 374,
+      "new_id": 374,
+      "username": "白艺飞",
+      "real_name": "白艺飞",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "水表检定站",
+      "perms": [
+        "overtime:hr",
+        "overtime:verify",
+        "overtime:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 375,
+      "new_id": 375,
+      "username": "黄玉美",
+      "real_name": "黄玉美",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "厦门营业所",
+      "perms": [
+        "overtime:verify",
+        "overtime:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 376,
+      "new_id": 376,
+      "username": "邵海态",
+      "real_name": "邵海态",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "厦门营业所",
+      "perms": [
+        "overtime:verify",
+        "overtime:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 377,
+      "new_id": 377,
+      "username": "刘俊玲",
+      "real_name": "刘俊玲",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "厦门营业所",
+      "perms": [
+        "overtime:verify",
+        "overtime:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 378,
+      "new_id": 378,
+      "username": "薛璐芬",
+      "real_name": "薛璐芬",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "厦门营业所",
+      "perms": [
+        "overtime:verify",
+        "overtime:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 379,
+      "new_id": 379,
+      "username": "李子淳",
+      "real_name": "李子淳",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "厦门营业所",
+      "perms": [
+        "overtime:verify",
+        "overtime:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 380,
+      "new_id": 380,
+      "username": "李媖",
+      "real_name": "李媖",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "厦门营业所",
+      "perms": [
+        "overtime:verify",
+        "overtime:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 381,
+      "new_id": 381,
+      "username": "郑慧清",
+      "real_name": "郑慧清",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 3,
+      "dept": "规建部",
+      "perms": [
+        "celou:manage",
+        "celou:view",
+        "wzcgsq:view"
+      ]
+    },
+    {
+      "old_id": 382,
+      "new_id": 382,
+      "username": "林丽丽",
+      "real_name": "林丽丽",
+      "phone": "",
+      "zw": "",
+      "is_active": true,
+      "password_version": 2,
+      "dept": "二供部",
+      "perms": [
+        "simcard:view",
+        "simfee:view",
+        "wzcgsq:view"
+      ]
+    }
+  ],
+  "unmapped_menus": [
+    {
+      "menu": "发票列表",
+      "users": 32
+    },
+    {
+      "menu": "登记发票",
+      "users": 30
+    },
+    {
+      "menu": "水车查询",
+      "users": 13
+    },
+    {
+      "menu": "水车登记",
+      "users": 13
+    },
+    {
+      "menu": "营业所小散",
+      "users": 11
+    },
+    {
+      "menu": "旧稽查信息",
+      "users": 11
+    },
+    {
+      "menu": "临时取水",
+      "users": 11
+    },
+    {
+      "menu": "小散工程",
+      "users": 10
+    },
+    {
+      "menu": "添加水车违章记录",
+      "users": 9
+    },
+    {
+      "menu": "传导完好率",
+      "users": 8
+    },
+    {
+      "menu": "传导大修",
+      "users": 8
+    },
+    {
+      "menu": "传导变动表",
+      "users": 8
+    },
+    {
+      "menu": "传导故障",
+      "users": 7
+    },
+    {
+      "menu": "签发票",
+      "users": 6
+    },
+    {
+      "menu": "发票统计",
+      "users": 5
+    },
+    {
+      "menu": "网盘",
+      "users": 5
+    },
+    {
+      "menu": "盘点表功能",
+      "users": 4
+    },
+    {
+      "menu": "油耗记录",
+      "users": 4
+    },
+    {
+      "menu": "地点设置",
+      "users": 3
+    },
+    {
+      "menu": "车辆调度",
+      "users": 3
+    },
+    {
+      "menu": "休闲方块",
+      "users": 3
+    },
+    {
+      "menu": "短信发送",
+      "users": 2
+    },
+    {
+      "menu": "考勤补卡",
+      "users": 2
+    },
+    {
+      "menu": "系统日记",
+      "users": 2
+    },
+    {
+      "menu": "更新系统",
+      "users": 2
+    },
+    {
+      "menu": "内网应用门户",
+      "users": 2
+    },
+    {
+      "menu": "内网代理管理",
+      "users": 2
+    },
+    {
+      "menu": "统计报表",
+      "users": 1
+    }
+  ]
+}

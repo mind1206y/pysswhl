@@ -12,8 +12,18 @@
           <div v-if="!c.day" class="cal-cell cal-cell-blank"></div>
           <div v-else class="cal-cell">
             <div class="cal-daynum" :class="{ sun: c.dow === 6, sat: c.dow === 5 }">{{ c.day }}</div>
-            <div v-for="(e, j) in c.entries" :key="j" class="cal-entry" :class="'cal-lv' + level(e.rawHours)"
-                 :title="tip(e)">{{ Number(e.rawHours || 0).toFixed(2) }}h</div>
+            <el-tooltip v-for="(e, j) in c.entries" :key="j" placement="top" effect="light"
+                        :show-after="120" :offset="7" popper-class="cal-tip-pop">
+              <div class="cal-entry" :class="'cal-lv' + level(e.rawHours)">{{ Number(e.rawHours || 0).toFixed(2) }}h</div>
+              <template #content>
+                <div class="cal-tip">
+                  <div class="cal-tip-row"><span class="cal-tip-k">时段</span><span class="cal-tip-v">{{ tipTime(e) }}</span></div>
+                  <div class="cal-tip-row"><span class="cal-tip-k">原始时长</span><span class="cal-tip-v">{{ Number(e.rawHours ?? e.raw_hours ?? 0).toFixed(2) }} h</span></div>
+                  <div v-if="e.workType || e.work_type" class="cal-tip-row"><span class="cal-tip-k">类型</span><span class="cal-tip-v">{{ e.workType || e.work_type }}</span></div>
+                  <div v-if="e.reason" class="cal-tip-row"><span class="cal-tip-k">事由</span><span class="cal-tip-v">{{ e.reason }}</span></div>
+                </div>
+              </template>
+            </el-tooltip>
           </div>
         </template>
       </div>
@@ -38,10 +48,10 @@ function level(h) {
   if (v < 8) return 4
   return 5
 }
-function tip(e) {
+function tipTime(e) {
   const s = (e.startTime || '').slice(11, 16) || (e.start_time || '').slice(11, 16)
   const t = (e.endTime || '').slice(11, 16) || (e.end_time || '').slice(11, 16)
-  return `${s}-${t} | 原始${Number(e.rawHours ?? e.raw_hours ?? 0).toFixed(2)}h | ${e.workType || e.work_type || ''} | ${e.reason || ''}`
+  return s || t ? `${s}-${t}` : '—'
 }
 const months = computed(() => {
   const byMonth = {}

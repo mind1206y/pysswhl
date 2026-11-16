@@ -15,9 +15,17 @@ from cryptography.hazmat.primitives.asymmetric import padding, rsa
 
 from app.core.config import settings
 
-# 密码哈希版本:v0 = bcrypt(历史遗留);v1 = Argon2id + pepper(现行)
-# 老用户在下次登录成功时自动升级到 v1,无需重置密码。
+# 密码哈希版本:
+#   0 = bcrypt(新系统早期,已废弃)
+#   1 = Argon2id + pepper(现行,新密码一律用它)
+#   2 = 旧系统 PBKDF2-HMAC-SHA1:格式 pbkdf2$迭代次数$盐(Base64)$哈希(Base64),
+#       对应旧 whl.common.PasswordHasher(.NET Rfc2898DeriveBytes),密码按 UTF-8 编码
+#   3 = 旧系统无盐 MD5:.NET Encoding.Unicode(UTF-16LE) 求 MD5,且每字节 ToString("x")
+#       会丢掉前导零,因此长度是 29~32 位十六进制而非固定 32 位
+# 2/3 是旧系统用户表原样导入后的形态;任一格式验证通过后都会在登录时透明升级到 v1。
 CURRENT_PASSWORD_VERSION = 1
+LEGACY_PBKDF2_VERSION = 2
+LEGACY_MD5_VERSION = 3
 _ph = PasswordHasher(time_cost=3, memory_cost=65536, parallelism=4)
 
 
@@ -34,7 +42,13 @@ def hash_password(plain: str) -> str:
 
 
 def verify_password(plain: str, hashed: str, version: int = CURRENT_PASSWORD_VERSION) -> bool:
-    """按存储时的版本校验密码"""
+    """按存储时的版本校验密码(v1 现行,v0 bcrypt,v2 旧 PBKDF2,v3 旧 MD5)"""
+    hashed = hashed or ""
+    # 版本号优先,其次按哈希长相兜底:老数据版本号可能没写对,但格式是自描述的
+    if version == LEGACY_PBKDF2_VERSION or hashed.startswith("pbkdf2$"):
+        return verify_password_old_pbkdf2(plain, hashed)
+    if version == LEGACY_MD5_VERSION or _LEGACY_MD5_RE.fullmatch(hashed):
+        return verify_password_old_md5(plain, hashed)
     if version <= 0:
         return verify_password_legacy(plain, hashed)
     try:
@@ -66,6 +80,34 @@ def verify_password_legacy(plain: str, hashed: str) -> bool:
         return bcrypt.checkpw(plain.encode("utf-8"), hashed.encode("utf-8"))
     except ValueError:
         return False
+
+
+# 旧系统 MD5 哈希的可识别长相:29~32 位十六进制(.NET ToString("x") 丢前导零,长度不固定)
+_LEGACY_MD5_RE = re.compile(r"[0-9a-f]{29,32}", re.IGNORECASE)
+
+
+def verify_password_old_pbkdf2(plain: str, hashed: str) -> bool:
+    """旧系统 PBKDF2(pbkdf2$迭代$盐$哈希),与 .NET Rfc2898DeriveBytes(SHA1, UTF-8) 同口径"""
+    parts = (hashed or "").split("$")
+    if len(parts) != 4 or parts[0] != "pbkdf2":
+        return False
+    try:
+        iterations = int(parts[1])
+        salt = base64.b64decode(parts[2], validate=True)
+        expected = base64.b64decode(parts[3], validate=True)
+    except (ValueError, TypeError):
+        return False
+    if iterations <= 0 or not expected:
+        return False
+    derived = hashlib.pbkdf2_hmac("sha1", plain.encode("utf-8"), salt, iterations, len(expected))
+    return hmac.compare_digest(derived, expected)
+
+
+def verify_password_old_md5(plain: str, hashed: str) -> bool:
+    """旧系统无盐 MD5:.NET Encoding.Unicode(UTF-16LE) 求 MD5,再逐字节 ToString("x") 转 hex"""
+    digest = hashlib.md5(plain.encode("utf-16-le")).digest()
+    legacy = "".join(format(b, "x") for b in digest)
+    return hmac.compare_digest(legacy, (hashed or "").strip().lower())
 
 
 def create_access_token(user_id: int, username: str) -> str:
@@ -124,8 +166,16 @@ def get_public_key_pem() -> str:
     ).decode("utf-8")
 
 
+# 内网用纯 HTTP(http://<ip>:端口,既不是 https 也不是 localhost)访问时,
+# 浏览器不暴露 Web Crypto(crypto.subtle 为 undefined),前端无法做 RSA 加密,
+# 会改发带该前缀的明文。判在前缀上,避免与合法 base64 密文混淆。
+PLAIN_PASSWORD_PREFIX = "plain:"
+
+
 def decrypt_password(encrypted_b64: str) -> str:
     """解密前端 RSA-OAEP(SHA-256) 加密的密码(base64 密文);无效密文抛 ValueError"""
+    if encrypted_b64.startswith(PLAIN_PASSWORD_PREFIX):
+        return encrypted_b64[len(PLAIN_PASSWORD_PREFIX):]
     ciphertext = base64.b64decode(encrypted_b64)
     plaintext = _rsa_private_key().decrypt(
         ciphertext,

@@ -82,7 +82,13 @@ def _check_login_rate(request: Request):
 @router.post("/login")
 def login(data: LoginIn, request: Request, db: Session = Depends(get_db)):
     _check_login_rate(request)
-    user = db.query(User).filter(User.username == data.username.strip()).first()
+    ident = data.username.strip()
+    user = db.query(User).filter(User.username == ident).first()
+    if user is None and ident:
+        # 旧系统用户习惯用姓名登录,但也有人记得手机号:手机号唯一命中时同样放行
+        matched = db.query(User).filter(User.phone == ident).limit(2).all()
+        if len(matched) == 1:
+            user = matched[0]
     try:
         plain = decrypt_password(data.password)
     except (ValueError, TypeError):
@@ -124,8 +130,8 @@ def login(data: LoginIn, request: Request, db: Session = Depends(get_db)):
     # 登录成功,清除错误计数与锁定状态
     user.failed_attempts = 0
     user.locked_until = None
-    # 旧版本哈希透明升级到当前算法(无需用户重置密码)
-    if (user.password_version or 0) < CURRENT_PASSWORD_VERSION:
+    # 旧版本哈希(bcrypt / 旧系统 PBKDF2 / 旧系统 MD5)透明升级到当前算法,无需用户重置密码
+    if (user.password_version or 0) != CURRENT_PASSWORD_VERSION:
         user.password_hash = hash_password(plain)
         user.password_version = CURRENT_PASSWORD_VERSION
     user.last_login_at = datetime.now()
@@ -149,7 +155,8 @@ def change_password(
         new_plain = decrypt_password(data.new_password)
     except (ValueError, TypeError):
         raise HTTPException(status_code=400, detail="密码解密失败,请刷新页面后重试")
-    if not verify_password(old_plain, user.password_hash):
+    # 按账号实际存储的版本校验:旧系统导入的账号是 v2(PBKDF2)/v3(MD5),不能一律按 v1 校验
+    if not verify_password(old_plain, user.password_hash, user.password_version or 0):
         raise HTTPException(status_code=400, detail="原密码不正确")
     issues = password_issues(new_plain)
     if issues:

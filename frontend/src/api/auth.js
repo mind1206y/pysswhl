@@ -2,8 +2,20 @@ import request from './request'
 
 let cachedPublicKey = null
 
+// Web Crypto(crypto.subtle) 只在「安全上下文」暴露:https、localhost、127.0.0.1。
+// 内网部署常用 http://<内网IP>:18080,此时 crypto.subtle 是 undefined,
+// 直接调用会抛 TypeError: Cannot read properties of undefined (reading 'importKey')。
+// 这种情况降级为带前缀的明文,后端 decrypt_password 认这个前缀(见 backend/app/core/security.py)。
+// 一旦以后套上 HTTPS,这里会自动恢复加密,不用改代码。
+const PLAIN_PREFIX = 'plain:'
+
+function hasWebCrypto() {
+  return typeof globalThis !== 'undefined' && !!globalThis.crypto?.subtle
+}
+
 // RSA-OAEP(SHA-256) 加密:后端下发公钥,密码不再明文出现在请求里
 async function encryptPassword(password) {
+  if (!hasWebCrypto()) return PLAIN_PREFIX + password
   if (!cachedPublicKey) {
     const res = await request.get('/auth/public-key')
     cachedPublicKey = res.publicKey

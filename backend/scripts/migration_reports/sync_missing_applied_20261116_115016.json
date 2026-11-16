@@ -1,0 +1,400 @@
+{
+  "at": "2026-11-16T11:50:09",
+  "tables": [
+    {
+      "table": "cailiao_fujian",
+      "old": 48,
+      "new": 46,
+      "to_add": 2,
+      "cols": 7,
+      "skipped_old_cols": [],
+      "filled_new_cols": [],
+      "added": 2
+    },
+    {
+      "table": "cl_chetupian",
+      "old": 527,
+      "new": 521,
+      "to_add": 11,
+      "cols": 4,
+      "skipped_old_cols": [],
+      "filled_new_cols": [],
+      "added": 11
+    },
+    {
+      "table": "cl_wxdan",
+      "old": 1455,
+      "new": 1433,
+      "to_add": 22,
+      "cols": 18,
+      "skipped_old_cols": [],
+      "filled_new_cols": [],
+      "added": 22
+    },
+    {
+      "table": "clweizhang",
+      "old": 35,
+      "new": 33,
+      "to_add": 2,
+      "cols": 12,
+      "skipped_old_cols": [],
+      "filled_new_cols": [],
+      "added": 2
+    },
+    {
+      "table": "gongchenggl",
+      "old": 104,
+      "new": 97,
+      "to_add": 7,
+      "cols": 26,
+      "skipped_old_cols": [],
+      "filled_new_cols": [],
+      "added": 7
+    },
+    {
+      "table": "gongchenggl_fujian",
+      "old": 463,
+      "new": 283,
+      "to_add": 180,
+      "cols": 7,
+      "skipped_old_cols": [],
+      "filled_new_cols": [],
+      "added": 180
+    },
+    {
+      "table": "gongchenggl_jindu",
+      "old": 86,
+      "new": 77,
+      "to_add": 9,
+      "cols": 8,
+      "skipped_old_cols": [],
+      "filled_new_cols": [],
+      "added": 9
+    },
+    {
+      "table": "gongdancailiao",
+      "old": 23342,
+      "new": 19689,
+      "to_add": 3654,
+      "cols": 20,
+      "skipped_old_cols": [],
+      "filled_new_cols": [],
+      "added": 3654
+    },
+    {
+      "table": "gx_gxgz",
+      "old": 4432,
+      "new": 4428,
+      "to_add": 4,
+      "cols": 22,
+      "skipped_old_cols": [],
+      "filled_new_cols": [],
+      "added": 4
+    },
+    {
+      "table": "gx_jilu",
+      "old": 842,
+      "new": 835,
+      "to_add": 7,
+      "cols": 9,
+      "skipped_old_cols": [],
+      "filled_new_cols": [],
+      "added": 7
+    },
+    {
+      "table": "gx_jindu",
+      "old": 43,
+      "new": 41,
+      "to_add": 2,
+      "cols": 3,
+      "skipped_old_cols": [],
+      "filled_new_cols": [],
+      "added": 2
+    },
+    {
+      "table": "ht_add",
+      "old": 1152,
+      "new": 1141,
+      "to_add": 11,
+      "cols": 29,
+      "skipped_old_cols": [],
+      "filled_new_cols": [
+        "djuser_name",
+        "spuserid_name"
+      ],
+      "added": 11
+    },
+    {
+      "table": "ip_net_creator",
+      "old": 10,
+      "new": 0,
+      "to_add": 10,
+      "cols": 3,
+      "skipped_old_cols": [],
+      "filled_new_cols": [],
+      "added": 10
+    },
+    {
+      "table": "jc_jcxx",
+      "old": 17587,
+      "new": 17495,
+      "to_add": 92,
+      "cols": 42,
+      "skipped_old_cols": [],
+      "filled_new_cols": [],
+      "added": 92
+    },
+    {
+      "table": "jc_printcolum",
+      "old": 77,
+      "new": 26,
+      "to_add": 51,
+      "cols": 3,
+      "skipped_old_cols": [],
+      "filled_new_cols": [],
+      "added": 51
+    },
+    {
+      "table": "jc_tupian",
+      "old": 12787,
+      "new": 12652,
+      "to_add": 135,
+      "cols": 3,
+      "skipped_old_cols": [],
+      "filled_new_cols": [],
+      "added": 135
+    },
+    {
+      "table": "jcjiangli",
+      "old": 186,
+      "new": 179,
+      "to_add": 7,
+      "cols": 11,
+      "skipped_old_cols": [],
+      "filled_new_cols": [],
+      "added": 7
+    },
+    {
+      "table": "jh_ssdb",
+      "old": 1623,
+      "new": 1614,
+      "to_add": 21,
+      "cols": 28,
+      "skipped_old_cols": [],
+      "filled_new_cols": [
+        "zhuanguan_name"
+      ],
+      "added": 21
+    },
+    {
+      "table": "jiesuancailiao",
+      "old": 48,
+      "new": 47,
+      "to_add": 2,
+      "cols": 11,
+      "skipped_old_cols": [],
+      "filled_new_cols": [],
+      "added": 2
+    },
+    {
+      "table": "jiesuandetail",
+      "old": 424,
+      "new": 392,
+      "to_add": 33,
+      "cols": 6,
+      "skipped_old_cols": [],
+      "filled_new_cols": [],
+      "added": 33
+    },
+    {
+      "table": "LeakFile",
+      "old": 1064,
+      "new": 940,
+      "to_add": 124,
+      "cols": 8,
+      "skipped_old_cols": [],
+      "filled_new_cols": [],
+      "added": 124
+    },
+    {
+      "table": "LeakRecord",
+      "old": 118,
+      "new": 104,
+      "to_add": 14,
+      "cols": 28,
+      "skipped_old_cols": [],
+      "filled_new_cols": [],
+      "added": 14
+    },
+    {
+      "table": "lingliao",
+      "old": 71,
+      "new": 66,
+      "to_add": 5,
+      "cols": 13,
+      "skipped_old_cols": [],
+      "filled_new_cols": [],
+      "added": 5
+    },
+    {
+      "table": "lingliao_file",
+      "old": 61,
+      "new": 54,
+      "to_add": 7,
+      "cols": 6,
+      "skipped_old_cols": [],
+      "filled_new_cols": [
+        "operator_name"
+      ],
+      "added": 7
+    },
+    {
+      "table": "lingliaodetail",
+      "old": 509,
+      "new": 454,
+      "to_add": 55,
+      "cols": 16,
+      "skipped_old_cols": [],
+      "filled_new_cols": [],
+      "added": 55
+    },
+    {
+      "table": "qiangxiurenyuan",
+      "old": 15,
+      "new": 14,
+      "to_add": 1,
+      "cols": 3,
+      "skipped_old_cols": [],
+      "filled_new_cols": [],
+      "added": 1
+    },
+    {
+      "table": "shouji_attachment",
+      "old": 2,
+      "new": 1,
+      "to_add": 1,
+      "cols": 7,
+      "skipped_old_cols": [],
+      "filled_new_cols": [],
+      "added": 1
+    },
+    {
+      "table": "shouji_edit_log",
+      "old": 170,
+      "new": 16,
+      "to_add": 154,
+      "cols": 8,
+      "skipped_old_cols": [],
+      "filled_new_cols": [],
+      "added": 154
+    },
+    {
+      "table": "shuifeixitong",
+      "old": 28655,
+      "new": 28653,
+      "to_add": 2,
+      "cols": 39,
+      "skipped_old_cols": [
+        "ksbriqiT",
+        "jsbriqiT",
+        "youhuiksriqiT",
+        "youhuijsriqiT"
+      ],
+      "filled_new_cols": [],
+      "added": 2
+    },
+    {
+      "table": "shuifeixitong_log",
+      "old": 8976,
+      "new": 8534,
+      "to_add": 442,
+      "cols": 8,
+      "skipped_old_cols": [],
+      "filled_new_cols": [],
+      "added": 442
+    },
+    {
+      "table": "shuifeixitongbiandong",
+      "old": 842,
+      "new": 839,
+      "to_add": 3,
+      "cols": 16,
+      "skipped_old_cols": [
+        "youhuiksriqiT",
+        "youhuijsriqiT"
+      ],
+      "filled_new_cols": [],
+      "added": 3
+    },
+    {
+      "table": "sim",
+      "old": 2657,
+      "new": 2627,
+      "to_add": 30,
+      "cols": 21,
+      "skipped_old_cols": [],
+      "filled_new_cols": [],
+      "added": 30
+    },
+    {
+      "table": "sim_edit_log",
+      "old": 1836,
+      "new": 1820,
+      "to_add": 16,
+      "cols": 8,
+      "skipped_old_cols": [],
+      "filled_new_cols": [],
+      "added": 16
+    },
+    {
+      "table": "wzcgsq",
+      "old": 2,
+      "new": 1,
+      "to_add": 1,
+      "cols": 9,
+      "skipped_old_cols": [],
+      "filled_new_cols": [],
+      "added": 1
+    },
+    {
+      "table": "wzcgsq_mx",
+      "old": 13,
+      "new": 1,
+      "to_add": 12,
+      "cols": 10,
+      "skipped_old_cols": [],
+      "filled_new_cols": [],
+      "added": 12
+    },
+    {
+      "table": "yongcherc",
+      "old": 33767,
+      "new": 33175,
+      "to_add": 592,
+      "cols": 22,
+      "skipped_old_cols": [],
+      "filled_new_cols": [],
+      "added": 592
+    },
+    {
+      "table": "yongchercTP",
+      "old": 2,
+      "new": 0,
+      "to_add": 2,
+      "cols": 3,
+      "skipped_old_cols": [],
+      "filled_new_cols": [],
+      "added": 2
+    },
+    {
+      "table": "zc_baofeidan",
+      "old": 181,
+      "new": 176,
+      "to_add": 5,
+      "cols": 6,
+      "skipped_old_cols": [],
+      "filled_new_cols": [],
+      "added": 5
+    }
+  ]
+}

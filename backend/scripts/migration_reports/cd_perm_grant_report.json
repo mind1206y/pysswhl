@@ -1,0 +1,98 @@
+{
+  "generated_at": "2026-11-15 13:32:43",
+  "old_users": 14,
+  "granted_users": 13,
+  "unmapped_old_userids": [],
+  "roles": {
+    "cdbd:view": 128,
+    "cddaxiu:view": 129,
+    "cdgz:view": 130,
+    "cdwhl:manage": 131,
+    "cdwhl:view": 132
+  },
+  "detail": {
+    "7": [
+      "cdbd:view",
+      "cddaxiu:view",
+      "cdgz:view",
+      "cdwhl:manage",
+      "cdwhl:view"
+    ],
+    "9": [
+      "cdbd:view",
+      "cddaxiu:view",
+      "cdgz:view",
+      "cdwhl:view"
+    ],
+    "10": [
+      "cdbd:view",
+      "cddaxiu:view",
+      "cdgz:view",
+      "cdwhl:view"
+    ],
+    "209": [
+      "cdbd:view",
+      "cddaxiu:view",
+      "cdwhl:manage",
+      "cdwhl:view"
+    ],
+    "213": [
+      "cdbd:view",
+      "cddaxiu:view",
+      "cdgz:view",
+      "cdwhl:manage",
+      "cdwhl:view"
+    ],
+    "214": [
+      "cdbd:view",
+      "cddaxiu:view",
+      "cdgz:view",
+      "cdwhl:manage",
+      "cdwhl:view"
+    ],
+    "221": [
+      "cdbd:view",
+      "cddaxiu:view",
+      "cdgz:view",
+      "cdwhl:view"
+    ],
+    "223": [
+      "cdbd:view",
+      "cddaxiu:view",
+      "cdgz:view",
+      "cdwhl:manage",
+      "cdwhl:view"
+    ],
+    "225": [
+      "cdbd:view",
+      "cddaxiu:view",
+      "cdgz:view",
+      "cdwhl:view"
+    ],
+    "226": [
+      "cdbd:view",
+      "cddaxiu:view",
+      "cdgz:view",
+      "cdwhl:view"
+    ],
+    "230": [
+      "cdbd:view",
+      "cddaxiu:view",
+      "cdgz:view",
+      "cdwhl:view"
+    ],
+    "297": [
+      "cdbd:view",
+      "cddaxiu:view",
+      "cdgz:view",
+      "cdwhl:manage",
+      "cdwhl:view"
+    ],
+    "313": [
+      "cdbd:view",
+      "cddaxiu:view",
+      "cdgz:view",
+      "cdwhl:view"
+    ]
+  }
+}

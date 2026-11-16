@@ -1,0 +1,26 @@
+[Unit]
+Description=sswhl API (售水业务管理系统 FastAPI)
+Documentation=file:///opt/sswhl/deploy/README.md
+After=network-online.target docker.service
+Wants=network-online.target
+Requires=docker.service
+
+[Service]
+Type=simple
+User=sswhl
+Group=sswhl
+WorkingDirectory=/opt/sswhl/backend
+Environment=PYTHONUNBUFFERED=1
+Environment=TZ=Asia/Shanghai
+# 单进程:内网几百人足够;多 worker 会让首次启动时的 RSA 密钥生成产生竞争,
+# 若确实要加,先手动跑一次(uvicorn 起 5 秒)生成 rsa_key.pem 再加 --workers。
+ExecStart=/opt/sswhl/backend/.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 18080 --proxy-headers
+Restart=always
+RestartSec=3
+LimitNOFILE=65535
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=sswhl-api
+
+[Install]
+WantedBy=multi-user.target

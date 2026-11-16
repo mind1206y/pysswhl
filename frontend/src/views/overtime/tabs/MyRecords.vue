@@ -36,7 +36,7 @@
       <input ref="importFile" type="file" accept=".xlsx,.xls" style="display: none" @change="onImportFile" />
     </div>
 
-    <div class="table-card">
+    <div class="table-card table-fill">
       <el-table :data="rows" border size="small" v-loading="loading" row-key="id" height="520"
                 @selection-change="(v) => (selected = v)">
         <el-table-column type="selection" width="42" />
@@ -125,6 +125,7 @@
           <label>部门：</label>
           <el-tree-select v-model="tplDept" :data="ot.deptTreeData.value" node-key="value"
                           :props="{ label: 'label', children: 'children' }" check-strictly clearable
+                          popper-class="ot-dept-pop"
                           size="small" style="width: 280px" />
         </div>
         <el-input v-model="tplSearch" placeholder="搜索姓名/工号" size="small" clearable style="width: 170px" />

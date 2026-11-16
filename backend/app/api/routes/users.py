@@ -53,7 +53,10 @@ def list_users(
             User.username.like(kw), User.real_name.like(kw), User.zw.like(kw),
         ))
     total = query.count()
-    users = query.order_by(User.id.desc()).offset((page - 1) * size).limit(size).all()
+    # 默认按最后登录时间倒序(最近登录的排最前),从未登录过的排在末尾;
+    # id 倒序作次级键,保证同为空时翻页稳定。MySQL 中 DESC 排序 NULL 自带末尾。
+    users = (query.order_by(User.last_login_at.desc(), User.id.desc())
+             .offset((page - 1) * size).limit(size).all())
     return {"total": total, "items": [u.to_dict() for u in users]}
 
 

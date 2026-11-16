@@ -1,0 +1,260 @@
+{
+  "generated_at": "2026-11-15 14:40:01",
+  "source": "db_plan.dbo.overtime_*",
+  "target": "sswhl_new.overtime_*",
+  "dry_run": false,
+  "tables": {
+    "overtime_dept": {
+      "exists": true,
+      "rows": 47,
+      "columns": [
+        "id",
+        "name",
+        "parent_id",
+        "sys_bumen_id",
+        "full_path",
+        "level",
+        "sort_order",
+        "is_active",
+        "create_time",
+        "is_field"
+      ],
+      "missing_source_columns": []
+    },
+    "overtime_personnel": {
+      "exists": true,
+      "rows": 559,
+      "columns": [
+        "id",
+        "name",
+        "employee_no",
+        "bb_user_id",
+        "bb_bumen_id",
+        "parent_id",
+        "daily_wage",
+        "is_active",
+        "create_time"
+      ],
+      "missing_source_columns": []
+    },
+    "overtime_approval_level": {
+      "exists": true,
+      "rows": 0,
+      "columns": [
+        "id",
+        "level_name",
+        "level_order",
+        "parent_id",
+        "dept_offset",
+        "mapped_bumen_id",
+        "approval_mode",
+        "route_type",
+        "is_active",
+        "create_time"
+      ],
+      "missing_source_columns": []
+    },
+    "overtime_approver": {
+      "exists": true,
+      "rows": 0,
+      "columns": [
+        "id",
+        "bb_user_id",
+        "approval_level_id",
+        "scope_bumen_id",
+        "work_type",
+        "is_active",
+        "create_time"
+      ],
+      "missing_source_columns": []
+    },
+    "overtime_month_config": {
+      "exists": true,
+      "rows": 3,
+      "columns": [
+        "id",
+        "config_type",
+        "start_day",
+        "end_day",
+        "description",
+        "is_active"
+      ],
+      "missing_source_columns": []
+    },
+    "overtime_apply": {
+      "exists": true,
+      "rows": 186,
+      "columns": [
+        "id",
+        "apply_no",
+        "record_type",
+        "apply_month",
+        "work_type",
+        "apply_user_id",
+        "apply_dept_id",
+        "apply_date",
+        "total_hours",
+        "status",
+        "remark",
+        "create_time",
+        "update_time",
+        "verify_time",
+        "verify_user_id",
+        "settle_type"
+      ],
+      "missing_source_columns": []
+    },
+    "overtime_apply_detail": {
+      "exists": true,
+      "rows": 1465,
+      "columns": [
+        "id",
+        "apply_id",
+        "personnel_id",
+        "accounting_month",
+        "total_hours",
+        "sort_order",
+        "work_type",
+        "apply_month",
+        "apply_user_id",
+        "create_time",
+        "status",
+        "settle_type"
+      ],
+      "missing_source_columns": []
+    },
+    "overtime_time_entry": {
+      "exists": true,
+      "rows": 7570,
+      "columns": [
+        "id",
+        "detail_id",
+        "work_type",
+        "work_date",
+        "start_time",
+        "end_time",
+        "raw_hours",
+        "multiplier",
+        "total_hours",
+        "reason",
+        "daily_wage",
+        "overtime_amount",
+        "work_order_no",
+        "address",
+        "accounting_month",
+        "sort_order",
+        "is_full_day",
+        "shift_type"
+      ],
+      "missing_source_columns": []
+    },
+    "overtime_apply_approval": {
+      "exists": true,
+      "rows": 0,
+      "columns": [
+        "id",
+        "apply_id",
+        "step_order",
+        "approval_level_id",
+        "approver_id",
+        "status",
+        "comment",
+        "approve_time",
+        "create_time"
+      ],
+      "missing_source_columns": []
+    },
+    "overtime_comp_leave": {
+      "exists": true,
+      "rows": 2,
+      "columns": [
+        "id",
+        "personnel_id",
+        "leave_date",
+        "start_time",
+        "end_time",
+        "hours",
+        "leave_type",
+        "reason",
+        "create_user_id",
+        "create_time"
+      ],
+      "missing_source_columns": []
+    },
+    "overtime_record": {
+      "exists": true,
+      "rows": 51,
+      "columns": [
+        "id",
+        "userid",
+        "username",
+        "work_date",
+        "work_type",
+        "remark",
+        "create_time",
+        "update_time",
+        "creater"
+      ],
+      "missing_source_columns": []
+    },
+    "overtime_user": {
+      "exists": true,
+      "rows": 19,
+      "columns": [
+        "id",
+        "username"
+      ],
+      "missing_source_columns": []
+    }
+  },
+  "warnings": {
+    "overtime_dept": {
+      "dept": [],
+      "user": []
+    },
+    "overtime_personnel": {
+      "dept": [],
+      "user": []
+    },
+    "overtime_approval_level": {
+      "dept": [],
+      "user": []
+    },
+    "overtime_approver": {
+      "dept": [],
+      "user": []
+    },
+    "overtime_month_config": {
+      "dept": [],
+      "user": []
+    },
+    "overtime_apply": {
+      "dept": [],
+      "user": []
+    },
+    "overtime_apply_detail": {
+      "dept": [],
+      "user": []
+    },
+    "overtime_time_entry": {
+      "dept": [],
+      "user": []
+    },
+    "overtime_apply_approval": {
+      "dept": [],
+      "user": []
+    },
+    "overtime_comp_leave": {
+      "dept": [],
+      "user": []
+    },
+    "overtime_record": {
+      "dept": [],
+      "user": []
+    },
+    "overtime_user": {
+      "dept": [],
+      "user": []
+    }
+  }
+}

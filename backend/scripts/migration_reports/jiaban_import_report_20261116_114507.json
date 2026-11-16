@@ -1,0 +1,60 @@
+{
+  "at": "2026-11-16T11:45:06",
+  "tables": {
+    "jiaban": {
+      "rows": 3436,
+      "auto_increment": 3458
+    },
+    "jiabanrenyuan": {
+      "rows": 52,
+      "auto_increment": 62
+    },
+    "jiaban_attachment": {
+      "rows": 722,
+      "auto_increment": 795
+    }
+  },
+  "checks": {
+    "rows_jiaban": {
+      "old": 3436,
+      "new": 3436,
+      "ok": true
+    },
+    "rows_jiabanrenyuan": {
+      "old": 52,
+      "new": 52,
+      "ok": true
+    },
+    "rows_jiaban_attachment": {
+      "old": 722,
+      "new": 722,
+      "ok": true
+    },
+    "sum_jiaban": {
+      "old": [
+        12081.0,
+        21225.75
+      ],
+      "new": [
+        12081.0,
+        21225.75
+      ],
+      "ok": true
+    },
+    "sum_danjia": {
+      "old": 11251.7,
+      "new": 11251.7,
+      "ok": true
+    },
+    "sum_fileSize": {
+      "old": 2181192944,
+      "new": 2181192944,
+      "ok": true
+    },
+    "gongdancailiao_untouched": {
+      "before": 19689,
+      "after": 19689,
+      "ok": true
+    }
+  }
+}

@@ -16,7 +16,14 @@
   --ot-muted: #64748d;
   padding: 10px 12px 14px;
   background: var(--ot-paper);
-  min-height: calc(100vh - 112px);
+  /* 撑满 el-main 内容区（100% = 视口 - 页头 - 内边距），整页不再出滚动条；
+     剩余高度交给下方 .table-fill 的表格卡片吃掉，表格底部与视口对齐。 */
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 :is(.ot-page, .ot-dialog, .ot-drawer) .ot-banner {
@@ -60,16 +67,79 @@
 :is(.ot-page, .ot-dialog, .ot-drawer) .ot-tabs > .el-tabs__header .el-tabs__nav-wrap::after { display: none; }
 :is(.ot-page, .ot-dialog, .ot-drawer) .ot-tabs > .el-tabs__content { padding: 0; }
 
+/* 高度链路：.ot-page → el-tabs → tab 面板 → 面板根节点，逐级 flex:1 传递，
+   让标了 .table-fill 的表格卡片吃掉剩余高度（表格本身由 flex 拉伸，不再写死 500px）。
+   没标 .table-fill 的面板（申请单管理/配置管理内容更高）在面板内部滚动，不带动整页滚动。 */
+.ot-page > .ot-banner,
+.ot-page > .ot-tabs > .el-tabs__header { flex: 0 0 auto; }
+.ot-page > .ot-tabs {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.ot-page > .ot-tabs > .el-tabs__content {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.ot-page > .ot-tabs > .el-tabs__content > .el-tab-pane {
+  height: 100%;
+  min-height: 0;
+  overflow: auto;
+}
+/* 只有要"撑到底"的面板才把根节点变成 flex 列（避免把别的面板里的固定高表格压扁） */
+.ot-page > .ot-tabs > .el-tabs__content > .el-tab-pane > div:has(> .table-fill) {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.ot-page .table-card.table-fill {
+  flex: 1 1 auto;
+  /* 视口很矮时不把表格压没，留出表头+几行，超出部分由面板滚动 */
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+}
+.ot-page .table-card.table-fill > .el-table { flex: 1 1 auto; min-height: 0; }
+.ot-page .table-card.table-fill > .pager { flex: 0 0 auto; }
+
 :is(.ot-page, .ot-dialog, .ot-drawer) .filter-card { margin-bottom: 8px; border: 1px solid var(--ot-border); border-radius: 8px; }
 :is(.ot-page, .ot-dialog, .ot-drawer) .filter-card .el-card__body { padding: 9px 12px 3px; }
 :is(.ot-page, .ot-dialog, .ot-drawer) .filter-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
 :is(.ot-page, .ot-dialog, .ot-drawer) .filter-group { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; white-space: nowrap; }
 :is(.ot-page, .ot-dialog, .ot-drawer) .filter-group > label { color: #475569; }
+/* 过滤行控件统一加高到 32px（仅过滤行，表格/弹窗不受影响） */
+:is(.ot-page, .ot-dialog, .ot-drawer) .filter-row .el-select__wrapper { min-height: 32px; font-size: 13px; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .filter-row .el-input__wrapper { height: 32px; box-sizing: border-box; --el-input-inner-height: 30px; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .filter-row .el-input__inner { font-size: 13px; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .filter-row .el-button { height: 32px; padding: 0 16px; font-size: 13px; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .filter-row .el-checkbox { height: 32px; }
+:is(.ot-page, .ot-dialog, .ot-drawer) .filter-row .el-date-editor.el-input,
+:is(.ot-page, .ot-dialog, .ot-drawer) .filter-row .el-date-editor.el-input__wrapper { height: 32px; box-sizing: border-box; --el-input-inner-height: 30px; }
+
+/* 部门树选择浮层（teleport 到 body，须全局类）。
+   ⚠️ 坑：el-tree-select 会把组件自身 attrs（含 style="width:280px"）透传给浮层里的 el-tree，
+   树宽被钉成控件宽度，深层部门名在浮层里被硬切 —— 只能靠 !important 顶掉内联宽度。
+   EP 给每个 tree-select 浮层自动加 .el-tree-select__popper，所以模块里所有部门下拉一次性兜住，
+   不依赖逐个实例写 popper-class（.ot-dept-pop 作为同义钩子保留）。 */
+:is(.el-tree-select__popper, .ot-dept-pop).el-popper { width: 540px; }
+:is(.el-tree-select__popper, .ot-dept-pop) .el-select-dropdown { width: 100% !important; min-width: 0 !important; max-width: none !important; }
+:is(.el-tree-select__popper, .ot-dept-pop) .el-scrollbar,
+:is(.el-tree-select__popper, .ot-dept-pop) .el-scrollbar__view,
+:is(.el-tree-select__popper, .ot-dept-pop) .el-select-dropdown__wrap,
+:is(.el-tree-select__popper, .ot-dept-pop) .el-select-dropdown__list { width: 100% !important; }
+:is(.el-tree-select__popper, .ot-dept-pop) .el-tree { width: 100% !important; min-width: 0 !important; }
+:is(.el-tree-select__popper, .ot-dept-pop) .el-select-dropdown__wrap { max-height: 320px; }
+:is(.el-tree-select__popper, .ot-dept-pop) .el-select-dropdown__item { overflow: visible; text-overflow: clip; white-space: nowrap; }
+:is(.el-tree-select__popper, .ot-dept-pop) .el-tree-node__label { font-size: 13px; }
 :is(.ot-page, .ot-dialog, .ot-drawer) .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 8px; }
 :is(.ot-page, .ot-dialog, .ot-drawer) .toolbar .spacer { flex: 1; }
 :is(.ot-page, .ot-dialog, .ot-drawer) .table-card { border: 1px solid var(--ot-border); border-radius: 8px; overflow: hidden; }
 :is(.ot-page, .ot-dialog, .ot-drawer) .el-table th.el-table__cell { background: #f8fbfd !important; color: var(--ot-ink); font-weight: 600; }
-:is(.ot-page, .ot-dialog, .ot-drawer) .el-table .cell { font-size: 12px; }
+/* 表体字号与全局(App.vue 里 .el-table--small)保持一致:13px。
+   此处选择器带 :is() 三个类,特异性高于全局规则,所以必须跟着改,否则本模块仍是 12px。 */
+:is(.ot-page, .ot-dialog, .ot-drawer) .el-table .cell { font-size: 13px; }
 :is(.ot-page, .ot-dialog, .ot-drawer) .el-table td.el-table__cell { padding: 4px 0; }
 :is(.ot-page, .ot-dialog, .ot-drawer) .pager { display: flex; justify-content: flex-end; padding: 8px 10px; background: #fff; }
 
@@ -252,6 +322,25 @@
 .cal-lv3 { background: #c9c0f9; color: #2c2090; }
 .cal-lv4 { background: #7c5cf5; color: #fff; }
 .cal-lv5 { background: #533afd; color: #fff; }
+
+/* 日历看板悬浮气泡（teleport 到 body，须全局类） */
+.cal-tip-pop.el-popper.is-light {
+  max-width: 340px;
+  padding: 9px 13px;
+  background: #fff6bf;
+  border: 1px solid #e9d37e;
+  border-radius: 10px;
+  color: #5b4a00;
+  box-shadow: 0 6px 18px rgba(122, 98, 10, .22);
+}
+.cal-tip-pop.el-popper.is-light .el-popper__arrow::before {
+  background: #fff6bf;
+  border: 1px solid #e9d37e;
+}
+.cal-tip-pop .cal-tip { display: grid; gap: 3px; font-size: 12px; line-height: 1.55; }
+.cal-tip-pop .cal-tip-row { display: flex; gap: 8px; }
+.cal-tip-pop .cal-tip-k { flex: none; color: #9a7b12; font-weight: 600; }
+.cal-tip-pop .cal-tip-v { min-width: 0; word-break: break-all; }
 
 /* 批量日期网格 */
 :is(.ot-page, .ot-dialog, .ot-drawer) .date-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; max-height: 210px; overflow: auto; }

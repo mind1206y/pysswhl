@@ -1,0 +1,100 @@
+# 售水业务管理系统 —— 数据库容器
+#
+# 只跑 MySQL。API 用系统自带的 Python 3.10 venv + systemd 运行(服务器上没有 python 基础镜像)。
+# 与机器上已有的 xinkong 栈彻底隔离:独立容器名 / 独立网络 / 独立数据卷 / 独立端口。
+# 3306 只映射到宿主 127.0.0.1:13306,不对内网开放。
+
+# 固定 compose 项目名。不带这一行时项目名取目录名(deploy),换目录名就会变成另一个项目,
+# 而 down / --remove-orphans 是按项目名圈定范围的。写死 sswhl 后,
+# 任何 compose 命令的作用域都只包含本文件定义的 sswhl-api 与 sswhl-mysql,
+# 绝不会碰到同机 xinkong 项目的容器。
+name: sswhl
+
+services:
+  mysql:
+    image: mysql:8
+    container_name: sswhl-mysql
+    restart: always
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_0900_ai_ci
+      # 关键:Windows 开发机 lower_case_table_names=1,这里必须保持一致。
+      # 否则 Linux 区分大小写,CLdui / celouTb / cl_cxTP 等 11 张大小写混用的表会"找不到",
+      # 而且 create_all 会另外建一张同名空表,数据看着正常、内容却全是空的。
+      - --lower-case-table-names=1
+      - --max-connections=300
+      - --innodb-buffer-pool-size=512M
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?请先在 deploy/.env 里设置 MYSQL_ROOT_PASSWORD}
+      TZ: Asia/Shanghai
+    ports:
+      - "127.0.0.1:13306:3306"
+    volumes:
+      - sswhl_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    networks:
+      - sswhl_net
+
+  # ---------------------------------------------------------------- 容器化备选
+  # 默认不启动。只有显式带 --profile docker-api 才会起。
+  # 需要先有 Python 基础镜像(见 Dockerfile.api 顶部说明),否则构建会失败。
+  # 启用前请先停掉宿主上的 systemd 服务,否则 18080 端口冲突:
+  #   sudo systemctl disable --now sswhl-api
+  #   sudo docker compose -f /opt/sswhl/deploy/docker-compose.yml --profile docker-api up -d --build
+  api:
+    profiles: ["docker-api"]
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.api
+    image: sswhl-api:1.0
+    container_name: sswhl-api
+    restart: always
+    environment:
+      TZ: Asia/Shanghai
+      # 容器内必须用服务名连库,不能用 backend/.env 里的 127.0.0.1
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      # 以下四项在 .env 里是宿主机路径,容器内必须覆盖,否则附件写到不存在目录
+      UPLOAD_DIR: /app/backend/uploads
+      FRONTEND_DIST: /app/frontend/dist
+      SERVE_FRONTEND: "true"
+      ENABLE_DOCS: "false"
+      # 代码目录是只读挂载,禁止 Python 往宿主机目录写 .pyc
+      PYTHONDONTWRITEBYTECODE: "1"
+    volumes:
+      # 配置与密钥不入镜像,运行时只读挂载
+      - ../backend/.env:/app/backend/.env:ro
+      - ../backend/rsa_key.pem:/app/backend/rsa_key.pem:ro
+      - sswhl_uploads:/app/backend/uploads
+      # 代码与前端产物从宿主目录只读挂载:
+      # 更新程序 = 覆盖 /opt/sswhl 下这几个目录 + restart 容器,不用重建 71MB 镜像。
+      # 镜像里另有一份同样的代码兜底,挂载目录被删空时容器仍能靠镜像启动。
+      - ../backend/app:/app/backend/app:ro
+      - ../backend/scripts:/app/backend/scripts:ro
+      - ../frontend/dist:/app/frontend/dist:ro
+      # 离线高德瓦片(z10~17,约 330MB / 6.5 万个小 png)。只读挂载,不打进镜像。
+      # 挂到这个路径正好命中 config 的默认探测(BASE_DIR/assets/tiles),
+      # 所以不必在 backend/.env 里另配 CELOU_TILE_DIR。
+      - ../tiles:/app/backend/assets/tiles:ro
+    ports:
+      - "18080:18080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - sswhl_net
+
+networks:
+  sswhl_net:
+    name: sswhl_net
+
+volumes:
+  sswhl_mysql_data:
+    name: sswhl_mysql_data
+  sswhl_uploads:
+    name: sswhl_uploads

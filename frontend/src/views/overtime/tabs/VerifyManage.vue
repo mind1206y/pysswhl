@@ -13,6 +13,7 @@
           <label>部门：</label>
           <el-tree-select v-model="filters.dept" :data="ot.deptTreeData.value" node-key="value"
                           :props="{ label: 'label', children: 'children' }" check-strictly clearable
+                          popper-class="ot-dept-pop"
                           size="small" style="width: 280px" @change="onFilterChange" />
         </div>
         <div class="filter-group">
@@ -36,7 +37,7 @@
       <el-button size="small" @click="clearFilter">重置</el-button>
       <el-button size="small" type="primary" plain @click="batchVerify">批量核销</el-button>
     </div>
-    <div class="table-card">
+    <div class="table-card table-fill">
       <el-table :data="rows" border size="small" v-loading="loading" height="540"
                 @selection-change="(v) => (selected = v)">
         <el-table-column type="selection" width="42" />

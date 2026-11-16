@@ -144,7 +144,8 @@ def main():
         check("GET dicts 200", r.status_code == 200)
         d = r.json()
         check("dicts 领料类别 11 项", len(d["lingliaotypes"]) == 11)
-        check("dicts 班组 14 项", len(d["banzu"]) == 14, str(len(d["banzu"])))
+        # 2026-11-16 全库补数后基线:班字典 14->15 项(gongdancailiao 补 3654 行)
+        check("dicts 班组 15 项", len(d["banzu"]) == 15, str(len(d["banzu"])))
         check("dicts 超管 manage=true", d["perms"]["manage"] is True)
         rv = client.get("/api/workorder/dicts", headers=hv)
         check("仅 view 用户 manage=false", rv.json()["perms"]["manage"] is False)
@@ -168,7 +169,8 @@ def main():
               all(k in first for k in ("IsUsed", "AttachmentCount", "CreatedTime")))
         r = client.get("/api/workorder/orders", headers=h,
                        params={"page": 1, "size": 5, "unusedOnly": True})
-        check("只看未领用 total 1872", r.json()["total"] == 1872, str(r.json().get("total")))
+        # 补入 3654 条历史领料记录后,原本"未领用"的工单大量转为已领用:1872 -> 730
+        check("只看未领用 total 730", r.json()["total"] == 730, str(r.json().get("total")))
         check("只看未领用行均 IsUsed=false",
               all(not x["IsUsed"] for x in r.json()["rows"]))
         r = client.get("/api/workorder/orders", headers=h,

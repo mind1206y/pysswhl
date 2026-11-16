@@ -69,6 +69,13 @@ class Settings(BaseSettings):
     # 生产环境建议设为 false:关闭 /docs /openapi.json 接口文档,避免接口信息泄露
     ENABLE_DOCS: bool = True
 
+    # ===== 生产部署:由后端直接托管前端构建产物 =====
+    # 裸机/venv 部署(不装 nginx)时设为 true,访问 http://<ip>:<端口>/ 即为前端页面,
+    # /api 仍走后端接口;开发时保持 false,由 Vite 的 5173 端口提供前端。
+    SERVE_FRONTEND: bool = False
+    # 前端 dist 目录,留空则自动使用 backend 同级的 frontend/dist
+    FRONTEND_DIST: str = ""
+
     @property
     def database_url(self) -> str:
         return (

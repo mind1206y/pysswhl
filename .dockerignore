@@ -1,0 +1,18 @@
+# 构建镜像时排除,减小上下文并避免把开发机环境带进镜像
+backend/.venv
+backend/.env
+backend/rsa_key.pem
+backend/uploads
+backend/__pycache__
+**/__pycache__
+**/*.pyc
+frontend/node_modules
+frontend/src
+frontend/public
+deploy/import
+.git
+.workbuddy
+.vscode
+docs
+*.tar.gz
+*.sql
