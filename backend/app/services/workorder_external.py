@@ -9,11 +9,32 @@
 """
 
 import json
+import time
 import urllib.request
+from pathlib import Path
 from typing import Optional
 from urllib.parse import urlparse
 
 from app.core.config import settings
+
+# 原始报文诊断日志(排查上游字段名/结构漂移用,每条截断、文件封顶)
+_DEBUG_LOG = Path(__file__).resolve().parents[2] / "logs" / "workorder_flow_debug.log"
+_DEBUG_ENTRY_MAX = 1500
+_DEBUG_FILE_MAX = 512 * 1024
+
+
+def _log_raw_body(body) -> None:
+    try:
+        if not _DEBUG_LOG.parent.exists():
+            _DEBUG_LOG.parent.mkdir(parents=True, exist_ok=True)
+        if _DEBUG_LOG.exists() and _DEBUG_LOG.stat().st_size > _DEBUG_FILE_MAX:
+            _DEBUG_LOG.write_text("", encoding="utf-8")  # 封顶即清空重来
+        text = json.dumps(body, ensure_ascii=False) if not isinstance(body, str) else body
+        line = f"{time.strftime('%Y-%m-%d %H:%M:%S')} {text[:_DEBUG_ENTRY_MAX]}\n"
+        with _DEBUG_LOG.open("a", encoding="utf-8") as f:
+            f.write(line)
+    except Exception:
+        pass  # 诊断日志失败不影响主流程
 
 
 def _post_json(url: str, payload: dict, timeout: int) -> dict:
@@ -52,14 +73,49 @@ def fetch_workorder(no: str, timeout: Optional[int] = None) -> dict:
         }
     if not isinstance(body, dict):
         return {"success": False, "msg": "工单接口返回异常", "data": None}
+    _log_raw_body(body)
+    code = body.get("Code") if body.get("Code") is not None else body.get("code")
+    if code is not None and str(code).strip() != "200":
+        # 与旧站 WorkOrderNoService 对齐:Code!=200 一律视为失败
+        return {
+            "success": False,
+            "msg": str(body.get("Msg") or body.get("msg") or f"工单接口返回码 {code}"),
+            "data": None,
+        }
     data = body.get("Data") or body.get("data")
+    if isinstance(data, str):
+        # 兜底:上游偶发把 Data 双重序列化成 JSON 字符串
+        try:
+            data = json.loads(data)
+        except ValueError:
+            data = None
     if not data:
         return {
             "success": False,
             "msg": body.get("Msg") or body.get("msg") or "工单不存在",
             "data": None,
         }
-    return {"success": True, "msg": "获取成功", "data": data}
+    return {"success": True, "msg": "获取成功", "data": normalize_flow_data(data)}
+
+
+# 旧站 Newtonsoft 反序列化大小写不敏感,上游字段名若与规范名不一致旧站仍可用;
+# 新系统按规范名精确取值,故在此统一归一(未知字段原样保留)。
+CANONICAL_FIELDS = ("Id", "CreateTime", "AddressStr", "Problem", "OtherDemand",
+                    "DamageType", "LeakageType", "CloseValve", "Status", "updateTime")
+
+
+def normalize_flow_data(d: dict) -> dict:
+    """把上游返回的工单字典归一到 WorkOrderOut 规范字段名(大小写不敏感补齐)。"""
+    if not isinstance(d, dict):
+        return d
+    lower = {}
+    for k, v in d.items():
+        lower.setdefault(str(k).lower(), v)
+    out = dict(d)
+    for name in CANONICAL_FIELDS:
+        if name not in out and name.lower() in lower:
+            out[name] = lower[name.lower()]
+    return out
 
 
 def workorder_detail(d: dict) -> dict:
