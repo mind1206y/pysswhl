@@ -100,8 +100,12 @@ def fetch_workorder(no: str, timeout: Optional[int] = None) -> dict:
 
 # 旧站 Newtonsoft 反序列化大小写不敏感,上游字段名若与规范名不一致旧站仍可用;
 # 新系统按规范名精确取值,故在此统一归一(未知字段原样保留)。
+# 接口文档《厦门市政水务－工单查询接口--2025-12-22》定义的即小驼峰:
+# id/createTime/addressStr/problem/otherDemand/damageType/leakageType/
+# closeValve/status/finishTime
 CANONICAL_FIELDS = ("Id", "CreateTime", "AddressStr", "Problem", "OtherDemand",
-                    "DamageType", "LeakageType", "CloseValve", "Status", "updateTime")
+                    "DamageType", "LeakageType", "CloseValve", "Status",
+                    "updateTime", "finishTime")
 
 
 def normalize_flow_data(d: dict) -> dict:
@@ -115,6 +119,9 @@ def normalize_flow_data(d: dict) -> dict:
     for name in CANONICAL_FIELDS:
         if name not in out and name.lower() in lower:
             out[name] = lower[name.lower()]
+    if "updateTime" not in out and "finishTime" in out:
+        # 文档字段 finishTime = 工单结束时间;旧站读的是 updateTime,做别名兜底
+        out["updateTime"] = out["finishTime"]
     return out
 
 
