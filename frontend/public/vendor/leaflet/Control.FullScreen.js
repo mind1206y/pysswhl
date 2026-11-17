@@ -102,7 +102,9 @@ L.Control.FullScreen = L.Control.extend({
 	},
 	
 	_toggleTitle: function () {
-		this.link.title = this._map._isFullscreen ? this.options.title : this.options.titleCancel;
+		var title = this._map._isFullscreen ? this.options.titleCancel : this.options.title;
+		this.link.title = title;
+		this.link.setAttribute('aria-label', title);
 	},
 	
 	_handleFullscreenChange: function () {

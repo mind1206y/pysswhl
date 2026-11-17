@@ -98,6 +98,7 @@ const uploadDlg = ref(false)
 const chartDlg = ref(false)
 const formulaDlg = ref(false)
 const heatDlg = ref(false)
+const heatMaximized = ref(false)
 const drawer = ref(false)
 
 const uploadForm = reactive({
@@ -474,7 +475,12 @@ async function ensureHeatMap() {
     attribution: '&copy; 高德地图', maxZoom: 18, maxNativeZoom: 17,
   }).addTo(leafletMap)
   if (L.control?.fullscreen) {
-    L.control.fullscreen({ position: 'topleft', title: '全屏模式' }).addTo(leafletMap)
+    // 本地 vendor 目录没有 fullscreen 插件的 png 图标,用内置 SVG 作为按钮内容,
+    // 否则 .fullscreen-icon 只剩空背景图,按钮实际不可见
+    L.control.fullscreen({
+      position: 'topleft', title: '全屏模式', titleCancel: '退出全屏',
+      content: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>',
+    }).addTo(leafletMap)
   }
   leafletMap.on('click', onMapClick)
   leafletMap.on('zoomend moveend', updateRadiusLabel)
@@ -538,10 +544,18 @@ async function onHeatOpened() {
   }
 }
 function onHeatClosed() {
+  if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {})
   if (leafletMap) { leafletMap.remove(); leafletMap = null }
   heatLayer = null
   heatStats.value = null
+  heatMaximized.value = false
 }
+// 弹窗最大化/还原后 Leaflet 容器尺寸变了,必须重新计算,否则底图留白、点击坐标偏移
+watch(heatMaximized, async () => {
+  await nextTick()
+  leafletMap?.invalidateSize()
+  setTimeout(() => leafletMap?.invalidateSize(), 240)
+})
 function changeScheme(k) { heatScheme.value = k; loadHeat() }
 
 onMounted(async () => {
@@ -761,8 +775,17 @@ onBeforeUnmount(() => {
 
     <!-- Leaflet 热力图(1:1 复刻旧版 Heatmap.cshtml) -->
     <el-dialog v-model="heatDlg" class="celou-heat-dialog" title="测漏成果热力图"
-      width="min(1220px, 95vw)" top="4vh" destroy-on-close
+      width="min(1560px, 96vw)" top="2vh" :fullscreen="heatMaximized" destroy-on-close
       @opened="onHeatOpened" @closed="onHeatClosed">
+      <template #header>
+        <div class="celou-heat-title">
+          <span class="el-dialog__title">测漏成果热力图</span>
+          <el-button class="celou-heat-max" size="small"
+            @click="heatMaximized = !heatMaximized">
+            {{ heatMaximized ? '还原' : '最大化' }}
+          </el-button>
+        </div>
+      </template>
       <div class="celou-heat-head">
         <div class="celou-heat-group">
           <span>🎯 权重</span>
@@ -872,82 +895,104 @@ onBeforeUnmount(() => {
 <style>
 /* 热力图弹窗会 teleport 到 body,scoped 样式命中不了,故单独一份带前缀的全局样式 */
 .celou-heat-dialog {
-  --el-dialog-bg-color: #071120;
-  --el-dialog-border-radius: 16px;
-  border: 1px solid rgba(0, 200, 255, .32);
-  box-shadow: 0 18px 60px rgba(0, 0, 0, .45);
+  --el-dialog-bg-color: #fff;
+  --el-dialog-border-radius: 14px;
+  --el-dialog-margin-top: 2vh;
+  border: 1px solid #dcdfe6;
+  box-shadow: 0 16px 48px rgba(31, 41, 55, .18);
 }
-.celou-heat-dialog .el-dialog__header { padding: 12px 18px; border-bottom: 1px solid rgba(0, 200, 255, .18); margin: 0; }
-.celou-heat-dialog .el-dialog__title { color: #bbf0ff; font-size: 15px; letter-spacing: .5px; }
-.celou-heat-dialog .el-dialog__headerbtn .el-dialog__close { color: #7fb6d6; }
-.celou-heat-dialog .el-dialog__body { padding: 10px 14px 12px; }
+.celou-heat-dialog .el-dialog__header { flex: none; padding: 12px 18px; border-bottom: 1px solid #ebeef5; margin: 0; }
+.celou-heat-title { display: flex; align-items: center; padding-right: 82px; }
+.celou-heat-dialog .el-dialog__title { color: #1b1d21; font-size: 15px; font-weight: 600; }
+.el-button.celou-heat-max {
+  margin-left: auto; padding: 5px 12px; border-radius: 16px;
+  background: #f3f2f0; border: 1px solid #e4e2df; color: #1b1d21;
+  font-size: 12px; font-weight: 500;
+}
+.el-button.celou-heat-max:hover { background: #e9e7e4; border-color: #d6d3cf; color: #0f1115; }
+.celou-heat-dialog .el-dialog__headerbtn .el-dialog__close { color: #6b7280; font-size: 17px; }
+.celou-heat-dialog .el-dialog__headerbtn:hover .el-dialog__close { color: #1b1d21; }
+/* 默认就吃满视口,最大化时去掉弹窗留白继续撑满 */
+.celou-heat-dialog .el-dialog__body {
+  display: flex; flex-direction: column;
+  height: calc(100vh - 150px); min-height: 520px;
+  padding: 10px 14px 12px; background: #f7f8fa;
+}
+.celou-heat-dialog.is-fullscreen { display: flex; flex-direction: column; padding: 0; border: 0; }
+.celou-heat-dialog.is-fullscreen .el-dialog__body { flex: 1; height: auto; min-height: 0; }
 .celou-heat-head {
   display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px;
-  padding: 8px 12px; margin-bottom: 8px; font-size: 12px; color: #bbf0ff;
-  background: rgba(10, 24, 40, .9); border: 1px solid rgba(0, 200, 255, .22); border-radius: 20px;
+  padding: 8px 12px; margin-bottom: 8px; font-size: 12px; color: #303133;
+  background: #fff; border: 1px solid #e4e7ed; border-radius: 20px;
 }
 .celou-heat-group { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
-.celou-heat-num { color: #ffd966; font-weight: 700; text-shadow: 0 0 6px rgba(255, 170, 51, .45); }
-.celou-heat-sub, .celou-heat-tip, .celou-heat-foot { color: #6f93b0; font-size: 11px; }
-.celou-heat-head .el-select__wrapper { background: #0e1a2b; box-shadow: 0 0 0 1px #2f6f96 inset; }
-.celou-heat-head .el-select__selected-item { color: #d9f3ff; }
+.celou-heat-num { color: #d46b08; font-weight: 700; }
+.celou-heat-sub, .celou-heat-tip, .celou-heat-foot { color: #909399; font-size: 11px; }
+.celou-heat-head .el-select__wrapper { background: #fff; box-shadow: 0 0 0 1px #dcdfe6 inset; }
+.celou-heat-head .el-select__selected-item { color: #303133; }
 .celou-scheme {
   width: 24px; height: 24px; border-radius: 50%; cursor: pointer; padding: 0;
-  border: 2px solid rgba(255, 255, 255, .25); transition: transform .18s, box-shadow .18s;
+  border: 2px solid rgba(0, 0, 0, .15); transition: transform .18s, box-shadow .18s;
 }
-.celou-scheme:hover { transform: scale(1.16); border-color: #fff; }
-.celou-scheme.active { border-color: #fff; box-shadow: 0 0 10px rgba(255, 255, 255, .7); transform: scale(1.12); }
+.celou-scheme:hover { transform: scale(1.16); border-color: #533afd; }
+.celou-scheme.active { border-color: #533afd; box-shadow: 0 0 0 2px rgba(83, 58, 253, .2); transform: scale(1.12); }
 .celou-heat-filter {
   display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-  margin-bottom: 8px; padding: 0 4px; font-size: 11px; color: #8fb6d6;
+  margin-bottom: 8px; padding: 0 4px; font-size: 11px; color: #606266;
 }
 .celou-heat-tip { margin-left: auto; }
 .celou-heat-map {
-  height: min(560px, 66vh); min-height: 360px; width: 100%;
-  border-radius: 14px; overflow: hidden; background: #010b14;
-  box-shadow: 0 0 0 1px rgba(0, 242, 255, .18) inset;
+  flex: 1 1 auto; min-height: 360px; width: 100%;
+  border-radius: 14px; overflow: hidden; background: #e8edf2;
+  box-shadow: 0 0 0 1px #dcdfe6 inset;
+}
+.celou-heat-dialog.is-fullscreen .celou-heat-map { min-height: 0; border-radius: 0; }
+/* 全屏控件用内置 SVG,补齐对齐与配色 */
+.celou-heat-map .leaflet-control-zoom-fullscreen {
+  display: flex; align-items: center; justify-content: center; font-size: 0;
 }
 .celou-heat-foot { display: flex; justify-content: space-between; gap: 10px; padding: 7px 4px 0; }
-.celou-heat-warn { color: #ffb74d; }
+.celou-heat-warn { color: #d46b08; }
 .celou-heat-stats {
-  margin-top: 8px; padding: 7px 10px; font-size: 12px; color: #bfe6ff;
-  border: 1px solid rgba(0, 200, 255, .22); border-radius: 8px; background: rgba(10, 24, 40, .8);
+  margin-top: 8px; padding: 7px 10px; font-size: 12px; color: #303133;
+  border: 1px solid #e4e7ed; border-radius: 8px; background: #fff;
 }
 .celou-heat-map.leaflet-container { font-family: inherit; }
 .celou-heat-map .leaflet-control-zoom a {
-  background: #102238; color: #bbf0ff; border-color: rgba(0, 200, 255, .25);
+  background: #fff; color: #303133; border-color: #dcdfe6;
 }
 .celou-heat-map .leaflet-control-attribution {
-  background: rgba(6, 16, 28, .72); color: #6f93b0; font-size: 10px;
+  background: rgba(255, 255, 255, .82); color: #606266; font-size: 10px;
 }
-.celou-heat-map .leaflet-control-attribution a { color: #8bc5ff; }
+.celou-heat-map .leaflet-control-attribution a { color: #533afd; }
 /* Leaflet CSS 是运行时动态插入 head 末尾,需靠 .celou-heat-map 后代选择器提高优先级 */
 .celou-heat-map .leaflet-popup-content-wrapper,
-.celou-heat-map .leaflet-popup-tip { background: #0d1c2e; color: #d6ecff; }
+.celou-heat-map .leaflet-popup-tip { background: #fff; color: #303133; }
 .celou-heat-map .leaflet-popup-content-wrapper {
-  border: 1px solid rgba(0, 200, 255, .35); border-radius: 10px;
-  box-shadow: 0 8px 26px rgba(0, 0, 0, .5);
+  border: 1px solid #e4e7ed; border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(31, 41, 55, .16);
 }
 .celou-heat-map .leaflet-popup-content {
   margin: 10px 12px; font-size: 12.5px; line-height: 1.8; font-family: inherit;
 }
-.celou-heat-map a.leaflet-popup-close-button { color: #8fb6d9 !important; }
+.celou-heat-map a.leaflet-popup-close-button { color: #909399 !important; }
 .celou-pop { min-width: 230px; }
-.celou-pop b { color: #ffd966; }
+.celou-pop b { color: #d46b08; }
 .celou-pop-hd {
   display: flex; justify-content: space-between; gap: 16px;
-  border-bottom: 1px solid rgba(0, 200, 255, .45); margin-bottom: 6px; padding-bottom: 4px;
+  border-bottom: 1px solid #ebeef5; margin-bottom: 6px; padding-bottom: 4px;
 }
-.celou-pop-hd span { color: #8bc5ff; }
+.celou-pop-hd span { color: #533afd; }
 .celou-pop-coord {
   margin: 0 0 6px; padding-bottom: 5px; font-size: 11.5px; line-height: 1.6;
-  color: #bfe6ff; border-bottom: 1px solid rgba(0, 200, 255, .18);
+  color: #606266; border-bottom: 1px solid #ebeef5;
 }
-.celou-pop-dt { margin-top: 8px; border-top: 1px solid rgba(0, 200, 255, .2); padding-top: 6px; }
+.celou-pop-dt { margin-top: 8px; border-top: 1px solid #ebeef5; padding-top: 6px; }
 .celou-pop-dt ul { max-height: 150px; overflow-y: auto; margin: 4px 0 0; padding-left: 16px; font-size: 11px; }
-.celou-pop-ft { margin-top: 6px; font-size: 10px; color: #7aa2f7; }
+.celou-pop-ft { margin-top: 6px; font-size: 10px; color: #533afd; }
 @media (max-width: 900px) {
-  .celou-heat-map { height: 50vh; min-height: 300px; }
+  .celou-heat-dialog .el-dialog__body { min-height: 420px; }
+  .celou-heat-map { min-height: 300px; }
   .celou-heat-tip { margin-left: 0; }
 }
 </style>

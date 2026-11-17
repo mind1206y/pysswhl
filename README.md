@@ -64,10 +64,10 @@ cp .env.example .env
 python -m scripts.init_db
 
 # 启动(开发模式)
-uvicorn app.main:app --reload --port 8000
+uvicorn app.main:app --reload --port 8001
 ```
 
-启动后可打开 http://127.0.0.1:8000/docs 查看接口文档(Swagger)。
+启动后可打开 http://127.0.0.1:8001/docs 查看接口文档(Swagger)。
 
 ### 2. 前端
 

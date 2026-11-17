@@ -48,6 +48,9 @@ class Settings(BaseSettings):
     SMS_AES_KEY: str = "__XM_SWJT__ISW__"
     SMS_TIMEOUT: int = 8
 
+    # 车辆年检定时短信(照旧 CarNianJian Quartz Job,每天 08:25);False 可整体停用
+    NIANJIAN_JOB_ENABLED: bool = True
+
     # 外部工单系统(旧站代理口溯源后的原始上游地址),旧站停运后直接调上游。
     # 工单详情:/ImageProxy/GetByNo -> getFlowInfoById(旧 WorkOrderNoService)
     WORKORDER_FLOW_URL: str = "http://172.16.73.91/flowIntefaceCx/getFlowInfoById"

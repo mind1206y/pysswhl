@@ -28,8 +28,10 @@ from app.api.deps import (
 from app.core.config import settings
 from app.core.security import create_short_token, decode_short_token
 from app.db.session import get_db
+from app.models.plan import ConsolTb
 from app.models.user import Department, User
 from app.models.vehicle import ClChe, ClChetupian, ClChuxian, ClCxTP, ClWxdan, PlusOil, Yongcherc
+from app.services import nianjian_job, sms as sms_service
 from app.services.vehicle_common import (
     DATE_FIELDS, EDITABLE_FIELDS, LX_OPTIONS, NUMBER_FIELDS, OIL_OPTIONS,
     REMINDER_LABELS, STATUS_OPTIONS, YONGTU_OPTIONS, ZEREN_OPTIONS,
@@ -97,6 +99,12 @@ class BatchInspectIn(BaseModel):
 
 class PdfIn(BaseModel):
     ids: List[int]
+
+
+class SmsIn(BaseModel):
+    """照旧 Xiaoxi:lb=类别(年检提醒/违章提醒等),nr=自定义内容(年检提醒时忽略)。"""
+    lb: str = "年检提醒"
+    nr: str = ""
 
 
 # ==================== 公共辅助 ====================
@@ -483,6 +491,43 @@ def delete_accident(
 
 
 # ==================== 单车主资源(静态路径必须排在 /{vehicle_id} 之前) ====================
+# ==================== 提醒短信开关(仅超管) ====================
+class SmsSwitchIn(BaseModel):
+    enabled: bool
+
+
+@router.get("/sms-switch")
+def get_sms_switch(
+    db: Session = Depends(get_db),
+    current: User = Depends(require_permission("vehicle:view")),
+):
+    if not current.is_superuser:
+        raise HTTPException(status_code=403, detail="仅超级管理员可操作提醒短信开关")
+    return {"enabled": nianjian_job.sms_reminder_enabled(db)}
+
+
+@router.put("/sms-switch")
+def set_sms_switch(
+    data: SmsSwitchIn,
+    db: Session = Depends(get_db),
+    current: User = Depends(require_permission("vehicle:view")),
+):
+    if not current.is_superuser:
+        raise HTTPException(status_code=403, detail="仅超级管理员可操作提醒短信开关")
+    row = (
+        db.query(ConsolTb)
+        .filter(ConsolTb.conName == nianjian_job.SMS_SWITCH_NAME)
+        .first()
+    )
+    if row is None:
+        row = ConsolTb(conName=nianjian_job.SMS_SWITCH_NAME, val=data.enabled)
+        db.add(row)
+    else:
+        row.val = data.enabled
+    db.commit()
+    return {"enabled": data.enabled}
+
+
 @router.get("/{vehicle_id}")
 def get_vehicle(
     vehicle_id: int,
@@ -605,6 +650,69 @@ def undo_inspect(
     car.LastReminderDate = None
     db.commit()
     return {"message": "已撤销年检", "NextInspectionDate": car.NextInspectionDate}
+
+
+# ==================== 短信发送(照旧 SendMsm) ====================
+def _find_car_manager(db: Session, bmid):
+    """照旧:同部门、职务含「设备」的车管员,取第一个有手机号的。"""
+    if not bmid:
+        return None
+    for u in (
+        db.query(User)
+        .filter(User.is_active == True, User.zw.like("%设备%"))  # noqa: E712
+        .all()
+    ):
+        if bmid in [d.id for d in u.departments] and (u.phone or "").strip():
+            return u
+    return None
+
+
+@router.post("/{vehicle_id}/sms")
+def send_vehicle_sms(
+    vehicle_id: int,
+    data: SmsIn,
+    db: Session = Depends(get_db),
+    current: User = Depends(require_permission("vehicle:view")),
+):
+    """照旧 cheliangguanliController.SendMsm:
+    - 年检提醒:固定文案,发驾驶员 + 同部门车管员,类别记「年检提醒」
+    - 其他提醒:前缀「部门-操作员给您发送提示信息:（车号）」+ 自定义内容,
+      发驾驶员(类别记「车辆提醒」)与车管员(类别记所选 lb)。
+    短信失败不影响流程,只记 sms_record.zt。
+    """
+    car = _get_car_or_404(db, vehicle_id)
+    _check_visible(car, db, current)
+    results = []
+    manager = _find_car_manager(db, car.bmid)
+
+    if data.lb == "年检提醒":
+        nr = (f"系统提示您的{car.chehao}号车年检日期截止下月底，请尽快年检，"
+              "如已年检请忽略此消息。")
+        results.append({"to": "驾驶员", **sms_service.send_sms(
+            db, current.username, car.telphone, nr, data.lb, car.jiashiyuan)})
+        if manager:
+            results.append({"to": "车管员", **sms_service.send_sms(
+                db, current.username, manager.phone, nr, data.lb, manager.username)})
+    else:
+        if not (data.nr or "").strip():
+            raise HTTPException(status_code=400, detail="请填写提醒内容")
+        dept_name = (
+            current.departments[0].name if current.departments
+            else dept_name_map(db).get(car.bmid) or ""
+        )
+        content = f"{dept_name}-{current.username}给您发送提示信息:（{car.chehao}）{data.nr.strip()}"
+        results.append({"to": "驾驶员", **sms_service.send_sms(
+            db, current.username, car.telphone, content, "车辆提醒", car.jiashiyuan)})
+        if manager:
+            results.append({"to": "车管员", **sms_service.send_sms(
+                db, current.username, manager.phone, content, data.lb, manager.username)})
+
+    db.commit()
+    sent = sum(1 for r in results if r.get("ok"))
+    return {
+        "message": f"已提交 {sent}/{len(results)} 条短信",
+        "sent": sent, "total": len(results), "results": results,
+    }
 
 
 @router.get("/{vehicle_id}/oil-month-stat")

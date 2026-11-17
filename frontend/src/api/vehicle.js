@@ -13,6 +13,13 @@ export const inspectVehicle = (id, riqi) => request.post(`/vehicles/${id}/inspec
 export const undoInspectVehicle = (id) => request.post(`/vehicles/${id}/undo-inspect`)
 export const batchInspect = (ids, riqi) => request.post('/vehicles/batch-inspect', { ids, riqi: riqi || null })
 
+// 短信提醒(照旧 SendMsm:年检提醒=固定文案;其他提醒=自定义内容发驾驶员+车管)
+export const sendVehicleSms = (id, lb, nr) => request.post(`/vehicles/${id}/sms`, { lb, nr })
+
+// 年检提醒短信总开关(仅超管可见/可改,控制每天 08:25 定时任务是否发短信)
+export const getSmsSwitch = () => request.get('/vehicles/sms-switch')
+export const setSmsSwitch = (enabled) => request.put('/vehicles/sms-switch', { enabled })
+
 // 图片(短时效令牌直链)
 export const createImageToken = (id, kind = 'car') =>
   request.post(`/vehicles/images/${id}/token`, null, { params: { kind } })

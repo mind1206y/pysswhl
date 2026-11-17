@@ -309,16 +309,32 @@ async function queryWzr(queryString, cb) {
   } catch { cb([]) }
 }
 
-// 工单号失焦回填
+// 工单号失焦回填(照旧 bindGongdanhaoBlur/searchGongdanInfo:带出日期+地址)
+const gdHint = ref('')
+const gdHintOk = ref(false)
 async function onGongdanhaoBlur() {
-  if (!form.gongdanhao) return
+  const no = (form.gongdanhao || '').trim()
+  if (!no) { gdHint.value = ''; return }
+  gdHint.value = '查询工单信息…'
+  gdHintOk.value = false
   try {
-    const res = await getGongdanInfo(form.gongdanhao)
+    const res = await getGongdanInfo(no)
     if (res.success) {
       if (res.data.ksriqi) form.weizhangriqi = res.data.ksriqi?.slice(0, 10)
       if (res.data.dizhi) form.weizhangdizhi = res.data.dizhi
+      gdHint.value = (res.data.ksriqi || res.data.dizhi) ? '已带出日期与地址' : '工单存在但无日期/地址'
+      gdHintOk.value = true
+    } else {
+      // 与旧系统一致:添加时查不到就清空日期地址(编辑模式不清理,避免误伤已填内容)
+      if (dlgMode.value === 'add') {
+        form.weizhangriqi = ''
+        form.weizhangdizhi = ''
+      }
+      gdHint.value = res.message || '未查到工单信息'
     }
-  } catch { /* 未迁移/未找到不提示 */ }
+  } catch {
+    gdHint.value = '查询工单信息失败'
+  }
 }
 
 const activeTab = ref('base')
@@ -771,7 +787,10 @@ onMounted(async () => {
           <el-tab-pane label="基本稽查信息" name="base">
             <div class="grid2">
               <el-form-item label="工单号">
-                <el-input v-model="form.gongdanhao" @blur="onGongdanhaoBlur" />
+                <div class="gd-wrap">
+                  <el-input v-model="form.gongdanhao" @blur="onGongdanhaoBlur" />
+                  <span v-if="gdHint" class="gd-hint" :class="{ ok: gdHintOk }">{{ gdHint }}</span>
+                </div>
               </el-form-item>
               <el-form-item label="违章日期" required prop="weizhangriqi">
                 <el-date-picker v-model="form.weizhangriqi" type="date"
@@ -1066,6 +1085,11 @@ onMounted(async () => {
 .jcxt-page .pic-icons { white-space: nowrap; }
 .jcxt-page .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
 .jcxt-page .grid2 .span2 { grid-column: span 2; }
+/* 工单号失焦带出日期地址:输入框下方轻提示 */
+.jcxt-page .gd-wrap { width: 100%; }
+.jcxt-page .gd-hint { display: block; margin-top: 2px; font-size: 12px;
+  color: var(--el-text-color-secondary); line-height: 1.4; }
+.jcxt-page .gd-hint.ok { color: var(--el-color-success); }
 .jcxt-page .total-amount { color: var(--el-color-danger); font-weight: 600; }
 .jcxt-page .tip { color: var(--el-text-color-secondary); font-size: 12px; margin-top: 4px; }
 .jcxt-page .tip-inline { color: var(--el-text-color-secondary); font-size: 12px; }

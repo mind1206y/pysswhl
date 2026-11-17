@@ -115,6 +115,7 @@ QX_TO_PERM = {
     74: "oilcard:view",           # 油卡管理
     75: "plusoil:view",           # 加油明细
     79: "spjicha:view",           # 审批稽查
+    80: "sms:view",               # 短信发送(bb_quanx 80, /SmsRecord 短信记录页)
     81: "jcdan:view",             # 稽查单
     82: "jcjl:view",              # 稽查奖励
     85: "vehicle:view",           # 车辆费用

@@ -15,6 +15,9 @@
 - 校验：新旧行数/SUM(金额) 对齐；`smoke_xxx.py` TestClient 全链路（临时超管自动建删、登录 RSA-OAEP + `/api/auth/public-key`）；前端 `npm run build`，必要时 Chrome CDP 真机回归。
 - 权限码 `scripts/init_db.py`；菜单/路由 `router/index.js` + `MainLayout.vue`；文档 `docs/权限控制机制.md`、`docs/数据迁移约定.md`。图片：旧 `/Upload/...` 多缺失→占位/404；列表图走短令牌 URL（`create_short_token`），⛔登录令牌别进 URL；黑名单照 UploadGuard、10MB。
 
+### 本地开发端口（2026-11-16 起）
+- 本机 8000 被 `E:\celouApp\backend` 的 uvicorn 长期占用（另一个项目「测漏水印管理系统 API」），pysswhl 本地后端统一改用 **8001**：`start-backend.bat`、`frontend/vite.config.js` 代理、`README.md`、两个 `ui_check_*.py` 登录取 token 地址已同步。⛔别再把开发后端设回 8000；服务器对外仍是 `http://172.16.43.126:18080`，不受影响。
+
 ### Git 备份 / 双远程推送（2026-11-09）
 - 入口 `E:\pysswhl\push.bat`（纯 ASCII + CRLF），桌面 `push-pysswhl.bat` 只 `call` 它。流程：缺则建裸库 `E:/pysswhl-backup.git` 并把 HEAD 指 `refs/heads/main`（原 HEAD=master→clone 出空分支；2026-11-16 起改为**静默前置**，不占步骤号）→ `git add -A` + 时间戳提交 → push `origin main` → push `github main:github-clean`（`mind1206y/pysswhl.git`）→ 备份 `backend/.env`、`.env.example`、`rsa_key.pem` 到 `E:\pysswhl-backup\`，并 `robocopy deploy\import` + 根目录 `*.tar.gz`/`*.sql.gz` 到 `E:\pysswhl-backup\artifacts`（2026-11-16 起）。
 - ⛔ **数据库 dump / 发版包一律不进 Git**（`.gitignore` 已加 `*.sql`、`*.sql.gz`、`*.tar.gz`、`deploy/import/`）：`deploy/import/sswhl_new.sql` 122MB 撞 GitHub 100MB 硬限，第一次只在 push 的最后一步炸（接收端 pre-receive 校验，本地无提示）。再遇到同类报错：只改 tip 提交（`reset --soft HEAD~1` → `git rm -r --cached` → 重新 commit → 裸库打标签留档再 `-f` 推 origin），别急着重写全历史。

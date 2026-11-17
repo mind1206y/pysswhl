@@ -12,7 +12,7 @@ from app.api.routes import (
     jcjl, jcxt, jiesuan, jiesuandan, jiaban, leak, lingliao, material, oilcard, oiltj, overtime,
     overtime_config,
     overtime_flow, phone, plus_oil, project_details, projects, repair, roadrepair, roles,
-    simcard, simfee, users, vehicle, vehicle_daily, water_fee, weizhang, workorder, jcdan,
+    simcard, simfee, sms_records, users, vehicle, vehicle_daily, water_fee, weizhang, workorder, jcdan,
     spjicha, gxdxljihua, jhssdb, jhsshz, jhyyfaqi,
     gdzc, baofeizc, wzcgsq,
 )
@@ -26,6 +26,20 @@ app = FastAPI(
     redoc_url=None,
     openapi_url="/openapi.json" if settings.ENABLE_DOCS else None,
 )
+
+
+# ===== 车辆年检定时短信(照旧 CarNianJian Quartz Job,每天 08:25) =====
+# 用守护线程实现,不引入额外依赖;.env 设 NIANJIAN_JOB_ENABLED=false 可停用。
+if settings.NIANJIAN_JOB_ENABLED:
+    import logging
+    import threading
+
+    from app.services.nianjian_job import nianjian_loop
+
+    @app.on_event("startup")
+    def _start_nianjian_job():
+        threading.Thread(target=nianjian_loop, daemon=True, name="nianjian-job").start()
+        logging.getLogger("nianjian_job").warning("车辆年检定时任务已启动(每天 08:25)")
 
 app.add_middleware(
     CORSMiddleware,
@@ -84,6 +98,7 @@ app.include_router(overtime_flow.router, prefix="/api/overtime", tags=["加班�
 app.include_router(overtime_config.router, prefix="/api/overtime", tags=["加班申请审批-配置"])
 app.include_router(simcard.router, prefix="/api/simcard", tags=["SIM卡管理"])
 app.include_router(simfee.router, prefix="/api/simfees", tags=["通信费"])
+app.include_router(sms_records.router, prefix="/api/sms-records", tags=["短信发送记录"])
 app.include_router(jcxt.router, prefix="/api/jcxt", tags=["稽查系统"])
 app.include_router(spjicha.router, prefix="/api/spjicha", tags=["审批稽查"])
 app.include_router(jcdan.router, prefix="/api/jcdan", tags=["稽查单"])

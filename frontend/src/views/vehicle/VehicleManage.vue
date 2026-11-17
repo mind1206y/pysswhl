@@ -5,7 +5,9 @@ import {
   addAccident, batchInspect, createImageToken, createVehicle, deleteAccident,
   deleteAccidentImage, deleteVehicle, deleteVehicleImage, exportVehicles,
   exportVehiclesPdf, getOilMonthStat, getVehicle, getVehicleDicts, inspectVehicle,
-  listAccidents, listAccidentImages, listVehicles, scrapVehicle, undoInspectVehicle,
+  listAccidents, listAccidentImages, listVehicles, scrapVehicle, sendVehicleSms,
+  getSmsSwitch, setSmsSwitch,
+  undoInspectVehicle,
   updateAccident, updateVehicle, uploadAccidentImages, uploadVehicleImages,
 } from '@/api/vehicle'
 import { useAuthStore } from '@/stores/auth'
@@ -41,6 +43,7 @@ const ALL_COLUMNS = [
   { prop: 'xinghao', label: '型号', width: 100 },
   { prop: 'IsInspected', label: '年检状态', width: 145 },
   { prop: 'ReminderLevel', label: '年检剩余天数', width: 200 },
+  { prop: 'sms', label: '短信', width: 60 },
   { prop: 'oil', label: '油品', width: 68 },
   { prop: 'jiashiyuan', label: '使用人', width: 86 },
   { prop: 'yongtu', label: '车辆用途', width: 92 },
@@ -129,7 +132,28 @@ onMounted(async () => {
   Object.assign(dicts, d)
   filters.year = d.current_year || yearNow
   load()
+  if (isSuper.value) loadSmsSwitch()
 })
+
+// ===== 年检提醒短信总开关(仅超管可见,consol_tb 落库) =====
+const smsSwitchOn = ref(true)
+const smsSwitchSaving = ref(false)
+async function loadSmsSwitch() {
+  try { smsSwitchOn.value = (await getSmsSwitch()).enabled } catch { /* 默认开启 */ }
+}
+async function onSmsSwitchChange(v) {
+  smsSwitchSaving.value = true
+  try {
+    await setSmsSwitch(v)
+    ElMessage.success(v ? '年检提醒短信已开启，明天 08:25 起恢复自动发送'
+                        : '年检提醒短信已关闭，定时任务不再发送')
+  } catch {
+    smsSwitchOn.value = !v
+    ElMessage.error('保存失败，请重试')
+  } finally {
+    smsSwitchSaving.value = false
+  }
+}
 
 // ===== 勾选 =====
 const selection = ref([])
@@ -402,6 +426,33 @@ async function removeCxImage(img) {
   cxImageList.value = cxImageList.value.filter((i) => i.id !== img.id)
 }
 
+// ===== 短信发送(照旧 senddiv/SendMsm) =====
+const smsDialog = ref(false)
+const smsSaving = ref(false)
+const smsRow = ref(null)
+const smsLb = ref('年检提醒')
+const smsNr = ref('')
+function openSms(row) {
+  smsRow.value = row
+  smsLb.value = '年检提醒'
+  smsNr.value = ''
+  smsDialog.value = true
+}
+async function submitSms() {
+  if (smsSaving.value) return  // 防双击重复提交
+  if (smsLb.value !== '年检提醒' && !smsNr.value.trim()) {
+    ElMessage.warning('请填写提醒内容'); return
+  }
+  smsSaving.value = true
+  try {
+    const res = await sendVehicleSms(smsRow.value.id, smsLb.value, smsNr.value.trim())
+    const skipped = res.results.filter((r) => !r.ok)
+    if (!skipped.length) ElMessage.success(res.message)
+    else ElMessage.warning(`${res.message};${skipped.map((r) => `${r.to}:${r.message || r.status}`).join('；')}`)
+    smsDialog.value = false
+  } finally { smsSaving.value = false }
+}
+
 // ===== 年检功能说明 =====
 const docDialog = ref(false)
 </script>
@@ -469,6 +520,12 @@ const docDialog = ref(false)
       <el-button size="small" @click="doExportPdf()">批量导出 PDF</el-button>
       <el-button size="small" @click="openColDialog">显示列设置</el-button>
       <el-button size="small" text type="primary" @click="docDialog = true">年检提醒功能说明</el-button>
+      <span v-if="isSuper" class="sms-switch">
+        <el-tooltip content="控制每天 08:25 年检到期/过期的自动提醒短信是否发送，不影响页面手动发送" placement="top">
+          <span class="sms-switch-label">年检提醒短信</span>
+        </el-tooltip>
+        <el-switch v-model="smsSwitchOn" :disabled="smsSwitchSaving" size="small" @change="onSmsSwitchChange" />
+      </span>
       <span class="toolbar-hint">共 {{ total }} 辆 · 双击行可编辑 · 展开行查看出险记录</span>
     </div>
 
@@ -564,6 +621,9 @@ const docDialog = ref(false)
               :stroke-width="8" :show-text="false" />
             <span :style="{ color: row.reminder_color }">{{ row.reminder_text }}</span>
           </div>
+          <!-- 短信(照旧 DX 列) -->
+          <el-button v-else-if="col.prop === 'sms'" link type="primary" size="small"
+            :disabled="!canOperate" @click="openSms(row)">短信</el-button>
           <!-- 审批状态 -->
           <el-tag v-else-if="col.prop === 'spzt'" :type="row.spzt === '待审批' ? 'warning' : 'success'" size="small">
             {{ row.spzt || '-' }}
@@ -792,6 +852,36 @@ const docDialog = ref(false)
       </template>
     </el-dialog>
 
+    <!-- 发送提醒短信(照旧 DivSend 弹窗) -->
+    <el-dialog v-model="smsDialog" title="发送提醒短信" width="460px" class="std-dialog"
+      :close-on-click-modal="false">
+      <div class="sms-target">
+        目标车辆：<b>{{ smsRow?.chehao }}</b>
+        <span class="sms-hint">收件人：驾驶员{{ smsRow?.jiashiyuan ? `（${smsRow.jiashiyuan}）` : '' }} 与同部门车管员</span>
+      </div>
+      <el-form label-width="72px">
+        <el-form-item label="提醒类型">
+          <el-radio-group v-model="smsLb">
+            <el-radio value="年检提醒">下个月年检提醒</el-radio>
+            <el-radio value="违章提醒">其他提醒</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item v-if="smsLb !== '年检提醒'" label="提醒内容">
+          <el-input v-model="smsNr" type="textarea" :rows="3" maxlength="200" show-word-limit
+            placeholder="发送时自动加上「部门-操作员给您发送提示信息:（车号）」前缀" />
+        </el-form-item>
+        <el-form-item v-else label="">
+          <div class="sms-preview">
+            系统提示您的{{ smsRow?.chehao }}号车年检日期截止下月底，请尽快年检，如已年检请忽略此消息。
+          </div>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="smsDialog = false">关闭</el-button>
+        <el-button type="primary" :loading="smsSaving" @click="submitSms">发送</el-button>
+      </template>
+    </el-dialog>
+
     <!-- 年检说明 -->
     <el-dialog v-model="docDialog" title="车辆年检提醒功能说明" width="680px">
       <div class="doc">
@@ -799,7 +889,7 @@ const docDialog = ref(false)
         <p><b>提醒级别</b>：0 未提醒（&gt; 90 天）、1 90 天提醒、2 30 天提醒、3 7 天紧急提醒、4 已过期。列表「年检剩余天数」按到期日实时计算并用进度条展示。</p>
         <p><b>标注年检</b>：登记完成后点「标记」，系统记录本次年检日期并自动推算下一次年检日；点「撤销」回退状态。支持工具栏批量标记。</p>
         <p><b>登记信息变更</b>：修改注册日期或车辆类型后，系统立即重算下次年检日；修改资料后审批状态回到「待审批」。</p>
-        <p><b>与旧系统差异</b>：旧系统的定时短信提醒依赖短信网关，新系统暂未接入，界面不提供短信发送；年检倒计时与级别按到期日实时展示，不再依赖每日定时任务落库。</p>
+        <p><b>与旧系统差异</b>：年检倒计时与级别按到期日实时展示，不再依赖每日定时任务落库；短信提醒已接入内部网关——列表「短信」列可手动发送（固定年检提醒或自定义内容，发驾驶员与车管员），系统每天 08:25 也会自动按提醒级别发送年检提醒短信（1/2/3 级每年度一次、已过期每 10 天催办一次），发送记录可在短信记录中查询。<b>超级管理员</b>可通过工具栏「年检提醒短信」开关一键停用/恢复自动提醒短信。</p>
       </div>
     </el-dialog>
   </div>
@@ -817,6 +907,8 @@ const docDialog = ref(false)
 }
 .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .toolbar-hint { margin-left: auto; color: #909399; font-size: 12px; }
+.sms-switch { display: inline-flex; align-items: center; gap: 6px; padding: 0 4px; }
+.sms-switch-label { font-size: 12px; color: #909399; cursor: help; }
 .pager { display: flex; justify-content: flex-end; }
 /* 展开内容固定在左侧:主表横向滚动时不会被带到屏幕外 */
 .sub-wrap { padding: 8px 12px 12px 46px; position: sticky; left: 0;
@@ -863,6 +955,11 @@ const docDialog = ref(false)
   .col-group { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 .doc p { line-height: 1.8; font-size: 13px; margin: 6px 0; }
+/* 短信弹窗 */
+.sms-target { margin: -6px 0 12px; font-size: 13px; color: var(--el-text-color-primary); }
+.sms-target .sms-hint { margin-left: 10px; font-size: 12px; color: #909399; }
+.sms-preview { font-size: 13px; line-height: 1.7; color: var(--el-text-color-regular);
+  background: var(--el-fill-color-light); border-radius: 4px; padding: 8px 12px; }
 :deep(.row-110) { background-color: #fdf6e6 !important; }
 :deep(.row-chaobiao) { background-color: #f0f6e8 !important; }
 </style>

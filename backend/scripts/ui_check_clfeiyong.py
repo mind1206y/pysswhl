@@ -60,11 +60,11 @@ def main():
     finally:
         db.close()
 
-    pub = get("http://127.0.0.1:8000/api/auth/public-key")["publicKey"]
+    pub = get("http://127.0.0.1:8001/api/auth/public-key")["publicKey"]
     pubkey = serialization.load_pem_public_key(pub.encode())
     enc = pubkey.encrypt(PWD.encode(), padding.OAEP(
         mgf=padding.MGF1(algorithm=hashes.SHA256()), algorithm=hashes.SHA256(), label=None))
-    res = post("http://127.0.0.1:8000/api/auth/login",
+    res = post("http://127.0.0.1:8001/api/auth/login",
                {"username": USER, "password": base64.b64encode(enc).decode()})
     print(json.dumps({"token": res["token"], "user": USER, "pwd": PWD}))
     return 0

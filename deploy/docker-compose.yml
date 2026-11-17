@@ -92,6 +92,14 @@ services:
 networks:
   sswhl_net:
     name: sswhl_net
+    # 2026-11-17:公司营业所内网全在 172.17.0.0/16,而 docker0 默认网段恰好是
+    # 172.17.0.0/16,导致服务器回包被路由进 docker 网桥黑洞,所有 172.17.x 网段
+    # ping 不通服务器。Docker 相关网段(含 docker0 的 bip)一律避开 172.16.0.0/12,
+    # 统一用 10.212~10.213 段(见 /etc/docker/daemon.json)。此 subnet 必须与
+    # daemon.json 的 default-address-pools 配套,改一处必改另一处。
+    ipam:
+      config:
+        - subnet: 10.213.1.0/24
 
 volumes:
   sswhl_mysql_data:

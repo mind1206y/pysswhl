@@ -128,6 +128,8 @@ DEFAULT_PERMISSIONS = [
     ("simcard:view", "SIM卡查看", "通信管理"),
     ("simcard:manage", "SIM卡管理", "通信管理"),
     ("simfee:view", "通信费查看", "通信管理"),
+    # 短信发送记录:旧系统 bb_quanx 80「短信发送」(/SmsRecord),仅菜单级权限,只读查询
+    ("sms:view", "短信记录查看", "通信管理"),
     # 稽查系统:旧系统按菜单控制访问,无细分权限,每个模块一个 view 码。
     ("jcxt:view", "稽查系统查看", "稽查管理"),
     ("spjicha:view", "审批稽查查看", "稽查管理"),

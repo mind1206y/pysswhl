@@ -24,6 +24,7 @@ import ChelFyTj from '@/views/vehicle/ChelFyTj.vue'
 import RepairManage from '@/views/repair/RepairManage.vue'
 import SimCardManage from '@/views/simcard/SimCardManage.vue'
 import SimFeeManage from '@/views/simfee/SimFeeManage.vue'
+import SmsRecordView from '@/views/sms/SmsRecord.vue'
 import CelouTb from '@/views/celou/CelouTb.vue'
 import LeakNotes from '@/views/leak/LeakNotes.vue'
 import ContractRegister from '@/views/contract/ContractRegister.vue'
@@ -184,6 +185,11 @@ const router = createRouter({
           path: 'simfee',
           component: SimFeeManage,
           meta: { title: '通信费', perm: 'simfee:view' },
+        },
+        {
+          path: 'sms-records',
+          component: SmsRecordView,
+          meta: { title: '短信发送记录', perm: 'sms:view' },
         },
         {
           path: 'celou',

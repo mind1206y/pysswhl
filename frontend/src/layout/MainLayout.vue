@@ -29,6 +29,7 @@ const menuItems = computed(() => {
   if (auth.hasPerm('ipadress:view')) communication.push({ path: '/ipadress', title: 'IP地址管理' })
   if (auth.hasPerm('simcard:view')) communication.push({ path: '/simcard', title: 'SIM卡管理' })
   if (auth.hasPerm('simfee:view')) communication.push({ path: '/simfee', title: '通信费' })
+  if (auth.hasPerm('sms:view')) communication.push({ path: '/sms-records', title: '短信发送记录' })
   if (communication.length) {
     items.push({ title: '通信网络', icon: 'Connection', children: communication })
   }
